@@ -35,6 +35,9 @@ class UpdateService:
         self.github_repo = os.getenv("GITHUB_REPO") or self.settings_service.get(
             "app_info", "github_repo", DEFAULT_GITHUB_REPO
         )
+        self.github_token = os.getenv("GITHUB_TOKEN") or self.settings_service.get(
+            "app_info", "github_token", ""
+        )
 
     def _normalize_version(self, v_str: str) -> str:
         """Chuẩn hóa chuỗi version (bỏ chữ v ở đầu nếu có)"""
@@ -43,6 +46,15 @@ class UpdateService:
         clean = v_str.strip().lstrip("vV")
         return clean
 
+    def _get_headers(self, is_raw_asset: bool = False) -> Dict[str, str]:
+        headers = {
+            "User-Agent": "VB-STUDIO-Updater",
+            "Accept": "application/octet-stream" if is_raw_asset else "application/vnd.github.v3+json"
+        }
+        if self.github_token:
+            headers["Authorization"] = f"Bearer {self.github_token}"
+        return headers
+
     def check_for_updates(self) -> Dict[str, Any]:
         """
         Kiểm tra phiên bản mới nhất từ GitHub Releases API.
@@ -50,14 +62,12 @@ class UpdateService:
         """
         repo = self.github_repo.strip().strip("/")
         api_url = f"https://api.github.com/repos/{repo}/releases/latest"
-        headers = {
-            "User-Agent": "VB-STUDIO-Updater",
-            "Accept": "application/vnd.github.v3+json"
-        }
+        headers = self._get_headers()
 
         try:
             req = urllib.request.Request(api_url, headers=headers)
             with urllib.request.urlopen(req, timeout=10) as resp:
+
                 if resp.status != 200:
                     return {
                         "has_update": False,
@@ -180,8 +190,9 @@ class UpdateService:
         updater_bat_path = exe_dir / "apply_update.bat"
 
         try:
-            headers = {"User-Agent": "VB-STUDIO-Updater"}
+            headers = self._get_headers(is_raw_asset=True)
             req = urllib.request.Request(download_url, headers=headers)
+
 
             logger.info(f"Bắt đầu tải cập nhật từ: {download_url}")
             with urllib.request.urlopen(req, timeout=60) as resp:
