@@ -47,8 +47,9 @@ jobs:
             --hidden-import src `
             --collect-submodules webview `
             --collect-submodules packaging `
-            --collect-submodules src `
+            --collect-all src `
             run.py
+
 
       - name: Prepare Release Package
         shell: pwsh

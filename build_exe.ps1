@@ -35,8 +35,9 @@ pyinstaller --noconfirm --clean --windowed --onefile `
   --hidden-import src `
   --collect-submodules webview `
   --collect-submodules packaging `
-  --collect-submodules src `
+  --collect-all src `
   run.py
+
 
 Write-Host "[3/4] Dang dong goi ban phan phoi (ZIP)..." -ForegroundColor Yellow
 

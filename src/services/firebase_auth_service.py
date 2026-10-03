@@ -210,13 +210,18 @@ class FirebaseAuthService:
   <script src="/vendor/firebase-app-compat.js"></script>
   <script src="/vendor/firebase-auth-compat.js"></script>
   <script>
-    if (typeof firebase === 'undefined') {
-      document.write('<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"><\/script>');
-      document.write('<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"><\/script>');
-    }
+    if (typeof firebase === 'undefined') {{
+      var s1 = document.createElement('script');
+      s1.src = 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js';
+      document.head.appendChild(s1);
+      var s2 = document.createElement('script');
+      s2.src = 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js';
+      document.head.appendChild(s2);
+    }}
   </script>
-
+  <style>
     * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+
     body {{
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background: #0b0f19;
