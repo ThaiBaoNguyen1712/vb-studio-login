@@ -56,7 +56,7 @@
       const dot = `<span class="w-2 h-2 rounded-full ${dotCls}${dotPulse} shrink-0" title="${dotTitle}"></span>`;
       const pendBadge = pendN > 0
         ? `<span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0" title="${pendN} yêu cầu xin mở đang chờ">${icon('send', 'w-3 h-3')}${pendN}</span>` : '';
-      const pinStar = ch.pinned ? `<span class="text-amber-500 shrink-0" title="Kênh đã ghim">${icon('star-solid', 'w-3.5 h-3.5')}</span>` : '';
+      const pinStar = ch.pinned ? `<span class="text-amber-500 shrink-0 inline-flex items-center" title="Kênh đã ghim">${icon('star-solid', 'w-3.5 h-3.5')}</span>` : '';
 
       let mainText = isReady ? 'Mở Studio' : (isInUse ? (pr.mine ? 'Bạn đang mở' : 'Xin mở') : (isExpired ? 'Setup lại' : 'Thiết lập'));
       let mainColor = isReady ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : (isInUse ? (pr.mine ? 'bg-sky-600 text-white cursor-not-allowed opacity-80' : 'bg-blue-600 hover:bg-blue-500 text-white') : (isExpired ? 'bg-red-600 hover:bg-red-500 text-white' : 'bg-amber-600 hover:bg-amber-500 text-white'));
@@ -71,8 +71,12 @@
            </div>`
         : '';
 
+      const cardHighlight = ch.pinned
+        ? 'border-amber-400 dark:border-amber-500/80 ring-2 ring-amber-400/50 dark:ring-amber-500/40 shadow-sm shadow-amber-500/15 bg-amber-50/30 dark:bg-amber-950/15'
+        : 'border-slate-200 dark:border-dark-border hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-dark-card shadow-xs';
+
       return `
-        <div class="ch-card bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl p-3 shadow-xs hover:border-slate-300 dark:hover:border-slate-600 transition-all flex flex-col gap-2">
+        <div class="ch-card border ${cardHighlight} rounded-xl p-3 transition-all flex flex-col gap-2">
           <div class="flex items-center gap-2 min-w-0">
             <span title="${platName(ch.platform)}">${platBadge(ch.platform, 'w-5 h-5')}</span>
             <h4 class="font-bold text-[13px] tracking-tight text-slate-800 dark:text-slate-100 truncate flex-1" title="${ch.channel_name} (${ch.id})">${ch.channel_name}</h4>
@@ -324,19 +328,26 @@
           const grad = avatarGradients[idx % avatarGradients.length];
 
           const countBadgeText = hasActiveFilters ? `${group.matchingChannels.length} / ${group.totalChannels} card` : `${group.matchingChannels.length} card`;
+          const hasPinned = group.matchingChannels.some(c => c.pinned);
+          const colBorder = hasPinned
+            ? 'border-amber-400/80 dark:border-amber-500/70 ring-2 ring-amber-400/25 dark:ring-amber-500/20 shadow-xs'
+            : 'border-slate-200 dark:border-dark-border shadow-xs';
 
           const logoHtml = group.logo
             ? `<img src="${group.logo}" class="w-9 h-9 rounded-xl object-cover shrink-0 shadow-xs ring-1 ring-slate-200 dark:ring-dark-border" title="${group.display_name}">`
             : `<div class="w-9 h-9 rounded-xl bg-gradient-to-br ${grad} text-white font-extrabold text-xs flex items-center justify-center shrink-0 shadow-xs">${initial}</div>`;
 
           return `
-            <div class="w-[320px] min-w-[280px] max-w-[340px] shrink-0 bg-slate-100/70 dark:bg-dark-sidebar/60 border border-slate-200 dark:border-dark-border rounded-2xl p-4 flex flex-col gap-3 shadow-xs self-start">
+            <div class="w-[320px] min-w-[280px] max-w-[340px] shrink-0 bg-slate-100/70 dark:bg-dark-sidebar/60 border ${colBorder} rounded-2xl p-4 flex flex-col gap-3 self-start">
               <!-- Cột Header Tài khoản (cố định chiều cao để các cột thẳng hàng) -->
               <div class="flex items-center justify-between gap-2 pb-3 border-b border-slate-200/80 dark:border-dark-border/80 min-h-[58px]">
                 <div class="flex items-center gap-2.5 min-w-0 flex-1">
                   ${logoHtml}
                   <div class="min-w-0 flex-1">
-                    <h4 class="font-extrabold text-sm text-slate-800 dark:text-slate-100 truncate leading-tight" title="${group.display_name}">${group.display_name}</h4>
+                    <div class="flex items-center gap-1.5 min-w-0">
+                      <h4 class="font-extrabold text-sm text-slate-800 dark:text-slate-100 truncate leading-tight" title="${group.display_name}">${group.display_name}</h4>
+                      ${hasPinned ? `<span class="text-amber-500 text-xs shrink-0" title="Có kênh đã ghim">${icon('star-solid', 'w-3.5 h-3.5')}</span>` : ''}
+                    </div>
                     <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate leading-tight" title="${group.email}">${group.email || 'Google Account'}</p>
                   </div>
                 </div>
