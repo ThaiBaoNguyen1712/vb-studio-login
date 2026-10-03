@@ -1,14 +1,18 @@
 import sys
 from pathlib import Path
 
-# Add project root to sys.path so 'src' can be imported anywhere
-# Hỗ trợ cả chạy source lẫn frozen exe (PyInstaller sys._MEIPASS)
+# Add project root and bundle root to sys.path so 'src' can be imported anywhere
 if getattr(sys, "frozen", False):
     PROJECT_ROOT = Path(sys.executable).resolve().parent
+    BUNDLE_ROOT = Path(getattr(sys, "_MEIPASS", str(PROJECT_ROOT)))
+    if str(BUNDLE_ROOT) not in sys.path:
+        sys.path.insert(0, str(BUNDLE_ROOT))
 else:
     PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
+
 
 from src.core.config import Config
 from src.core.logger import logger

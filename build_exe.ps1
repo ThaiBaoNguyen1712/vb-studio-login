@@ -1,26 +1,30 @@
 # Build VB-STUDIO WebView2 onefile exe (offline-first)
-# Chạy: .\build_exe.ps1
-$ErrorActionPreference = "Stop"
+# Chay: .\build_exe.ps1
+$ErrorActionPreference = "Continue"
 
 Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host "      VB-STUDIO Build & Package Exe       " -ForegroundColor Cyan
 Write-Host "==========================================" -ForegroundColor Cyan
 
 if (-not (Test-Path -LiteralPath "src\web\index.html")) {
-  throw "Không tìm thấy src\web\index.html. Hãy chạy script từ thư mục gốc của dự án."
+  Write-Host "Khong tim thay src\web\index.html. Hay chay script tu thu muc goc cua du an." -ForegroundColor Red
+  exit 1
 }
 
-Write-Host "[1/4] Đang cài đặt / nâng cấp các thư viện cần thiết..." -ForegroundColor Yellow
-pip install --upgrade pyinstaller -r requirements.txt 2>&1 | Out-Null
+Write-Host "[1/4] Dang cai dat / nang cap cac thu vien can thiet..." -ForegroundColor Yellow
+python -m pip install --upgrade pyinstaller -r requirements.txt | Out-Null
+
 
 $webData = "src\web;src\web"
 $assetData = "assets;assets"
 
-Write-Host "[2/4] Đang biên dịch mã nguồn với PyInstaller..." -ForegroundColor Yellow
+Write-Host "[2/4] Dang bien dich ma nguon voi PyInstaller..." -ForegroundColor Yellow
 
 pyinstaller --noconfirm --clean --windowed --onefile `
   --name "VB-STUDIO" `
   --icon "src\web\assets\app.ico" `
+  --paths "." `
+  --paths "src" `
   --add-data "$webData" `
   --add-data "$assetData" `
   --hidden-import webview `
@@ -30,11 +34,13 @@ pyinstaller --noconfirm --clean --windowed --onefile `
   --hidden-import cryptography `
   --hidden-import pyzipper `
   --hidden-import psycopg2 `
+  --hidden-import src `
   --collect-submodules webview `
   --collect-submodules packaging `
-  src/main.py
+  --collect-submodules src `
+  run.py
 
-Write-Host "[3/4] Đang đóng gói bản phân phối (ZIP)..." -ForegroundColor Yellow
+Write-Host "[3/4] Dang dong goi ban phan phoi (ZIP)..." -ForegroundColor Yellow
 
 $pkgDir = "dist\VB-STUDIO-pkg"
 if (Test-Path $pkgDir) { Remove-Item -Recurse -Force $pkgDir }
@@ -45,23 +51,22 @@ if (Test-Path ".env.example") {
   Copy-Item ".env.example" "$pkgDir\"
 }
 
-$readmeContent = @"
-==================================================
-           VB-STUDIO Multi-Channel Manager
-==================================================
-
-1. HƯỚNG DẪN CÀI ĐẶT & SỬ DỤNG:
-- Chạy trực tiếp file `VB-STUDIO.exe` để mở ứng dụng.
-- Dữ liệu và profile trình duyệt sẽ được lưu tự động tại thư mục của ứng dụng.
-
-2. YÊU CẦU HỆ THỐNG:
-- Windows 10/11 64-bit.
-- Đã cài Microsoft Edge WebView2 Runtime (thường có sẵn trên Windows 10/11).
-- Nếu gặp lỗi thiếu Chromium trình duyệt, chạy lệnh:
-  playwright install chromium
-==================================================
-"@
-Set-Content -Path "$pkgDir\README.txt" -Value $readmeContent -Encoding UTF8
+$readmeLines = @(
+  "==================================================",
+  "           VB-STUDIO Multi-Channel Manager",
+  "==================================================",
+  "",
+  "1. HUONG DAN SU DUNG:",
+  "- Chay truc tiep file VB-STUDIO.exe de mo ung dung.",
+  "- Du lieu va profile se duoc luu tu dong tai thu muc cua ung dung.",
+  "",
+  "2. YEU CAU HE THONG:",
+  "- Windows 10/11 64-bit.",
+  "- Microsoft Edge WebView2 Runtime.",
+  "- Neu gap loi thieu Chromium: chay 'playwright install chromium'",
+  "=================================================="
+)
+$readmeLines | Out-File -FilePath "$pkgDir\README.txt" -Encoding utf8
 
 $zipPath = "dist\VB-STUDIO-win64.zip"
 if (Test-Path $zipPath) { Remove-Item -Force $zipPath }
@@ -69,8 +74,7 @@ Compress-Archive -Path "$pkgDir\*" -DestinationPath $zipPath -Force
 
 Write-Host ""
 Write-Host "==========================================" -ForegroundColor Green
-Write-Host " ĐÓNG GÓI HOÀN TẤT THÀNH CÔNG!" -ForegroundColor Green
-Write-Host " File thực thi: dist\VB-STUDIO.exe" -ForegroundColor Green
-Write-Host " File nén phát hành: dist\VB-STUDIO-win64.zip" -ForegroundColor Green
+Write-Host " DONG GOI HOAN TAT THANH CONG!" -ForegroundColor Green
+Write-Host " File thuc thi: dist\VB-STUDIO.exe" -ForegroundColor Green
+Write-Host " File nen phat hanh: dist\VB-STUDIO-win64.zip" -ForegroundColor Green
 Write-Host "==========================================" -ForegroundColor Green
-Write-Host "Lưu ý: Bạn có thể tải file 'VB-STUDIO.exe' hoặc 'VB-STUDIO-win64.zip' lên GitHub Releases để người dùng tải về." -ForegroundColor Cyan

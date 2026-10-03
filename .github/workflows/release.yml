@@ -34,6 +34,8 @@ jobs:
           pyinstaller --noconfirm --clean --windowed --onefile `
             --name "VB-STUDIO" `
             --icon "src\web\assets\app.ico" `
+            --paths "." `
+            --paths "src" `
             --add-data "src\web;src\web" `
             --add-data "assets;assets" `
             --hidden-import webview `
@@ -43,9 +45,12 @@ jobs:
             --hidden-import cryptography `
             --hidden-import pyzipper `
             --hidden-import psycopg2 `
+            --hidden-import src `
             --collect-submodules webview `
             --collect-submodules packaging `
-            src/main.py
+            --collect-submodules src `
+            run.py
+
 
       - name: Prepare Release Package
         shell: pwsh
