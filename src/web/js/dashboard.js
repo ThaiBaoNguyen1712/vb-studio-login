@@ -402,10 +402,11 @@
       ['DEFAULT', 'DATE_DESC', 'DATE_ASC', 'PLATFORM', 'STATUS', 'ACCOUNT'].forEach(k => {
         const btn = document.getElementById(`sort-btn-${k}`);
         if (btn) {
+          const baseCls = 'inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs whitespace-nowrap transition-all';
           if (k === order) {
-            btn.className = 'px-2.5 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-xs transition-all';
+            btn.className = `${baseCls} font-bold bg-blue-600 text-white shadow-xs`;
           } else {
-            btn.className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 transition-all';
+            btn.className = `${baseCls} font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700`;
           }
         }
       });

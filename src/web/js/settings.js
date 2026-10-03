@@ -13,9 +13,12 @@
           }
         }
       });
-      // Tải mới nội dung tab động khi mở (bảng vault/thùng rác)
+      // Tải mới nội dung tab động khi mở (bảng vault/thùng rác/trạng thái đồng bộ)
       if (tabId === 'tab-vault') renderVaultStatus();
-      if (tabId === 'tab-data') renderTrash();
+      if (tabId === 'tab-data') {
+        renderTrash();
+        checkDataSyncStatus();
+      }
     }
 
     function renderSettingsData() {
@@ -260,3 +263,46 @@
     }
 
     // Auto-refresh cố định 15s — không cho đổi, không hiển thị trong Settings.
+
+    // Kiểm tra trạng thái đồng bộ Firebase (Cloud Sync) — chỉ hiển thị trạng thái kết nối, không hiện thông tin cấu hình
+    async function checkDataSyncStatus() {
+      const dot = document.getElementById('data-sync-dot');
+      const text = document.getElementById('data-sync-text');
+      const time = document.getElementById('data-sync-time');
+      const btn = document.getElementById('btn-check-data-sync');
+
+      if (btn) btn.disabled = true;
+      if (text) {
+        text.className = 'font-semibold text-slate-500 dark:text-slate-400 truncate';
+        text.textContent = 'Đang kiểm tra kết nối đồng bộ...';
+      }
+      if (dot) dot.className = 'w-2.5 h-2.5 rounded-full bg-sky-400 animate-pulse shrink-0';
+
+      try {
+        const res = await window.pywebview.api.test_firebase_connection();
+        const nowStr = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        if (res && res.success) {
+          if (dot) dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0';
+          if (text) {
+            text.className = 'font-semibold text-emerald-600 dark:text-emerald-400 truncate';
+            text.textContent = 'Dữ liệu đã được đồng bộ với Đám mây (Firebase Realtime)';
+          }
+          if (time) time.textContent = `Kiểm tra lúc ${nowStr}`;
+        } else {
+          if (dot) dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0';
+          if (text) {
+            text.className = 'font-semibold text-amber-600 dark:text-amber-400 truncate';
+            text.textContent = 'Chưa đồng bộ Đám mây (Đang hoạt động Ngoại tuyến / Local JSON)';
+          }
+          if (time) time.textContent = `Kiểm tra lúc ${nowStr}`;
+        }
+      } catch (err) {
+        if (dot) dot.className = 'w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0';
+        if (text) {
+          text.className = 'font-semibold text-rose-600 dark:text-rose-400 truncate';
+          text.textContent = 'Không thể kiểm tra đồng bộ (Ngoại tuyến)';
+        }
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }

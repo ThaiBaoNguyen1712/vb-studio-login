@@ -231,10 +231,21 @@
       }
     }
 
-    // 2. Biến đếm trên Floating Action Button (FAB)
+    // 2. Biến đếm và hiển thị/ẩn Floating Action Button (FAB) Xả phiên
+    const fabCluster = document.getElementById('fab-sessions-cluster');
     const fabBadge = document.getElementById('fab-held-count');
     const fabBtn = document.getElementById('fab-release-btn');
     const fabPulse = document.getElementById('fab-pulse-dot');
+
+    if (fabCluster) {
+      if (totalInUse > 0 || count > 0) {
+        fabCluster.classList.remove('hidden');
+        fabCluster.classList.add('flex');
+      } else {
+        fabCluster.classList.add('hidden');
+        fabCluster.classList.remove('flex');
+      }
+    }
 
     if (fabBadge) {
       fabBadge.textContent = count;
