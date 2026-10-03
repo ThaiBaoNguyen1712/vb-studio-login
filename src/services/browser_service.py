@@ -67,7 +67,8 @@ class BrowserService:
             "--disable-blink-features=AutomationControlled",
             "--start-maximized",
             "--no-first-run",
-            "--no-default-browser-check"
+            "--no-default-browser-check",
+            "--test-type"
         ] + custom_args
 
         last_error = None
@@ -79,7 +80,7 @@ class BrowserService:
                     "headless": False,
                     "no_viewport": True,
                     "args": launch_args,
-                    "ignore_default_args": ["--enable-automation"],
+                    "ignore_default_args": ["--enable-automation", "--no-sandbox"],
                 }
                 if channel:
                     kwargs["channel"] = channel
