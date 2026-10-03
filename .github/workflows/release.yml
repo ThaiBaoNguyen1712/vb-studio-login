@@ -1,10 +1,10 @@
-name: Build & Release VB-STUDIO
+name: Build & Release VB-Login
 
 on:
   push:
     tags:
-      - 'v*' # Trigger khi push tag dạng v1.0.0, v1.0.1,...
-  workflow_dispatch: # Cho phép bấm chạy thủ công từ GitHub UI
+      - 'v*' # Trigger khi push tag dang v1.0.0, v1.0.1,...
+  workflow_dispatch: # Cho phep bam chay thu cong tu GitHub UI
 
 permissions:
   contents: write
@@ -32,7 +32,7 @@ jobs:
       - name: Build Executable with PyInstaller
         run: |
           pyinstaller --noconfirm --clean --windowed --onefile `
-            --name "VB-STUDIO" `
+            --name "VB-Login" `
             --icon "src\web\assets\app.ico" `
             --paths "." `
             --paths "src" `
@@ -46,22 +46,20 @@ jobs:
             --hidden-import pyzipper `
             --hidden-import src `
             --collect-submodules webview `
-
             --collect-submodules packaging `
             --collect-submodules src `
             run.py
-
 
       - name: Prepare Release Package
         shell: pwsh
         run: |
           $tag = if ($env:GITHUB_REF_NAME) { $env:GITHUB_REF_NAME } else { "latest" }
           New-Item -ItemType Directory -Force -Path "release_pkg" | Out-Null
-          Copy-Item "dist\VB-STUDIO.exe" "release_pkg\"
+          Copy-Item "dist\VB-Login.exe" "release_pkg\"
           Copy-Item ".env.example" "release_pkg\"
           
-          # Nén thành file zip phân phối cho user
-          Compress-Archive -Path "release_pkg\*" -DestinationPath "dist\VB-STUDIO-$tag-win64.zip" -Force
+          # Nen thanh file zip phan phoi cho user
+          Compress-Archive -Path "release_pkg\*" -DestinationPath "dist\VB-Login-$tag-win64.zip" -Force
 
       - name: Create GitHub Release & Upload Assets
         uses: softprops/action-gh-release@v2
@@ -72,7 +70,7 @@ jobs:
           prerelease: false
           generate_release_notes: true
           files: |
-            dist/VB-STUDIO.exe
-            dist/VB-STUDIO-*-win64.zip
+            dist/VB-Login.exe
+            dist/VB-Login-*-win64.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

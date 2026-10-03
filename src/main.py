@@ -55,24 +55,25 @@ def run_web_gui(account_service: AccountService, settings_service: SettingsServi
     # Thiết lập AppUserModelID để Windows Taskbar nhận diện icon riêng biệt thay vì icon Python mặc định
     try:
         import ctypes
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("vbstudio.multichannel.manager.1.0")
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("vblogin.manager.1.0")
     except Exception:
         pass
 
-    logger.info("Khởi chạy VB-STUDIO WebView2 (Edge Chromium, GPU, offline-first)...")
+    logger.info("Khởi chạy VB-Login WebView2 (Edge Chromium, GPU, offline-first)...")
 
     api = WebBridge(account_service=account_service, settings_service=settings_service)
     url, http_root = resolve_web_entry()
     debug = "--debug" in sys.argv or settings_service.get("general", "debug", False) is True
 
     window = webview.create_window(
-        title="VB-STUDIO • Multi-Channel Dashboard",
+        title="VB-Login • Multi-Channel Dashboard",
         url=url,
         js_api=api,
         width=1320,
         height=880,
         min_size=(1060, 720),
         background_color="#0b0f19",
+
         text_select=False,
     )
     api.set_window(window)

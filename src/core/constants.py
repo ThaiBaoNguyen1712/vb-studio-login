@@ -1,6 +1,9 @@
 from enum import Enum
 
+APP_NAME = "VB-Login"
 APP_VERSION = "v1.0.0"
+
+
 
 class Platform(str, Enum):
 

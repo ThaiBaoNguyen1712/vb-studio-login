@@ -2,14 +2,14 @@ import json
 from pathlib import Path
 from typing import Dict, Any, Optional
 from src.core.config import Config
-from src.core.constants import APP_VERSION
+from src.core.constants import APP_NAME, APP_VERSION
 from src.core.logger import logger
 
 SETTINGS_FILE = Config.DATA_DIR / "settings.json"
 
 DEFAULT_SETTINGS = {
     "general": {
-        "app_title": "VB-STUDIO Multi-Channel",
+        "app_title": APP_NAME,
         "theme_mode": "Dark",
         "default_user": "Nam",
         "auto_refresh_seconds": 15,
@@ -18,11 +18,12 @@ DEFAULT_SETTINGS = {
         "enable_request_popup": True
     },
     "app_info": {
-        "app_name": "VB-STUDIO Multi-Channel",
+        "app_name": APP_NAME,
         "version": APP_VERSION,
         "github_repo": "ThaiBaoNguyen1712/vb-studio-login",
         "release_stage": "Release"
     },
+
     "firebase": {
         "url": "https://vb-studio-login-sync-default-rtdb.asia-southeast1.firebasedatabase.app/",
         "api_key": "AIzaSyCRJzx8Z8--dzQBgxbTsbYaygyifxj4waY",
