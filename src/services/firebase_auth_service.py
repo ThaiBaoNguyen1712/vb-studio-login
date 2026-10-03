@@ -73,7 +73,10 @@ class FirebaseAuthService:
             def log_message(self, format, *args):
                 pass  # Tắt log console mặc định để giữ console sạch sẽ
 
+            def do_GET(self):
+                parsed = urllib.parse.urlparse(self.path)
                 if parsed.path.startswith("/vendor/"):
+
                     import sys
                     from pathlib import Path
                     vendor_name = parsed.path.replace("/vendor/", "")
