@@ -73,18 +73,23 @@ class FirebaseAuthService:
             def log_message(self, format, *args):
                 pass  # Tắt log console mặc định để giữ console sạch sẽ
 
-            def do_GET(self):
-                parsed = urllib.parse.urlparse(self.path)
                 if parsed.path.startswith("/vendor/"):
+                    import sys
                     from pathlib import Path
                     vendor_name = parsed.path.replace("/vendor/", "")
-                    local_vendor_file = Path("src/web/vendor") / vendor_name
-                    if local_vendor_file.exists():
+                    candidates = [
+                        Path(getattr(sys, "_MEIPASS", "")) / "src" / "web" / "vendor" / vendor_name if getattr(sys, "_MEIPASS", "") else None,
+                        Path(__file__).resolve().parent.parent / "web" / "vendor" / vendor_name,
+                        Path("src/web/vendor") / vendor_name,
+                    ]
+                    vendor_file = next((c for c in candidates if c and Path(c).exists()), None)
+                    if vendor_file:
                         self.send_response(200)
                         self.send_header("Content-Type", "application/javascript; charset=utf-8")
                         self.end_headers()
-                        self.wfile.write(local_vendor_file.read_bytes())
+                        self.wfile.write(Path(vendor_file).read_bytes())
                         return
+
 
                 if parsed.path in ("/", "/auth", "/login"):
                     fb_config = {
@@ -202,10 +207,15 @@ class FirebaseAuthService:
 <head>
   <meta charset="UTF-8">
   <title>VB-Studio Login • Xác thực Google</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="/vendor/firebase-app-compat.js"></script>
   <script src="/vendor/firebase-auth-compat.js"></script>
-  <style>
+  <script>
+    if (typeof firebase === 'undefined') {
+      document.write('<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"><\/script>');
+      document.write('<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"><\/script>');
+    }
+  </script>
+
     * {{ box-sizing: border-box; margin: 0; padding: 0; }}
     body {{
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
