@@ -18,6 +18,8 @@ data/trash.json
 data/backup/
 data/*.db
 data/*.json
+data/*.bak
+
 
 # Keep data directory structure with .gitkeep
 !data/.gitkeep
