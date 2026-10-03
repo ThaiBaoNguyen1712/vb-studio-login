@@ -1,9 +1,9 @@
-# Build VB-Login WebView2 onefile exe (offline-first)
+# Build VBLogin WebView2 onefile exe (offline-first)
 # Chay: .\build_exe.ps1
 $ErrorActionPreference = "Continue"
 
 Write-Host "==========================================" -ForegroundColor Cyan
-Write-Host "       VB-Login Build & Package Exe       " -ForegroundColor Cyan
+Write-Host "        VBLogin Build & Package Exe       " -ForegroundColor Cyan
 Write-Host "==========================================" -ForegroundColor Cyan
 
 if (-not (Test-Path -LiteralPath "src\web\index.html")) {
@@ -20,7 +20,7 @@ $assetData = "assets;assets"
 Write-Host "[2/4] Dang bien dich ma nguon voi PyInstaller..." -ForegroundColor Yellow
 
 pyinstaller --noconfirm --clean --windowed --onefile `
-  --name "VB-Login" `
+  --name "VBLogin" `
   --icon "src\web\assets\app.ico" `
   --paths "." `
   --paths "src" `
@@ -42,11 +42,11 @@ pyinstaller --noconfirm --clean --windowed --onefile `
 
 Write-Host "[3/4] Dang dong goi ban phan phoi (ZIP)..." -ForegroundColor Yellow
 
-$pkgDir = "dist\VB-Login-pkg"
+$pkgDir = "dist\VBLogin-pkg"
 if (Test-Path $pkgDir) { Remove-Item -Recurse -Force $pkgDir }
 New-Item -ItemType Directory -Force -Path $pkgDir | Out-Null
 
-Copy-Item "dist\VB-Login.exe" "$pkgDir\"
+Copy-Item "dist\VBLogin.exe" "$pkgDir\"
 if (Test-Path "scripts\Tao-Shortcut-Desktop.bat") {
   Copy-Item "scripts\Tao-Shortcut-Desktop.bat" "$pkgDir\"
 }
@@ -56,12 +56,12 @@ if (Test-Path ".env.example") {
 
 $readmeLines = @(
   "==================================================",
-  "             VB-Login Manager",
+  "              VBLogin Manager",
   "==================================================",
   "",
   "1. HUONG DAN SU DUNG:",
-  "- Chay truc tiep file VB-Login.exe de mo ung dung.",
-  "- File VB-Login.exe se tu dong tao Shortcut 'VB-Login' ra Desktop.",
+  "- Chay truc tiep file VBLogin.exe de mo ung dung.",
+  "- File VBLogin.exe se tu dong tao Shortcut 'VBLogin' ra Desktop.",
   "- Hoac click dup file Tao-Shortcut-Desktop.bat de tao shortcut Desktop bat cu luc nao.",
   "- Du lieu va profile se duoc luu tu dong tai thu muc cua ung dung.",
   "",
@@ -73,13 +73,13 @@ $readmeLines = @(
 )
 $readmeLines | Out-File -FilePath "$pkgDir\README.txt" -Encoding utf8
 
-$zipPath = "dist\VB-Login-win64.zip"
+$zipPath = "dist\VBLogin-win64.zip"
 if (Test-Path $zipPath) { Remove-Item -Force $zipPath }
 Compress-Archive -Path "$pkgDir\*" -DestinationPath $zipPath -Force
 
 Write-Host ""
 Write-Host "==========================================" -ForegroundColor Green
 Write-Host " DONG GOI HOAN TAT THANH CONG!" -ForegroundColor Green
-Write-Host " File thuc thi: dist\VB-Login.exe" -ForegroundColor Green
-Write-Host " File nen phat hanh: dist\VB-Login-win64.zip" -ForegroundColor Green
+Write-Host " File thuc thi: dist\VBLogin.exe" -ForegroundColor Green
+Write-Host " File nen phat hanh: dist\VBLogin-win64.zip" -ForegroundColor Green
 Write-Host "==========================================" -ForegroundColor Green

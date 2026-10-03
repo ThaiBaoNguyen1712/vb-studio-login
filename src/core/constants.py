@@ -1,6 +1,6 @@
 from enum import Enum
 
-APP_NAME = "VB-Login"
+APP_NAME = "VBLogin"
 APP_VERSION = "v1.0.0"
 
 

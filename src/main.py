@@ -59,14 +59,14 @@ def run_web_gui(account_service: AccountService, settings_service: SettingsServi
     except Exception:
         pass
 
-    logger.info("Khởi chạy VB-Login WebView2 (Edge Chromium, GPU, offline-first)...")
+    logger.info("Khởi chạy VBLogin WebView2 (Edge Chromium, GPU, offline-first)...")
 
     api = WebBridge(account_service=account_service, settings_service=settings_service)
     url, http_root = resolve_web_entry()
     debug = "--debug" in sys.argv or settings_service.get("general", "debug", False) is True
 
     window = webview.create_window(
-        title="VB-Login • Multi-Channel Dashboard",
+        title="VBLogin • Multi-Channel Dashboard",
         url=url,
         js_api=api,
         width=1320,
@@ -130,7 +130,7 @@ def build_services():
 
 
 def ensure_desktop_shortcut():
-    """Tự động tạo shortcut VB-Login trên Desktop của người dùng nếu chưa có (khi chạy EXE)."""
+    """Tự động tạo shortcut VBLogin trên Desktop của người dùng nếu chưa có (khi chạy EXE)."""
     if not getattr(sys, "frozen", False):
         return
     try:
@@ -148,7 +148,7 @@ def ensure_desktop_shortcut():
         if not desktop:
             return
 
-        shortcut_file = desktop / "VB-Login.lnk"
+        shortcut_file = desktop / "VBLogin.lnk"
         if shortcut_file.exists():
             return
 
@@ -158,7 +158,7 @@ def ensure_desktop_shortcut():
             f'Set oLink = oWS.CreateShortcut(sLinkFile)\r\n'
             f'oLink.TargetPath = "{exe_path}"\r\n'
             f'oLink.WorkingDirectory = "{exe_path.parent}"\r\n'
-            f'oLink.Description = "VB-Login Manager"\r\n'
+            f'oLink.Description = "VBLogin Manager"\r\n'
             f'oLink.IconLocation = "{exe_path},0"\r\n'
             f'oLink.Save\r\n'
         )
