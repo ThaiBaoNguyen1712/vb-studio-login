@@ -12,7 +12,6 @@
       search_keyword: '',
       sort_order: 'DEFAULT',
       display_mode: (function(){ try { return localStorage.getItem('vb_display_mode') || 'HORIZONTAL'; } catch(e){ return 'HORIZONTAL'; } })(),
-      density: (function(){ try { return localStorage.getItem('vb_density') || 'COMFORT'; } catch(e){ return 'COMFORT'; } })(),
       active_user: 'Admin',
       auth_user: null,
       theme: 'Dark',

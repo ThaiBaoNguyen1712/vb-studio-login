@@ -32,11 +32,12 @@ pyinstaller --noconfirm --clean --windowed --onefile `
   --hidden-import packaging.version `
   --hidden-import cryptography `
   --hidden-import pyzipper `
-  --hidden-import src `
   --collect-submodules webview `
   --collect-submodules packaging `
+  --collect-all playwright `
   --collect-all src `
   run.py
+
 
 
 Write-Host "[3/4] Dang dong goi ban phan phoi (ZIP)..." -ForegroundColor Yellow
@@ -46,6 +47,9 @@ if (Test-Path $pkgDir) { Remove-Item -Recurse -Force $pkgDir }
 New-Item -ItemType Directory -Force -Path $pkgDir | Out-Null
 
 Copy-Item "dist\VB-Login.exe" "$pkgDir\"
+if (Test-Path "scripts\Tao-Shortcut-Desktop.bat") {
+  Copy-Item "scripts\Tao-Shortcut-Desktop.bat" "$pkgDir\"
+}
 if (Test-Path ".env.example") {
   Copy-Item ".env.example" "$pkgDir\"
 }
@@ -57,6 +61,8 @@ $readmeLines = @(
   "",
   "1. HUONG DAN SU DUNG:",
   "- Chay truc tiep file VB-Login.exe de mo ung dung.",
+  "- File VB-Login.exe se tu dong tao Shortcut 'VB-Login' ra Desktop.",
+  "- Hoac click dup file Tao-Shortcut-Desktop.bat de tao shortcut Desktop bat cu luc nao.",
   "- Du lieu va profile se duoc luu tu dong tai thu muc cua ung dung.",
   "",
   "2. YEU CAU HE THONG:",

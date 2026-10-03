@@ -129,11 +129,58 @@ def build_services():
     return account_service, settings_service
 
 
+def ensure_desktop_shortcut():
+    """Tự động tạo shortcut VB-Login trên Desktop của người dùng nếu chưa có (khi chạy EXE)."""
+    if not getattr(sys, "frozen", False):
+        return
+    try:
+        import os
+        import subprocess
+        import tempfile
+
+        exe_path = Path(sys.executable).resolve()
+        desktop_candidates = [
+            Path(os.environ.get("USERPROFILE", "")) / "Desktop",
+            Path(os.environ.get("ONEDRIVE", "")) / "Desktop" if os.environ.get("ONEDRIVE") else None,
+            Path.home() / "Desktop"
+        ]
+        desktop = next((d for d in desktop_candidates if d and d.exists()), None)
+        if not desktop:
+            return
+
+        shortcut_file = desktop / "VB-Login.lnk"
+        if shortcut_file.exists():
+            return
+
+        vbs = (
+            f'Set oWS = WScript.CreateObject("WScript.Shell")\r\n'
+            f'sLinkFile = "{shortcut_file}"\r\n'
+            f'Set oLink = oWS.CreateShortcut(sLinkFile)\r\n'
+            f'oLink.TargetPath = "{exe_path}"\r\n'
+            f'oLink.WorkingDirectory = "{exe_path.parent}"\r\n'
+            f'oLink.Description = "VB-Login Manager"\r\n'
+            f'oLink.IconLocation = "{exe_path},0"\r\n'
+            f'oLink.Save\r\n'
+        )
+        tmp_vbs = Path(tempfile.gettempdir()) / "create_vblogin_shortcut.vbs"
+        tmp_vbs.write_text(vbs, encoding="utf-8")
+        subprocess.run(["cscript", "//nologo", str(tmp_vbs)], shell=True, capture_output=True, timeout=5)
+        try:
+            tmp_vbs.unlink(missing_ok=True)
+        except Exception:
+            pass
+        logger.info(f"Đã tự động tạo Desktop Shortcut tại: {shortcut_file}")
+    except Exception as e:
+        logger.debug(f"Bỏ qua tự động tạo shortcut: {e}")
+
+
 def main():
     logger.info("=" * 60)
     logger.info("VB-STUDIO Multi-Channel (WebView2 UI) khởi động...")
     logger.info(f"Thư mục gốc: {Config.BASE_DIR}")
     logger.info("=" * 60)
+
+    ensure_desktop_shortcut()
 
     account_service, settings_service = build_services()
     run_web_gui(account_service, settings_service)
@@ -141,3 +188,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -8,6 +8,14 @@ from playwright.sync_api import sync_playwright
 from src.core.config import Config
 from src.core.logger import logger
 
+# Đảm bảo đường dẫn driver Playwright trong môi trường đóng gói PyInstaller
+if getattr(sys, "frozen", False):
+    meipass = getattr(sys, "_MEIPASS", "")
+    if meipass:
+        driver_path = Path(meipass) / "playwright" / "driver"
+        if driver_path.exists():
+            os.environ["PLAYWRIGHT_BROWSERS_PATH"] = os.getenv("PLAYWRIGHT_BROWSERS_PATH", "0")
+
 class BrowserService:
     """
     Manages Playwright browser automation, persistent profiles,
@@ -47,6 +55,43 @@ class BrowserService:
     # Tự lưu cookies mỗi 5 phút khi browser còn mở (không chờ đóng mới lưu)
     AUTOSAVE_INTERVAL_SEC = 300
 
+    def _launch_persistent_context(self, playwright, profile_dir: Path, custom_args: List[str]):
+        """
+        Khởi chạy trình duyệt bền vững (Persistent Context).
+        Tự động nhận diện và fallback lần lượt:
+        1. Google Chrome (nếu máy có Chrome)
+        2. Microsoft Edge (có sẵn 100% trên Windows 10/11)
+        3. Playwright Chromium mặc định
+        """
+        launch_args = [
+            "--disable-blink-features=AutomationControlled",
+            "--start-maximized",
+            "--no-first-run",
+            "--no-default-browser-check"
+        ] + custom_args
+
+        last_error = None
+        # Thử lần lượt các trình duyệt Chromium phổ biến trên máy người dùng
+        for channel in ["chrome", "msedge", None]:
+            try:
+                kwargs = {
+                    "user_data_dir": str(profile_dir),
+                    "headless": False,
+                    "no_viewport": True,
+                    "args": launch_args,
+                    "ignore_default_args": ["--enable-automation"],
+                }
+                if channel:
+                    kwargs["channel"] = channel
+                context = playwright.chromium.launch_persistent_context(**kwargs)
+                logger.info(f"Đã mở trình duyệt thành công (channel: {channel or 'default chromium'})")
+                return context
+            except Exception as e:
+                last_error = e
+                logger.warning(f"Không thể mở với channel='{channel}': {e}")
+
+        raise RuntimeError(f"Không thể khởi chạy trình duyệt: {last_error}")
+
     def launch_channel_browser(
         self,
         channel_id: str,
@@ -69,19 +114,8 @@ class BrowserService:
 
                 playwright = sync_playwright().start()
 
-                # Launch persistent context with stealth parameters
-                context = playwright.chromium.launch_persistent_context(
-                    user_data_dir=str(profile_dir),
-                    headless=False,
-                    no_viewport=True,
-                    args=[
-                        "--disable-blink-features=AutomationControlled",
-                        "--start-maximized",
-                        "--no-first-run",
-                        "--no-default-browser-check"
-                    ],
-                    ignore_default_args=["--enable-automation"]
-                )
+                # Launch persistent context with smart channel fallback (Chrome -> Edge -> Chromium)
+                context = self._launch_persistent_context(playwright, profile_dir, [])
 
                 self._active_contexts[channel_id] = context
 
@@ -107,9 +141,6 @@ class BrowserService:
                 page.goto(target_url, wait_until="commit", timeout=60000)
 
                 # Event loop waiting for user to close browser window.
-                # Chờ theo từng chặng AUTOSAVE_INTERVAL_SEC: mỗi chặng trích
-                # cookies hiện tại gọi on_autosave (tự lưu, giữ lock); hết
-                # timeout mà page chưa đóng -> lặp tiếp. Page đóng -> thoát.
                 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
                 browser_closed = False
                 while not browser_closed:
@@ -134,7 +165,6 @@ class BrowserService:
                             raise
 
             except Exception as e:
-                # If window was manually closed, page.wait_for_event may throw TargetClosedError which is normal
                 error_msg = str(e).lower()
                 if "target closed" in error_msg or "context closed" in error_msg:
                     logger.info(f"Trình duyệt kênh '{channel_id}' đã được người dùng đóng.")

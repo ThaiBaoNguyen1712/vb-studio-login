@@ -146,26 +146,11 @@
       const emptyState = document.getElementById('empty-state');
       try {
         renderDashboardInner(grid, emptyState);
-        applyDensity();
-        setDensityButtons();
         if (typeof refreshDrawerIfOpen === 'function') refreshDrawerIfOpen();
       } catch (err) {
         console.error('renderDashboard:', err);
         showToast('Lỗi vẽ dashboard: ' + (err && err.message ? err.message : err), 'error');
       }
-    }
-
-    function setDensityButtons() {
-      ['COMFORT', 'COMPACT'].forEach(m => {
-        const btn = document.getElementById(`density-${m}`);
-        if (btn) {
-          if (m === (appState.density || 'COMFORT')) {
-            btn.className = 'px-2.5 py-1 rounded-md text-xs font-bold bg-blue-600 text-white shadow-xs transition-all';
-          } else {
-            btn.className = 'px-2.5 py-1 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all';
-          }
-        }
-      });
     }
 
     function renderDashboardInner(grid, emptyState) {
@@ -311,7 +296,7 @@
           const pCode = appState.selected_platform;
           grid.innerHTML = chunks.map((cards) => {
             return `
-            <div class="flex-1 min-w-[300px] shrink-0 bg-slate-100/70 dark:bg-dark-sidebar/60 border border-slate-200 dark:border-dark-border rounded-2xl p-4 flex flex-col gap-3 shadow-xs self-start">
+            <div class="w-[320px] min-w-[280px] max-w-[340px] shrink-0 bg-slate-100/70 dark:bg-dark-sidebar/60 border border-slate-200 dark:border-dark-border rounded-2xl p-4 flex flex-col gap-3 shadow-xs self-start">
               <div class="flex items-center gap-2.5 pb-3 border-b border-slate-200/80 dark:border-dark-border/80 min-h-[58px] min-w-0">
                 ${platBadge(pCode, 'w-9 h-9')}
                 <h4 class="font-extrabold text-sm text-slate-800 dark:text-slate-100 truncate leading-tight min-w-0 flex-1">${platName(pCode)}</h4>
@@ -345,7 +330,7 @@
             : `<div class="w-9 h-9 rounded-xl bg-gradient-to-br ${grad} text-white font-extrabold text-xs flex items-center justify-center shrink-0 shadow-xs">${initial}</div>`;
 
           return `
-            <div class="flex-1 min-w-[300px] shrink-0 bg-slate-100/70 dark:bg-dark-sidebar/60 border border-slate-200 dark:border-dark-border rounded-2xl p-4 flex flex-col gap-3 shadow-xs self-start">
+            <div class="w-[320px] min-w-[280px] max-w-[340px] shrink-0 bg-slate-100/70 dark:bg-dark-sidebar/60 border border-slate-200 dark:border-dark-border rounded-2xl p-4 flex flex-col gap-3 shadow-xs self-start">
               <!-- Cột Header Tài khoản (cố định chiều cao để các cột thẳng hàng) -->
               <div class="flex items-center justify-between gap-2 pb-3 border-b border-slate-200/80 dark:border-dark-border/80 min-h-[58px]">
                 <div class="flex items-center gap-2.5 min-w-0 flex-1">
@@ -386,7 +371,7 @@
           scrollControls.classList.add('hidden');
           scrollControls.classList.remove('flex');
         }
-        grid.className = 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4';
+        grid.className = 'grid grid-cols-[repeat(auto-fill,minmax(280px,340px))] gap-4 justify-start';
 
         if (filtered.length === 0) {
           grid.innerHTML = '';
@@ -429,28 +414,6 @@
         }
       });
       renderDashboard();
-    }
-
-    // Mật độ hiển thị: COMFORT (rộng) / COMPACT (gọn, ẩn dòng phụ)
-    function setDensity(mode) {
-      appState.density = mode;
-      try { localStorage.setItem('vb_density', mode); } catch (e) {}
-      ['COMFORT', 'COMPACT'].forEach(m => {
-        const btn = document.getElementById(`density-${m}`);
-        if (btn) {
-          if (m === mode) {
-            btn.className = 'px-2.5 py-1 rounded-md text-xs font-bold bg-blue-600 text-white shadow-xs transition-all';
-          } else {
-            btn.className = 'px-2.5 py-1 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all';
-          }
-        }
-      });
-      applyDensity();
-    }
-
-    function applyDensity() {
-      const grid = document.getElementById('cards-grid');
-      if (grid) grid.classList.toggle('density-compact', appState.density === 'COMPACT');
     }
 
     function setDisplayMode(mode) {

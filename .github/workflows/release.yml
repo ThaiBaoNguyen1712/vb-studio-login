@@ -44,11 +44,12 @@ jobs:
             --hidden-import packaging.version `
             --hidden-import cryptography `
             --hidden-import pyzipper `
-            --hidden-import src `
             --collect-submodules webview `
             --collect-submodules packaging `
+            --collect-all playwright `
             --collect-all src `
             run.py
+
 
 
       - name: Prepare Release Package
@@ -57,6 +58,9 @@ jobs:
           $tag = if ($env:GITHUB_REF_NAME) { $env:GITHUB_REF_NAME } else { "latest" }
           New-Item -ItemType Directory -Force -Path "release_pkg" | Out-Null
           Copy-Item "dist\VB-Login.exe" "release_pkg\"
+          if (Test-Path "scripts\Tao-Shortcut-Desktop.bat") {
+            Copy-Item "scripts\Tao-Shortcut-Desktop.bat" "release_pkg\"
+          }
           Copy-Item ".env.example" "release_pkg\"
           
           # Nen thanh file zip phan phoi cho user
