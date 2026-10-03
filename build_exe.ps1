@@ -33,9 +33,9 @@ pyinstaller --noconfirm --clean --windowed --onefile `
   --hidden-import packaging.version `
   --hidden-import cryptography `
   --hidden-import pyzipper `
-  --hidden-import psycopg2 `
   --hidden-import src `
   --collect-submodules webview `
+
   --collect-submodules packaging `
   --collect-submodules src `
   run.py

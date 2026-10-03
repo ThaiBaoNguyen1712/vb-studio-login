@@ -14,9 +14,8 @@ from src.services.platform_service import PlatformService
 from src.services.update_service import UpdateService
 from src.repositories.local_repo import LocalJsonRepository
 
-from src.repositories.postgres_repo import PostgresRepository
-
 class WebBridge:
+
     """
     Bidirectional bridge between Python backend and Modern Web Frontend.
     Methods called via window.pywebview.api.<method_name>()
@@ -850,40 +849,8 @@ class WebBridge:
                 self._settings_service.settings[section] = values
         self._settings_service.save_settings()
 
-        # Check repository re-init
-        mode = self._settings_service.get("database", "storage_mode", "LOCAL")
-        if mode == "POSTGRES":
-            pg = PostgresRepository(
-                host=self._settings_service.get("database", "host"),
-                port=self._settings_service.get("database", "port"),
-                dbname=self._settings_service.get("database", "dbname"),
-                user=self._settings_service.get("database", "user"),
-                password=self._settings_service.get("database", "password"),
-                sslmode=self._settings_service.get("database", "sslmode", "prefer")
-            )
-            if pg.is_connected():
-                self._account_service.repository = pg
-                self._account_service.session_service.repository = pg
-                logger.info("Đã chuyển sang PostgreSQL VPS!")
-            else:
-                logger.warning("Không thể kết nối VPS! Giữ Local.")
-        else:
-            local_repo = LocalJsonRepository()
-            self._account_service.repository = local_repo
-            self._account_service.session_service.repository = local_repo
-
         return {"success": True}
 
-    def test_db_connection(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        ok, msg = self._settings_service.test_postgres_connection(
-            host=data.get("host"),
-            port=data.get("port", 5432),
-            dbname=data.get("dbname"),
-            user=data.get("user"),
-            password=data.get("password"),
-            sslmode=data.get("sslmode", "prefer")
-        )
-        return {"success": ok, "message": msg}
 
     def test_firebase_connection(self, firebase_url: Optional[str] = None) -> Dict[str, Any]:
         ok, msg = self._settings_service.test_firebase_connection(firebase_url)

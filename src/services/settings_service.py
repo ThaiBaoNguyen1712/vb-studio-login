@@ -23,8 +23,6 @@ DEFAULT_SETTINGS = {
         "github_repo": "ThaiBaoNguyen1712/vb-studio-login",
         "release_stage": "Release"
     },
-
-
     "firebase": {
         "url": "https://vb-studio-login-sync-default-rtdb.asia-southeast1.firebasedatabase.app/",
         "api_key": "AIzaSyCRJzx8Z8--dzQBgxbTsbYaygyifxj4waY",
@@ -49,7 +47,7 @@ DEFAULT_SETTINGS = {
 class SettingsService:
     """
     Manages persistent application settings,
-    database configuration, and runtime customization.
+    Firebase configuration, and runtime customization.
     """
 
     def __init__(self, file_path: Optional[Path] = None):
@@ -61,14 +59,7 @@ class SettingsService:
         Config.ensure_directories()
         if not self.file_path.exists():
             self.settings = json.loads(json.dumps(DEFAULT_SETTINGS))
-            # Sync initial settings with .env if available
-            self.settings["database"]["storage_mode"] = Config.STORAGE_MODE
             self.settings["general"]["default_user"] = Config.CURRENT_USER_NAME
-            self.settings["database"]["host"] = Config.DB_HOST
-            self.settings["database"]["port"] = Config.DB_PORT
-            self.settings["database"]["dbname"] = Config.DB_NAME
-            self.settings["database"]["user"] = Config.DB_USER
-            self.settings["database"]["password"] = Config.DB_PASSWORD
             self.save_settings()
         else:
             try:
@@ -170,28 +161,3 @@ class SettingsService:
                 return False, f"Mã phản hồi từ Firebase: {res.status}"
         except Exception as e:
             return False, f"Lỗi kết nối Firebase: {str(e)}"
-
-    def test_postgres_connection(self, host, port, dbname, user, password, sslmode="prefer") -> tuple[bool, str]:
-        """
-        Direct test of PostgreSQL connection parameters with detailed feedback.
-        """
-        try:
-            import psycopg2
-            conn = psycopg2.connect(
-                host=host,
-                port=int(port),
-                dbname=dbname,
-                user=user,
-                password=password,
-                sslmode=sslmode,
-                connect_timeout=4
-            )
-            with conn.cursor() as cur:
-                cur.execute("SELECT version();")
-                v = cur.fetchone()[0]
-            conn.close()
-            return True, f"Kết nối VPS thành công!\n{v.split(',')[0]}"
-        except ImportError:
-            return False, "Thiếu thư viện 'psycopg2-binary'."
-        except Exception as e:
-            return False, f"Lỗi kết nối: {str(e)}"

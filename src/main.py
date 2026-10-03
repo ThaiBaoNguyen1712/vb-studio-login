@@ -17,8 +17,8 @@ if str(PROJECT_ROOT) not in sys.path:
 from src.core.config import Config
 from src.core.logger import logger
 from src.repositories.local_repo import LocalJsonRepository
-from src.repositories.postgres_repo import PostgresRepository
 from src.services.settings_service import SettingsService
+
 from src.services.session_service import SessionService
 from src.services.browser_service import BrowserService
 from src.services.account_service import AccountService
@@ -106,31 +106,12 @@ def run_web_gui(account_service: AccountService, settings_service: SettingsServi
 def build_services():
     Config.ensure_directories()
     settings_service = SettingsService()
-    storage_mode = settings_service.get("database", "storage_mode", "LOCAL")
 
-    repo = None
-    if storage_mode == "POSTGRES":
-        logger.info("Đang kiểm tra kết nối PostgreSQL VPS...")
-        pg_repo = PostgresRepository(
-            host=settings_service.get("database", "host"),
-            port=settings_service.get("database", "port"),
-            dbname=settings_service.get("database", "dbname"),
-            user=settings_service.get("database", "user"),
-            password=settings_service.get("database", "password"),
-            sslmode=settings_service.get("database", "sslmode", "prefer"),
-        )
-        if pg_repo.is_connected():
-            logger.info("Kết nối PostgreSQL VPS thành công!")
-            repo = pg_repo
-        else:
-            logger.warning("Không kết nối được VPS! Fallback LOCAL JSON.")
-            storage_mode = "LOCAL"
-            repo = LocalJsonRepository()
-    else:
-        logger.info("Chế độ LOCAL JSON: data/local_db.json")
-        repo = LocalJsonRepository()
+    logger.info("Chế độ lưu trữ: LOCAL JSON (data/local_db.json)")
+    repo = LocalJsonRepository()
 
     session_service = SessionService(repository=repo)
+
     browser_service = BrowserService()
     account_service = AccountService(
         repository=repo,
