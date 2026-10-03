@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #161f30; color: #f1f5f9;
+         height: 100vh; display: flex; flex-direction: column; padding: 16px; user-select: none; }
+  .head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .head .bell { font-size: 22px; animation: shake 1s ease infinite; }
+  @keyframes shake { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-15deg); } 75% { transform: rotate(15deg); } }
+  .head h2 { font-size: 15px; font-weight: 800; flex: 1; }
+  .head .close { background: #0d1321; border: 1px solid #26314a; color: #94a3b8; width: 26px; height: 26px;
+                 border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .head .close:hover { color: #fff; border-color: #475569; }
+  .card { background: #0d1321; border: 1px solid #26314a; border-radius: 12px; padding: 12px; flex: 1; }
+  .card .ch { font-size: 14px; font-weight: 800; color: #fff; }
+  .card .from { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+  .card .from b { color: #60a5fa; }
+  .card .msg { font-size: 12px; color: #cbd5e1; margin-top: 6px; font-style: italic; }
+  .timer { font-size: 11px; color: #64748b; margin-top: 8px; }
+  .btns { display: flex; gap: 8px; margin-top: 12px; }
+  .btns button { flex: 1; height: 38px; border: none; border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer; }
+  #btn-approve { background: #059669; color: #fff; }
+  #btn-approve:hover { background: #10b981; }
+  #btn-deny { background: #334155; color: #e2e8f0; flex: 0.7; }
+  #btn-deny:hover { background: #475569; }
+  .foot { margin-top: 8px; text-align: center; }
+  .foot button { background: none; border: none; color: #60a5fa; font-size: 12px; font-weight: 700; cursor: pointer; }
+  .foot button:hover { text-decoration: underline; }
+  #result { font-size: 12px; font-weight: 700; margin-top: 8px; text-align: center; min-height: 16px; }
+</style>
+</head>
+<body>
+  <div class="head">
+    <span class="bell"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg></span>
+    <h2>Ai đó xin mở kênh bạn giữ</h2>
+    <button class="close" onclick="dismiss()" title="Để sau"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18 18 6M6 6l12 12"/></svg></button>
+  </div>
+  <div class="card">
+    <div class="ch" id="ch-name">-</div>
+    <div class="from" id="from-line">-</div>
+    <div class="msg" id="msg-line"></div>
+    <div class="timer">Tự đóng sau <b id="countdown">120</b>s</div>
+  </div>
+  <div class="btns">
+    <button id="btn-approve" onclick="resolve('approve')">Nhường kênh</button>
+    <button id="btn-deny" onclick="resolve('deny')">Từ chối</button>
+  </div>
+  <div class="foot"><button onclick="focusMain()">Mở app chính</button></div>
+  <div id="result"></div>
+
+<script>
+  var REQ = __VB_REQ_JSON__;
+  document.getElementById('ch-name').textContent = REQ.channel_name || REQ.channel_id || '-';
+  document.getElementById('from-line').innerHTML = '<b></b> xin mở kênh này';
+  document.getElementById('from-line').querySelector('b').textContent = REQ.requester || '?';
+  if (REQ.message) document.getElementById('msg-line').textContent = '\u201C' + REQ.message + '\u201D';
+
+  var left = 120;
+  var timer = setInterval(function () {
+    left -= 1;
+    var el = document.getElementById('countdown');
+    if (el) el.textContent = left;
+    if (left <= 0) { clearInterval(timer); dismiss(); }
+  }, 1000);
+
+  function busy(dis) {
+    document.getElementById('btn-approve').disabled = dis;
+    document.getElementById('btn-deny').disabled = dis;
+  }
+
+  async function resolve(action) {
+    busy(true);
+    try {
+      var res = await window.pywebview.api.popup_resolve(REQ.id, action);
+      var el = document.getElementById('result');
+      if (res && res.success) {
+        el.style.color = '#34d399';
+        el.textContent = res.message || 'Xong!';
+        setTimeout(dismiss, 1200);
+      } else {
+        el.style.color = '#f87171';
+        el.textContent = (res && res.message) || 'Không xử lý được!';
+        busy(false);
+      }
+    } catch (e) {
+      document.getElementById('result').textContent = 'Lỗi: ' + e;
+      busy(false);
+    }
+  }
+
+  async function dismiss() {
+    try { await window.pywebview.api.popup_dismiss(REQ.id); } catch (e) {}
+  }
+
+  async function focusMain() {
+    try { await window.pywebview.api.popup_focus_main(); } catch (e) {}
+  }
+</script>
+</body>
+</html>

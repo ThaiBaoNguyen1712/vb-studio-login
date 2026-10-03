@@ -1,0 +1,61 @@
+/* VB-Studio Login - base styles (tach tu index.html) */
+    /* Custom Scrollbar for smooth commercial look */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    .glass { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+
+    /* Cuộn dashboard: native, không snap (snap gây khựng), không smooth ép buộc */
+    #cards-grid.h-scroll {
+      scrollbar-width: thin;
+      scrollbar-color: #334155 transparent;
+      overscroll-behavior-x: contain;
+    }
+    /* Thanh cuộn mảnh, tối giản cho toàn app */
+    #main-scroll-container, #cards-grid.h-scroll {
+      scrollbar-width: thin;
+      scrollbar-color: #334155 transparent;
+    }
+    #main-scroll-container::-webkit-scrollbar, #cards-grid.h-scroll::-webkit-scrollbar { height: 8px; width: 8px; }
+    #main-scroll-container::-webkit-scrollbar-track, #cards-grid.h-scroll::-webkit-scrollbar-track { background: transparent; }
+    #main-scroll-container::-webkit-scrollbar-thumb, #cards-grid.h-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 8px; }
+    #main-scroll-container::-webkit-scrollbar-thumb:hover, #cards-grid.h-scroll::-webkit-scrollbar-thumb:hover { background: #475569; }
+    #main-scroll-container::-webkit-scrollbar-corner, #cards-grid.h-scroll::-webkit-scrollbar-corner { background: transparent; }
+
+    /* Fix dropdown đúp mũi tên: ẩn arrow mặc định, dùng arrow custom */
+    select.no-native-arrow {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 30px !important;
+    }
+    select.no-native-arrow::-ms-expand { display: none; }
+
+    /* Toast confirm: luôn nổi trên cùng */
+    #confirm-modal { transition: opacity .18s ease; }
+
+    /* Mật độ Gọn: card đặc lại, ẩn dòng tài khoản + presence (xem trong drawer) */
+    #cards-grid.density-compact { gap: 0.5rem; }
+    #cards-grid.density-compact .ch-card { padding: 0.6rem 0.75rem; gap: 0.4rem; }
+    #cards-grid.density-compact .ch-acc-line,
+    #cards-grid.density-compact .ch-presence-line { display: none; }
+    #cards-grid.density-compact .ch-main-btn { height: 1.75rem; font-size: 11px; }
+
+    /* Drawer trượt phải */
+    #channel-drawer { transition: transform .18s ease; }
+
+    /* Lớp phủ theme động (được JS sinh ra theo theme đã chọn) */
+  
+    /* Sidebar thu gọn / mở rộng (hover để expand) */
+    #sidebar { transition: width .25s ease; overflow-x: hidden; }
+    #sidebar.sb-collapsed { width: 68px; }
+    #sidebar.sb-collapsed:hover { width: 256px; }
+    #sidebar.sb-collapsed:not(:hover) .sb-label { display: none !important; }
+    #sidebar.sb-collapsed:not(:hover) .sb-pad { padding-left: 0 !important; padding-right: 0 !important; }
+    #sidebar.sb-collapsed:not(:hover) .sb-center { justify-content: center !important; }
+    #sidebar.sb-collapsed:not(:hover) nav button,
+    #sidebar.sb-collapsed:not(:hover) #platform-filter-list button { justify-content: center; padding-left: 0; padding-right: 0; }

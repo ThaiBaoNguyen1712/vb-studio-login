@@ -1,0 +1,1801 @@
+{
+  "accounts": [
+    {
+      "id": "acc_01",
+      "display_name": "Tài khoản #01",
+      "email": "vbstudio001@gmail.com",
+      "recovery_email": null,
+      "notes": "test1",
+      "created_at": "2026-10-03T13:55:30.918955",
+      "updated_at": "2026-10-03T13:55:30.918955"
+    },
+    {
+      "id": "acc_02",
+      "display_name": "Tài khoản #02",
+      "email": "baroclone001",
+      "recovery_email": null,
+      "notes": "Kênh công nghệ",
+      "created_at": "2026-10-03T13:57:46.759307",
+      "updated_at": "2026-10-03T13:57:46.759307"
+    },
+    {
+      "id": "acc_03",
+      "display_name": "Tài khoản #03",
+      "email": "test 3",
+      "recovery_email": null,
+      "notes": "Tài khoản chính",
+      "created_at": "2026-10-03T14:34:44.855252",
+      "updated_at": "2026-10-03T14:34:44.855252"
+    },
+    {
+      "id": "acc_04",
+      "display_name": "Tài khoản #04",
+      "email": "testaaa",
+      "recovery_email": null,
+      "notes": "aaaa",
+      "created_at": "2026-10-03T15:30:49.432713",
+      "updated_at": "2026-10-03T15:30:49.432713"
+    },
+    {
+      "id": "acc_05",
+      "display_name": "Tài khoản #05",
+      "email": "tesaga saewqead",
+      "recovery_email": null,
+      "notes": "Tài khoản chính",
+      "created_at": "2026-10-03T15:30:57.672291",
+      "updated_at": "2026-10-03T15:30:57.672291"
+    },
+    {
+      "id": "acc_06",
+      "display_name": "Tài khoản #06",
+      "email": "dsadas",
+      "recovery_email": null,
+      "notes": "dsad",
+      "created_at": "2026-10-03T15:31:07.917665",
+      "updated_at": "2026-10-03T15:31:07.917665"
+    }
+  ],
+  "channels": [
+    {
+      "id": "ch_01_yt",
+      "account_id": "acc_01",
+      "platform": "YOUTUBE_SHORTS",
+      "channel_name": "YT Shorts #01 (test1)",
+      "studio_url": "https://studio.youtube.com",
+      "login_url": "https://accounts.google.com/ServiceLogin?service=youtube",
+      "avatar_url": null,
+      "status": "READY",
+      "account_display_name": "Tài khoản #01",
+      "account_email": "vbstudio001@gmail.com"
+    },
+    {
+      "id": "ch_01_tt",
+      "account_id": "acc_01",
+      "platform": "TIKTOK",
+      "channel_name": "TikTok #01 (test1)",
+      "studio_url": "https://www.tiktok.com/creator-center/upload",
+      "login_url": "https://www.tiktok.com/login",
+      "avatar_url": null,
+      "status": "READY",
+      "account_display_name": "Tài khoản #01",
+      "account_email": "vbstudio001@gmail.com"
+    },
+    {
+      "id": "ch_01_fb",
+      "account_id": "acc_01",
+      "platform": "FACEBOOK_REELS",
+      "channel_name": "FB Reels #01 (test1)",
+      "studio_url": "https://business.facebook.com/latest/reels_composer",
+      "login_url": "https://www.facebook.com/login",
+      "avatar_url": null,
+      "status": "NOT_SETUP",
+      "account_display_name": "Tài khoản #01",
+      "account_email": "vbstudio001@gmail.com"
+    },
+    {
+      "id": "ch_01_ig",
+      "account_id": "acc_01",
+      "platform": "INSTAGRAM_REELS",
+      "channel_name": "Insta Reels #01 (test1)",
+      "studio_url": "https://www.instagram.com",
+      "login_url": "https://www.instagram.com/accounts/login",
+      "avatar_url": null,
+      "status": "NOT_SETUP",
+      "account_display_name": "Tài khoản #01",
+      "account_email": "vbstudio001@gmail.com"
+    },
+    {
+      "id": "ch_02_yt",
+      "account_id": "acc_02",
+      "platform": "YOUTUBE_SHORTS",
+      "channel_name": "YT Shorts #02 (Kênh công nghệ)",
+      "studio_url": "https://studio.youtube.com",
+      "login_url": "https://accounts.google.com/ServiceLogin?service=youtube",
+      "avatar_url": null,
+      "status": "READY",
+      "account_display_name": "Tài khoản #02",
+      "account_email": "baroclone001"
+    },
+    {
+      "id": "ch_03_yt",
+      "account_id": "acc_03",
+      "platform": "YOUTUBE_SHORTS",
+      "channel_name": "YouTube #03 (Tài khoản chính)",
+      "studio_url": "https://studio.youtube.com",
+      "login_url": "https://accounts.google.com/ServiceLogin?service=youtube",
+      "avatar_url": null,
+      "status": "NOT_SETUP",
+      "account_display_name": "Tài khoản #03",
+      "account_email": "test 3"
+    },
+    {
+      "id": "ch_03_tt",
+      "account_id": "acc_03",
+      "platform": "TIKTOK",
+      "channel_name": "TikTok #03 (Tài khoản chính)",
+      "studio_url": "https://www.tiktok.com/creator-center/upload",
+      "login_url": "https://www.tiktok.com/login",
+      "avatar_url": null,
+      "status": "NOT_SETUP",
+      "account_display_name": "Tài khoản #03",
+      "account_email": "test 3"
+    },
+    {
+      "id": "ch_03_fb",
+      "account_id": "acc_03",
+      "platform": "FACEBOOK_REELS",
+      "channel_name": "Facebook #03 (Tài khoản chính)",
+      "studio_url": "https://business.facebook.com/latest/reels_composer",
+      "login_url": "https://www.facebook.com/login",
+      "avatar_url": null,
+      "status": "NOT_SETUP",
+      "account_display_name": "Tài khoản #03",
+      "account_email": "test 3"
+    },
+    {
+      "id": "ch_03_ig",
+      "account_id": "acc_03",
+      "platform": "INSTAGRAM_REELS",
+      "channel_name": "Instagram #03 (Tài khoản chính)",
+      "studio_url": "https://www.instagram.com",
+      "login_url": "https://www.instagram.com/accounts/login",
+      "avatar_url": null,
+      "status": "NOT_SETUP",
+      "account_display_name": "Tài khoản #03",
+      "account_email": "test 3"
+    },
+    {
+      "id": "ch_04_yt",
+      "account_id": "acc_04",
+      "platform": "YOUTUBE_SHORTS",
+      "channel_name": "YouTube #04 (aaaa)",
+      "studio_url": "https://studio.youtube.com",
+      "login_url": "https://accounts.google.com/ServiceLogin?service=youtube",
+      "avatar_url": null,
+      "status": "NOT_SETUP",
+      "account_display_name": "Tài khoản #04",
+      "account_email": "testaaa"
+    },
+    {
+      "id": "ch_04_tt",
+      "account_id": "acc_04",
+      "platform": "TIKTOK",
+      "channel_name": "TikTok #04 (aaaa)",
+      "studio_url": "https://www.tiktok.com/creator-center/upload",
+      "login_url": "https://www.tiktok.com/login",
+      "avatar_url": null,
+      "status": "NOT_SETUP",
+      "account_display_name": "Tài khoản #04",
+      "account_email": "testaaa"
+    },
+    {
+      "id": "ch_04_fb",
+      "account_id": "acc_04",
+      "platform": "FACEBOOK_REELS",
+      "channel_name": "Facebook #04 (aaaa)",
+      "studio_url": "https://business.facebook.com/latest/reels_composer",
+      "login_url": "https://www.facebook.com/login",
+      "avatar_url": null,
+      "status": "NOT_SETUP",
+      "account_display_name": "Tài khoản #04",
+      "account_email": "testaaa"
+    },
+    {
+      "id": "ch_04_ig",
+      "account_id": "acc_04",
+      "platform": "INSTAGRAM_REELS",
+      "channel_name": "Instagram #04 (aaaa)",
+      "studio_url": "https://www.instagram.com",
+      "login_url": "https://www.instagram.com/accounts/login",
+      "avatar_url": null,
+      "status": "NOT_SETUP",
+      "account_display_name": "Tài khoản #04",
+      "account_email": "testaaa"
+    },
+    {
+      "id": "ch_05_yt",
+      "account_id": "acc_05",
+      "platform": "YOUTUBE_SHORTS",
+      "channel_name": "YouTube #05 (Tài khoản chính)",
+      "studio_url": "https://studio.youtube.com",
+      "login_url": "https://accounts.google.com/ServiceLogin?service=youtube",
+      "avatar_url": null,
+      "status": "NOT_SETUP",
+      "account_display_name": "Tài khoản #05",
+      "account_email": "tesaga saewqead"
+    },
+    {
+      "id": "ch_05_tt",
+      "account_id": "acc_05",
+      "platform": "TIKTOK",
+      "channel_name": "TikTok #05 (Tài khoản chính)",
+      "studio_url": "https://www.tiktok.com/creator-center/upload",
+      "login_url": "https://www.tiktok.com/login",
+      "avatar_url": null,
+      "status": "NOT_SETUP",
+      "account_display_name": "Tài khoản #05",
+      "account_email": "tesaga saewqead"
+    },
+    {
+      "id": "ch_05_fb",
+      "account_id": "acc_05",
+      "platform": "FACEBOOK_REELS",
+      "channel_name": "Facebook #05 (Tài khoản chính)",
+      "studio_url": "https://business.facebook.com/latest/reels_composer",
+      "login_url": "https://www.facebook.com/login",
+      "avatar_url": null,
+      "status": "NOT_SETUP",
+      "account_display_name": "Tài khoản #05",
+      "account_email": "tesaga saewqead"
+    },
+    {
+      "id": "ch_05_ig",
+      "account_id": "acc_05",
+      "platform": "INSTAGRAM_REELS",
+      "channel_name": "Instagram #05 (Tài khoản chính)",
+      "studio_url": "https://www.instagram.com",
+      "login_url": "https://www.instagram.com/accounts/login",
+      "avatar_url": null,
+      "status": "NOT_SETUP",
+      "account_display_name": "Tài khoản #05",
+      "account_email": "tesaga saewqead"
+    },
+    {
+      "id": "ch_06_yt",
+      "account_id": "acc_06",
+      "platform": "YOUTUBE_SHORTS",
+      "channel_name": "YouTube #06 (dsad)",
+      "studio_url": "https://studio.youtube.com",
+      "login_url": "https://accounts.google.com/ServiceLogin?service=youtube",
+      "avatar_url": null,
+      "status": "NOT_SETUP",
+      "account_display_name": "Tài khoản #06",
+      "account_email": "dsadas"
+    },
+    {
+      "id": "ch_06_tt",
+      "account_id": "acc_06",
+      "platform": "TIKTOK",
+      "channel_name": "TikTok #06 (dsad)",
+      "studio_url": "https://www.tiktok.com/creator-center/upload",
+      "login_url": "https://www.tiktok.com/login",
+      "avatar_url": null,
+      "status": "NOT_SETUP",
+      "account_display_name": "Tài khoản #06",
+      "account_email": "dsadas"
+    },
+    {
+      "id": "ch_06_fb",
+      "account_id": "acc_06",
+      "platform": "FACEBOOK_REELS",
+      "channel_name": "Facebook #06 (dsad)",
+      "studio_url": "https://business.facebook.com/latest/reels_composer",
+      "login_url": "https://www.facebook.com/login",
+      "avatar_url": null,
+      "status": "NOT_SETUP",
+      "account_display_name": "Tài khoản #06",
+      "account_email": "dsadas"
+    },
+    {
+      "id": "ch_06_ig",
+      "account_id": "acc_06",
+      "platform": "INSTAGRAM_REELS",
+      "channel_name": "Instagram #06 (dsad)",
+      "studio_url": "https://www.instagram.com",
+      "login_url": "https://www.instagram.com/accounts/login",
+      "avatar_url": null,
+      "status": "NOT_SETUP",
+      "account_display_name": "Tài khoản #06",
+      "account_email": "dsadas"
+    }
+  ],
+  "sessions": {
+    "ch_01_yt": {
+      "channel_id": "ch_01_yt",
+      "cookies_data": [
+        {
+          "name": "OTZ",
+          "value": "8810762_28_28__28_",
+          "domain": "accounts.google.com",
+          "path": "/",
+          "expires": 1793541732,
+          "httpOnly": false,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "NID",
+          "value": "CsQCCAES9gEBOxGDSONExDATMgNgaaD8JsifN4VY3oJ9FCGQ8HbGa2Zr4dXUW03MjNhjspC4VemDxNqNzwrmnzuJ8-33SfMr5eTP6BvIlOWYm0o2QWQAxDCG1YGit0tnMakQ3icuQGoWeJUEcIgIfGEC_0PnMYQBq5C18RwvSxzdOJqC658kV0xTkAqB-82F8LdTZwpLOJiPbPj2cCNjZQYeM3xewjgDW7CGtgEf-Y5LsNwBCg39szM101PYU36flrPlVmspZR6LKbzwUcGkETQwfYncFnQ23c4C7avR9_dXB0h3Ey45f-GsZmDN99UWxoY4n_G9s0FYAF2C-3EoATJFAdKsB89gI3zE186Ba57sphn7FMtxwAa0xv5oIIyoZS94KYrSI3d8sasXoxxKHGk-tAs1kiHc-0OpohvcRj-bzAv2N6wM",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1806760935.9052,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "HSID",
+          "value": "AoF-Rgw100GLN0gRv",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1825570560.905747,
+          "httpOnly": true,
+          "secure": false,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "SSID",
+          "value": "ApFu5ifn3yQIphYIP",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1825570560.905777,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "APISID",
+          "value": "gLPIJrtYzT0hTHga/AKXXzfX5NaYWIzjzw",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1825570560.905804,
+          "httpOnly": false,
+          "secure": false,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "SAPISID",
+          "value": "OXS3I9nfaNgs-lnP/AAnFAV-AIPbD4BSiW",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1825570560.905832,
+          "httpOnly": false,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-1PAPISID",
+          "value": "OXS3I9nfaNgs-lnP/AAnFAV-AIPbD4BSiW",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1825570560.905863,
+          "httpOnly": false,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-3PAPISID",
+          "value": "OXS3I9nfaNgs-lnP/AAnFAV-AIPbD4BSiW",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1825570560.905889,
+          "httpOnly": false,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "ACCOUNT_CHOOSER",
+          "value": "AFx_qI7jOM0OGqU-xB83BzEOjPJiKdHk9pDMhQa_Re1hcEwKxv4sEW-YPcvbMomO1uZSbMK4GdeuoPR9s4HYSmLyO_zDU-KRO7KLrIh-xReNOxNllXEMo2t3yUG28D1x1TQUqmSpe3Se",
+          "domain": "accounts.google.com",
+          "path": "/",
+          "expires": 1825570560.905911,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "SID",
+          "value": "g.a000DQmwoLfeFXpdrv-Fb-s6VILDopEzyhcSLM5x14tY6sYQ33VcA9RRZHTZFRfDOSRkPlM5lQACgYKAQ0SARASFQHGX2Mi8iUyl3n6SQjMFn2ZCfMwihoVAUF8yKpqFZkqKC7SRNPpMz167qkP0076",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1825570562.085813,
+          "httpOnly": false,
+          "secure": false,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-1PSID",
+          "value": "g.a000DQmwoLfeFXpdrv-Fb-s6VILDopEzyhcSLM5x14tY6sYQ33VcyvHPmCwxC2gngvZZQpAsWgACgYKATgSARASFQHGX2Mi8ZL5qTI2nEHYwmn3wZXWNxoVAUF8yKr9z-uI6E7bpshajhGsk-_R0076",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1825570562.085863,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-3PSID",
+          "value": "g.a000DQmwoLfeFXpdrv-Fb-s6VILDopEzyhcSLM5x14tY6sYQ33VcScVemN00-YGp96-GwUyP_wACgYKAbMSARASFQHGX2Mi40NNUnrZzU4mqZg0KOo6cBoVAUF8yKqi43jyAshnrEvAxY2WppqT0076",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1825570562.085907,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "OSID",
+          "value": "g.a000DQmwoDVzjF0df5C68yujIVVo73NGDQi13vqrQeXdYGi0_gYKkSbCpiL0F7TxiXXeuB6O5QACgYKAZQSARASFQHGX2MiHApggxH8d4lAvuB-jizV2xoVAUF8yKplFxWOcSXhJZ0eiknb6O2c0076",
+          "domain": "myaccount.google.com",
+          "path": "/",
+          "expires": 1825570562.177325,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-OSID",
+          "value": "g.a000DQmwoDVzjF0df5C68yujIVVo73NGDQi13vqrQeXdYGi0_gYKmVqg3sfRxXVI7eAt-3v56wACgYKAagSARASFQHGX2MiAXa_VBqUydM8IKpERFsJvBoVAUF8yKrNLLJgfBTu2lu983r9XHTW0076",
+          "domain": "myaccount.google.com",
+          "path": "/",
+          "expires": 1825570562.177481,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "__Host-GAPS",
+          "value": "1:i-x5yFS6Or2Fygh5IjZCeAgaWm0OW0J4UC0x9xy6iBf4iDAwfc1ZCHOu0zCvFtvBQaNzT8lqasbhnjiDxwsZpjwNpXIVYBT282sT-ZzoOoxJ2yAZ-rkZIjGz85fNEl_UB60IFpnEUnxKsLSUxZbUh9I37AovPSwnaF5JSx92EViRVvn9lvjaqQ:MNg9aVLau0lckjAm",
+          "domain": "accounts.google.com",
+          "path": "/",
+          "expires": 1825570562.84957,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "OTZ",
+          "value": "8811776_28_28__28_",
+          "domain": "myaccount.google.com",
+          "path": "/",
+          "expires": 1793602564,
+          "httpOnly": false,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "LSID",
+          "value": "o.myaccount.google.com|s.VN|s.youtube:g.a000DQmwoEcunZWEaeZU63zgywITrvlpguqNxdthmBs-vUMAuyGN4eaPka6Q1_cOadS3ENADIQACgYKAc8SARASFQHGX2MiXi7gVePGfBilgtUOKbUEXxoVAUF8yKrExhYB00WglZpGQYlpzAlH0076",
+          "domain": "accounts.google.com",
+          "path": "/",
+          "expires": 1825570566.137626,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Host-1PLSID",
+          "value": "o.myaccount.google.com|s.VN|s.youtube:g.a000DQmwoEcunZWEaeZU63zgywITrvlpguqNxdthmBs-vUMAuyGNpPP4ILtLu8leNmA-fvklxwACgYKAYkSARASFQHGX2MiKYyrZcagkQP_CdZUq7fMwBoVAUF8yKokf6iZinplkWB2NW7R_FcZ0076",
+          "domain": "accounts.google.com",
+          "path": "/",
+          "expires": 1825570566.138283,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Host-3PLSID",
+          "value": "o.myaccount.google.com|s.VN|s.youtube:g.a000DQmwoEcunZWEaeZU63zgywITrvlpguqNxdthmBs-vUMAuyGNrmy6jSj1QZnufEJ0lkwWAAACgYKAeMSARASFQHGX2Mi0hZaZLjlAwFRbDL2raO3QxoVAUF8yKqy7GrGGu8JAjhUb7ZocMBh0076",
+          "domain": "accounts.google.com",
+          "path": "/",
+          "expires": 1825570566.138355,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "__Secure-1PSIDTS",
+          "value": "sidts-CjQBkldj_8J8SwgRz7ib2e_k2OV4l4bB_mXf-183E0uhJG6BrW7WCV5KchdYltXljUdRG9F2EAA",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1822546566.441616,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-3PSIDTS",
+          "value": "sidts-CjQBkldj_8J8SwgRz7ib2e_k2OV4l4bB_mXf-183E0uhJG6BrW7WCV5KchdYltXljUdRG9F2EAA",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1822546566.441685,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "HSID",
+          "value": "A8epDs2BsY6V4YXo0",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1825570566.441706,
+          "httpOnly": true,
+          "secure": false,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "SSID",
+          "value": "A-Bz-v-J2t_3vzxcz",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1825570566.441726,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "APISID",
+          "value": "gLPIJrtYzT0hTHga/AKXXzfX5NaYWIzjzw",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1825570566.441742,
+          "httpOnly": false,
+          "secure": false,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "SAPISID",
+          "value": "OXS3I9nfaNgs-lnP/AAnFAV-AIPbD4BSiW",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1825570566.441759,
+          "httpOnly": false,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-1PAPISID",
+          "value": "OXS3I9nfaNgs-lnP/AAnFAV-AIPbD4BSiW",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1825570566.441777,
+          "httpOnly": false,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-3PAPISID",
+          "value": "OXS3I9nfaNgs-lnP/AAnFAV-AIPbD4BSiW",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1825570566.441794,
+          "httpOnly": false,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "SID",
+          "value": "g.a000DQmwoLfeFXpdrv-Fb-s6VILDopEzyhcSLM5x14tY6sYQ33VcA9RRZHTZFRfDOSRkPlM5lQACgYKAQ0SARASFQHGX2Mi8iUyl3n6SQjMFn2ZCfMwihoVAUF8yKpqFZkqKC7SRNPpMz167qkP0076",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1825570566.441809,
+          "httpOnly": false,
+          "secure": false,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-1PSID",
+          "value": "g.a000DQmwoLfeFXpdrv-Fb-s6VILDopEzyhcSLM5x14tY6sYQ33VcyvHPmCwxC2gngvZZQpAsWgACgYKATgSARASFQHGX2Mi8ZL5qTI2nEHYwmn3wZXWNxoVAUF8yKr9z-uI6E7bpshajhGsk-_R0076",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1825570566.441825,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-3PSID",
+          "value": "g.a000DQmwoLfeFXpdrv-Fb-s6VILDopEzyhcSLM5x14tY6sYQ33VcScVemN00-YGp96-GwUyP_wACgYKAbMSARASFQHGX2Mi40NNUnrZzU4mqZg0KOo6cBoVAUF8yKqi43jyAshnrEvAxY2WppqT0076",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1825570566.441841,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "HSID",
+          "value": "A8epDs2BsY6V4YXo0",
+          "domain": ".google.com.vn",
+          "path": "/",
+          "expires": 1825570566.694361,
+          "httpOnly": true,
+          "secure": false,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "SSID",
+          "value": "A-Bz-v-J2t_3vzxcz",
+          "domain": ".google.com.vn",
+          "path": "/",
+          "expires": 1825570566.69443,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "APISID",
+          "value": "gLPIJrtYzT0hTHga/AKXXzfX5NaYWIzjzw",
+          "domain": ".google.com.vn",
+          "path": "/",
+          "expires": 1825570566.694449,
+          "httpOnly": false,
+          "secure": false,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "SAPISID",
+          "value": "OXS3I9nfaNgs-lnP/AAnFAV-AIPbD4BSiW",
+          "domain": ".google.com.vn",
+          "path": "/",
+          "expires": 1825570566.694466,
+          "httpOnly": false,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-1PAPISID",
+          "value": "OXS3I9nfaNgs-lnP/AAnFAV-AIPbD4BSiW",
+          "domain": ".google.com.vn",
+          "path": "/",
+          "expires": 1825570566.694483,
+          "httpOnly": false,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-3PAPISID",
+          "value": "OXS3I9nfaNgs-lnP/AAnFAV-AIPbD4BSiW",
+          "domain": ".google.com.vn",
+          "path": "/",
+          "expires": 1825570566.694502,
+          "httpOnly": false,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "NID",
+          "value": "CuwBCAESngEBOxGDSLi7jfy0Jdrldlg713ljgmpNHZyF0vj8dNL86nZmu-9rM-_F-am8MFvyKRpl58Y5fpfaCQhzaaCwN4QzRwBTwdIL0iUT-TB4UEtADSLkNWy8oXTY7HekbU7IGwUMP6GfXwSaFGEtWPWRwELpNiEsdf1YsM90rsxsyihozKG_N2z84D1jOx_EPJf94OmB0JqU23p79yHg8P54bigBMkUB0qwHzwFRW4UpQRVsO_A3paluUcNdIjw0JwrLeCqlm4jJqFhcMMqz1xRIiuVUeBWT7mcoiHSuLkIISSdmtZz8QnP0GAo",
+          "domain": ".google.com.vn",
+          "path": "/",
+          "expires": 1806821766.69452,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "SID",
+          "value": "g.a000DQmwoLfeFXpdrv-Fb-s6VILDopEzyhcSLM5x14tY6sYQ33VcA9RRZHTZFRfDOSRkPlM5lQACgYKAQ0SARASFQHGX2Mi8iUyl3n6SQjMFn2ZCfMwihoVAUF8yKpqFZkqKC7SRNPpMz167qkP0076",
+          "domain": ".google.com.vn",
+          "path": "/",
+          "expires": 1825570566.694542,
+          "httpOnly": false,
+          "secure": false,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-1PSID",
+          "value": "g.a000DQmwoLfeFXpdrv-Fb-s6VILDopEzyhcSLM5x14tY6sYQ33VcyvHPmCwxC2gngvZZQpAsWgACgYKATgSARASFQHGX2Mi8ZL5qTI2nEHYwmn3wZXWNxoVAUF8yKr9z-uI6E7bpshajhGsk-_R0076",
+          "domain": ".google.com.vn",
+          "path": "/",
+          "expires": 1825570566.69456,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-3PSID",
+          "value": "g.a000DQmwoLfeFXpdrv-Fb-s6VILDopEzyhcSLM5x14tY6sYQ33VcScVemN00-YGp96-GwUyP_wACgYKAbMSARASFQHGX2Mi40NNUnrZzU4mqZg0KOo6cBoVAUF8yKqi43jyAshnrEvAxY2WppqT0076",
+          "domain": ".google.com.vn",
+          "path": "/",
+          "expires": 1825570566.694578,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "__Secure-BUCKET",
+          "value": "CJoC",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1806562566.982723,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "VISITOR_INFO1_LIVE",
+          "value": "yjlaXFPX-qE",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1806562787.439209,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None",
+          "partitionKey": "https://youtube.com",
+          "_crHasCrossSiteAncestor": false
+        },
+        {
+          "name": "VISITOR_PRIVACY_METADATA",
+          "value": "CgJWThIEGgAgNw%3D%3D",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1806562787.439248,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None",
+          "partitionKey": "https://youtube.com",
+          "_crHasCrossSiteAncestor": false
+        },
+        {
+          "name": "__Secure-YNID",
+          "value": "22.YT=IQhadb7Y4sRG5TNXFYUWCB5D4eht_X58T0rOrrZYjdQrN1rUYC9iRcbz6lN_0A1llr-roTDVTwx7BgRgaqMZ4Hz79lQa3wSdboTijZN05eU5dFQIkqtnEe5hT1yOtNTxvB0d8hCiR0t1AGCdqqR1DqUvRa73adteycBr4XatioaMfM-RdDRZT490V5Ixm6YBZ8HDny5OLLZMfuAtJm5LO_9HVnHD-hhFxVD6cE6R4n8TVuIilxdOZBnGd5isKGivK82ow5JL2MqtGAp-1vu3sgvnEVFJ9PedTzIrp5a1heQnozsYzjzL8rwB5P-obDwyw-cPlnLx6UFyZHXzjzRC1Q",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1806562566.472383,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None",
+          "partitionKey": "https://youtube.com",
+          "_crHasCrossSiteAncestor": false
+        },
+        {
+          "name": "__Secure-ROLLOUT_TOKEN",
+          "value": "CK_a8ouok7Lx9QEQ9-LOoaKdlwMYzezvoaKdlwM%3D",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1806562567.472485,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None",
+          "partitionKey": "https://youtube.com",
+          "_crHasCrossSiteAncestor": false
+        },
+        {
+          "name": "LOGIN_INFO",
+          "value": "AFmmF2swRQIhALdkiHfVE-TBzIQ7_tLg7eCaVX-vmPWECt9ZbktHPvReAiBO2gmMMRJKZk5gd8FZdoah-1Pg5Z_LXqvPiWvsXS25vw:QUQ3MjNmd3dvcWlxYlQ3cmtCRUg2alBGcjFvNS1qU1h5RTdJRkNtM2xGM0F4YnBmRTZQaWFwd3J2Q2RjZmRTdklZQkp6d1M0bUJiQnphSW1sWERRODlnTXNnX3NWdGdzVkF2b3htZlVIQnVzWFBpNFpqNmU4U1h5Yi1NYXMwdDJBOHpOUDVZOVlFWWxRZkdKeVBSc0pETXBZTlFLUTV4eFNB",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1825570567.472538,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "VISITOR_INFO1_LIVE",
+          "value": "yjlaXFPX-qE",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1806562568.679563,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "VISITOR_PRIVACY_METADATA",
+          "value": "CgJWThIEGgAgNw%3D%3D",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1806562568.679637,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "__Secure-YNID",
+          "value": "22.YT=IQhadb7Y4sRG5TNXFYUWCB5D4eht_X58T0rOrrZYjdQrN1rUYC9iRcbz6lN_0A1llr-roTDVTwx7BgRgaqMZ4Hz79lQa3wSdboTijZN05eU5dFQIkqtnEe5hT1yOtNTxvB0d8hCiR0t1AGCdqqR1DqUvRa73adteycBr4XatioaMfM-RdDRZT490V5Ixm6YBZ8HDny5OLLZMfuAtJm5LO_9HVnHD-hhFxVD6cE6R4n8TVuIilxdOZBnGd5isKGivK82ow5JL2MqtGAp-1vu3sgvnEVFJ9PedTzIrp5a1heQnozsYzjzL8rwB5P-obDwyw-cPlnLx6UFyZHXzjzRC1Q",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1806562566.472383,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "__Secure-ROLLOUT_TOKEN",
+          "value": "CK_a8ouok7Lx9QEQ9-LOoaKdlwMYzezvoaKdlwM%3D",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1806562567.472485,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "PREF",
+          "value": "f4=4000000&tz=Asia.Saigon",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1825570787.755872,
+          "httpOnly": false,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Host-GAPSTS",
+          "value": "gapsts-Ci0BxkkdjR6BitqgQtpc6LwqHIP4vgoXhj9wl1SRtto0aUrgiat7asJg1SWhJ6cQAQ==",
+          "domain": "accounts.google.com",
+          "path": "/",
+          "expires": 1825570787.800026,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-1PSIDTS",
+          "value": "sidts-CjYBkldj_5WJQU0CYqSlgOaMNs42XEiHXla33ZCVN9rSd980oKLeRoDA0XzU0Z6REyWitnIlAbAQAA",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1822546787.838223,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-1PSIDRTS",
+          "value": "sidts-CjYBkldj_5WJQU0CYqSlgOaMNs42XEiHXla33ZCVN9rSd980oKLeRoDA0XzU0Z6REyWitnIlAbAQAA",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1791011387.838404,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-3PSIDTS",
+          "value": "sidts-CjYBkldj_5WJQU0CYqSlgOaMNs42XEiHXla33ZCVN9rSd980oKLeRoDA0XzU0Z6REyWitnIlAbAQAA",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1822546787.838505,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "__Secure-3PSIDRTS",
+          "value": "sidts-CjYBkldj_5WJQU0CYqSlgOaMNs42XEiHXla33ZCVN9rSd980oKLeRoDA0XzU0Z6REyWitnIlAbAQAA",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1791011387.838658,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "SIDCC",
+          "value": "AKEyXzV6jdz6KEQIrELq1GugLI7BgD1mVZmGTvPd6rQgp2gg-aVijPAndSSk-KMvAljHXtFP8g",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1822546787.838728,
+          "httpOnly": false,
+          "secure": false,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-1PSIDCC",
+          "value": "AKEyXzUmFUcDTtFMxneujiKtc940WeYkPtTM_4idso0ap1YMHfmO5ylARj38IGMkku857NlA",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1822546787.838767,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-3PSIDCC",
+          "value": "AKEyXzXOaDnxRfKX8Fu2gtTkO0cMIWh3U5PNZDk0E53QFvFHIl4GYOZpe6bmy7R1GOWiDJwF",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1822546787.838799,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "ST-yve142",
+          "value": "session_logininfo=AFmmF2swRQIhALdkiHfVE-TBzIQ7_tLg7eCaVX-vmPWECt9ZbktHPvReAiBO2gmMMRJKZk5gd8FZdoah-1Pg5Z_LXqvPiWvsXS25vw%3AQUQ3MjNmd3dvcWlxYlQ3cmtCRUg2alBGcjFvNS1qU1h5RTdJRkNtM2xGM0F4YnBmRTZQaWFwd3J2Q2RjZmRTdklZQkp6d1M0bUJiQnphSW1sWERRODlnTXNnX3NWdGdzVkF2b3htZlVIQnVzWFBpNFpqNmU4U1h5Yi1NYXMwdDJBOHpOUDVZOVlFWWxRZkdKeVBSc0pETXBZTlFLUTV4eFNB",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1791010793,
+          "httpOnly": false,
+          "secure": false,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "SIDCC",
+          "value": "AKEyXzX9uWhL0lIdyNoODFxlTYX3HT2-N2SmJeGSZA5JWEMNUzZXnYEhlTExu6gRzjgfN7nd",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1822546789.584675,
+          "httpOnly": false,
+          "secure": false,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-1PSIDCC",
+          "value": "AKEyXzX3aQQgGUK_WF5bOFOjN4IvwH4S_oZDgJSZOxY2Mncb5BloY2I1dk7blURtyKAtSj-s",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1822546789.584704,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-3PSIDCC",
+          "value": "AKEyXzUygcNgdtC8MJ4mwtrupj2nIPiNoUGfUBloQhZeKTfbyYhpz0iOa3QkA9Sf2_LIR5XL",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1822546789.584735,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        }
+      ],
+      "in_use_by": null,
+      "in_use_since": null,
+      "last_synced_at": "2026-10-03T13:59:51.938764",
+      "updated_by": "Admin"
+    },
+    "ch_01_tt": {
+      "channel_id": "ch_01_tt",
+      "cookies_data": [
+        {
+          "name": "ttwid",
+          "value": "1%7CXecNhYAvpIUsVQJrUSjBamdwgfVBhio6PjqW4HfRpbo%7C1791018195%7C5dedd14e644fb54ed3c3b903361f03ec19fc8e71fcd332fbfc91a44ea5c0285c",
+          "domain": ".tiktok.com",
+          "path": "/",
+          "expires": 1822554202.848688,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "tiktok_webapp_theme_source",
+          "value": "auto",
+          "domain": ".www.tiktok.com",
+          "path": "/",
+          "expires": 1816938204,
+          "httpOnly": false,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "msToken",
+          "value": "lGmjtCp5LCmo6FPtmQz5qqSEMPUNfaIpmpKpvZWF65IpGCIJO5-oE7V_fyaze_cHvZ72XAOk-yOq75nXPX68JHGH5-ABz5Ihkww_2MfrTOvpBvBajlsWfiwycoz5Jw==",
+          "domain": "www.tiktok.com",
+          "path": "/",
+          "expires": 1798794203,
+          "httpOnly": false,
+          "secure": false,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "msToken",
+          "value": "FdnZVD15MqRlq9vcE2i6ZZIyTRjw5AfOZmRcVOTNKYHJLTgskjk_lYRd2rle8D6bLzWfHzfYJOnjNEKZ_FOhM2hit-nNkMhqSDO-i3bxnMcHlX-rAUDb5QZGW8-6RA==",
+          "domain": ".tiktok.com",
+          "path": "/",
+          "expires": 1791882203.996788,
+          "httpOnly": false,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "tiktok_webapp_theme",
+          "value": "dark",
+          "domain": ".www.tiktok.com",
+          "path": "/",
+          "expires": 1816938204,
+          "httpOnly": false,
+          "secure": true,
+          "sameSite": "Lax"
+        }
+      ],
+      "in_use_by": null,
+      "in_use_since": null,
+      "last_synced_at": "2026-10-03T16:03:24.885995",
+      "updated_by": "Bảo Nguyễn"
+    },
+    "ch_01_fb": {
+      "channel_id": "ch_01_fb",
+      "cookies_data": [],
+      "in_use_by": null,
+      "in_use_since": null,
+      "last_synced_at": null,
+      "updated_by": null
+    },
+    "ch_01_ig": {
+      "channel_id": "ch_01_ig",
+      "cookies_data": [],
+      "in_use_by": null,
+      "in_use_since": null,
+      "last_synced_at": null,
+      "updated_by": null
+    },
+    "ch_02_yt": {
+      "channel_id": "ch_02_yt",
+      "cookies_data": [
+        {
+          "name": "OTZ",
+          "value": "8811778_28_28__28_",
+          "domain": "accounts.google.com",
+          "path": "/",
+          "expires": 1793602679,
+          "httpOnly": false,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "NID",
+          "value": "CsUCCAES9wEBOxGDSCEyeGWq24pKkKuZptFy20w3c0InGD-gtgkl3OsT9MI-wfE2dDXNbxGRAp-eO2M5MO0_BfhbhHIX14UcILdm5uUFHaVf65UaN7EA7f6QuVYvvdYKiHGlwzJbJ5wWv7DETXOi0jizf5dpDxjWnbDu5cwlt52Bx76T30RC3JihB7WUMYc9P8rBL2dEQluIkTe1kyNek9Jg0FZcAUMvdcIjN5NOMWPTX7MIAqXsNKrcSAk75bonCGb4cM6gGAZnZ3nhah_7FeIiXJeAqTE0NrFBDl4Db4lKQgNs1ayGO12ipE3JE2bDQ1Cm-JN4ZHIBUduVeyLYKAEyRQHSrAfP6PWLToITEutBbdf8jmjp0a37hxNshsz-fVoewEnQTfXDWDgdd91IGUZS4GmK3VPYfIPm15DoF5BI1Ut2w6JzBg",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1806821879.922499,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "HSID",
+          "value": "AjRWQ79xNTURHfFTW",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1825570754.922834,
+          "httpOnly": true,
+          "secure": false,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "SSID",
+          "value": "AWAjg5HRjqK_HIPv5",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1825570754.922862,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "APISID",
+          "value": "P3LpLG6WSz643LBE/AIL_GP-7L4xcIMH1y",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1825570754.922882,
+          "httpOnly": false,
+          "secure": false,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "SAPISID",
+          "value": "SIAkWSkxJv_xi6YM/A4x5w_0McXVbDuskg",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1825570754.922907,
+          "httpOnly": false,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-1PAPISID",
+          "value": "SIAkWSkxJv_xi6YM/A4x5w_0McXVbDuskg",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1825570754.922924,
+          "httpOnly": false,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-3PAPISID",
+          "value": "SIAkWSkxJv_xi6YM/A4x5w_0McXVbDuskg",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1825570754.922945,
+          "httpOnly": false,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "ACCOUNT_CHOOSER",
+          "value": "AFx_qI4DdxNar11trQfbjwKbdMAkJfulNh1cfW4L3AA2pMpHmy2SkrLK1HzqhqKv5ViRwWiXuhxExruG2F82eMCbziaQckbEN7xxO3jqpOidh57S_HDfPIpWtji1JvY-R9t8hwfSsq66",
+          "domain": "accounts.google.com",
+          "path": "/",
+          "expires": 1825570754.922963,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "OSID",
+          "value": "g.a000DQlIfJ6iAVuNHZX4xWf_sX21VG9PI17Wjz4VEK25VDCNgi6nErPpsuLnELarR4SqSdVF1wACgYKARASARMSFQHGX2MiH8ES60smyDugB4E1q3gsrxoVAUF8yKrPOYP8vo_cNKBH_dfRbsCD0076",
+          "domain": "myaccount.google.com",
+          "path": "/",
+          "expires": 1825570755.638893,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-OSID",
+          "value": "g.a000DQlIfJ6iAVuNHZX4xWf_sX21VG9PI17Wjz4VEK25VDCNgi6nwNW4cReFr7MYFp9aX_r8TwACgYKAdISARMSFQHGX2MiiYbxfDnCkdI_7vJ7mgbglRoVAUF8yKqLtGZimKP03RyaagC4LSDK0076",
+          "domain": "myaccount.google.com",
+          "path": "/",
+          "expires": 1825570755.639036,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "SID",
+          "value": "g.a000DQlIfJOaiekEdb3vEReTYH6s_2aPVlGlSt4WGRbhHaQh9YwFs2O9E14r9EoClLDv3eRgvAACgYKAQcSARMSFQHGX2MiISlSarTe303TekySgWwANxoVAUF8yKpIfHFt_RkJcgcYgaGNDqHC0076",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1825570755.93204,
+          "httpOnly": false,
+          "secure": false,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-1PSID",
+          "value": "g.a000DQlIfJOaiekEdb3vEReTYH6s_2aPVlGlSt4WGRbhHaQh9YwFj-qDXi7aYA5_YNm6Gvnl9wACgYKAVMSARMSFQHGX2MimlB02PrDMw3YVL7VuTqpGBoVAUF8yKrcwU3l5QBF32xYU7Q4KCMf0076",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1825570755.932089,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-3PSID",
+          "value": "g.a000DQlIfJOaiekEdb3vEReTYH6s_2aPVlGlSt4WGRbhHaQh9YwFDXjakA7ab63hg67XkxYTjwACgYKAR4SARMSFQHGX2Mi2j5k_A-NHCK5Y-qNSwbK6BoVAUF8yKowh_2SOsX98Ajtu-Y3AUAv0076",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1825570755.932134,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "__Host-GAPS",
+          "value": "1:bg213MQwjmBugECpXisRCimqp2YLAhNt-gbyC8QhA5btAL_TMPGiNpGf38JHTs5C5kHuBogfeHh3G3L6n2cbPDXxuJUid6QSDebcPR-o_XU_ArOiL2IChqrakCuHPUNl_-99pGwpilV2bb_BkWoTF1thMrljFcc3tC4ey3MgJuj8KKio2PhcwQ:jpFj7ihamCxfb1yd",
+          "domain": "accounts.google.com",
+          "path": "/",
+          "expires": 1825570756.629529,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "OTZ",
+          "value": "8811779_28_28__28_",
+          "domain": "myaccount.google.com",
+          "path": "/",
+          "expires": 1793602759,
+          "httpOnly": false,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "LSID",
+          "value": "o.myaccount.google.com|s.VN|s.youtube:g.a000DQlIfL4T0vSzONEVV2rcyy5dG5d-FiM4GZH_LGJ-WjZSsyhFj1iZgGnXBWMArCGlRt7SBwACgYKAVwSARMSFQHGX2MiMc7GExLZj8ftUR01ghbonxoVAUF8yKpLJ8Pe1iGR8g2YgqCv5KI10076",
+          "domain": "accounts.google.com",
+          "path": "/",
+          "expires": 1825570759.93047,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Host-1PLSID",
+          "value": "o.myaccount.google.com|s.VN|s.youtube:g.a000DQlIfL4T0vSzONEVV2rcyy5dG5d-FiM4GZH_LGJ-WjZSsyhF4WDupRtuRVFsmKBlYk5nzwACgYKAQgSARMSFQHGX2MiU17nOZxwEwJTGtCqVXpOYRoVAUF8yKol2YpIZIq3684rz_bn7uHs0076",
+          "domain": "accounts.google.com",
+          "path": "/",
+          "expires": 1825570759.930601,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Host-3PLSID",
+          "value": "o.myaccount.google.com|s.VN|s.youtube:g.a000DQlIfL4T0vSzONEVV2rcyy5dG5d-FiM4GZH_LGJ-WjZSsyhFbrQ7_eP-UICPS3niXh_V8QACgYKAfASARMSFQHGX2MinUmhuNYNuOoeFd38m-UE1hoVAUF8yKqbwgErYRnLiCASYjXxuWQU0076",
+          "domain": "accounts.google.com",
+          "path": "/",
+          "expires": 1825570759.930643,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "__Secure-1PSIDTS",
+          "value": "sidts-CjQBkldj_1vNR3qdojUm63W0ILSSt8T5jhRTks10mCztEvJvurLNhunBqNxplsk1nlUd7cFXEAA",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1822546760.250572,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-3PSIDTS",
+          "value": "sidts-CjQBkldj_1vNR3qdojUm63W0ILSSt8T5jhRTks10mCztEvJvurLNhunBqNxplsk1nlUd7cFXEAA",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1822546760.250797,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "HSID",
+          "value": "AaNNCtUnluYhvVKdB",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1825570760.250839,
+          "httpOnly": true,
+          "secure": false,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "SSID",
+          "value": "APkW9aEqFPP_1ydON",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1825570760.250861,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "APISID",
+          "value": "P3LpLG6WSz643LBE/AIL_GP-7L4xcIMH1y",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1825570760.250877,
+          "httpOnly": false,
+          "secure": false,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "SAPISID",
+          "value": "SIAkWSkxJv_xi6YM/A4x5w_0McXVbDuskg",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1825570760.250895,
+          "httpOnly": false,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-1PAPISID",
+          "value": "SIAkWSkxJv_xi6YM/A4x5w_0McXVbDuskg",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1825570760.250915,
+          "httpOnly": false,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-3PAPISID",
+          "value": "SIAkWSkxJv_xi6YM/A4x5w_0McXVbDuskg",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1825570760.250936,
+          "httpOnly": false,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "SID",
+          "value": "g.a000DQlIfJOaiekEdb3vEReTYH6s_2aPVlGlSt4WGRbhHaQh9YwFs2O9E14r9EoClLDv3eRgvAACgYKAQcSARMSFQHGX2MiISlSarTe303TekySgWwANxoVAUF8yKpIfHFt_RkJcgcYgaGNDqHC0076",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1825570760.250959,
+          "httpOnly": false,
+          "secure": false,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-1PSID",
+          "value": "g.a000DQlIfJOaiekEdb3vEReTYH6s_2aPVlGlSt4WGRbhHaQh9YwFj-qDXi7aYA5_YNm6Gvnl9wACgYKAVMSARMSFQHGX2MimlB02PrDMw3YVL7VuTqpGBoVAUF8yKrcwU3l5QBF32xYU7Q4KCMf0076",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1825570760.250995,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-3PSID",
+          "value": "g.a000DQlIfJOaiekEdb3vEReTYH6s_2aPVlGlSt4WGRbhHaQh9YwFDXjakA7ab63hg67XkxYTjwACgYKAR4SARMSFQHGX2Mi2j5k_A-NHCK5Y-qNSwbK6BoVAUF8yKowh_2SOsX98Ajtu-Y3AUAv0076",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1825570760.251022,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "HSID",
+          "value": "AaNNCtUnluYhvVKdB",
+          "domain": ".google.com.vn",
+          "path": "/",
+          "expires": 1825570760.510925,
+          "httpOnly": true,
+          "secure": false,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "SSID",
+          "value": "APkW9aEqFPP_1ydON",
+          "domain": ".google.com.vn",
+          "path": "/",
+          "expires": 1825570760.510992,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "APISID",
+          "value": "P3LpLG6WSz643LBE/AIL_GP-7L4xcIMH1y",
+          "domain": ".google.com.vn",
+          "path": "/",
+          "expires": 1825570760.511012,
+          "httpOnly": false,
+          "secure": false,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "SAPISID",
+          "value": "SIAkWSkxJv_xi6YM/A4x5w_0McXVbDuskg",
+          "domain": ".google.com.vn",
+          "path": "/",
+          "expires": 1825570760.511048,
+          "httpOnly": false,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-1PAPISID",
+          "value": "SIAkWSkxJv_xi6YM/A4x5w_0McXVbDuskg",
+          "domain": ".google.com.vn",
+          "path": "/",
+          "expires": 1825570760.511067,
+          "httpOnly": false,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-3PAPISID",
+          "value": "SIAkWSkxJv_xi6YM/A4x5w_0McXVbDuskg",
+          "domain": ".google.com.vn",
+          "path": "/",
+          "expires": 1825570760.511085,
+          "httpOnly": false,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "NID",
+          "value": "Cu0BCAESnwEBOxGDSMYqeSH3wGxXDMkH3Tax2lRHGu8G4hKJOzC-ZB_4qe2SKuZpPthaNQu7IxiGRU0GwXMyO5dXvoMcz9O43TANMRksmyZzitwZnOk5S-SWxHFJW2nzpAbBVHmGXZNBOPtDBWz9tW9uACetr6bfFuSuh09-cO3YcOwf3ssl3bVBGtZk-cDZoVLf5muXHBEldfkAEfDAXkWqSTbe2n8oATJFAdKsB89zwViRTUw0PwAKx2w4H5tsKEleKse9MetQubo1E7fIZJ1af1Z1CexlcQMQOr8qtAwQoswctPtTK7XFJp27HtIN",
+          "domain": ".google.com.vn",
+          "path": "/",
+          "expires": 1806821960.511103,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "SID",
+          "value": "g.a000DQlIfJOaiekEdb3vEReTYH6s_2aPVlGlSt4WGRbhHaQh9YwFs2O9E14r9EoClLDv3eRgvAACgYKAQcSARMSFQHGX2MiISlSarTe303TekySgWwANxoVAUF8yKpIfHFt_RkJcgcYgaGNDqHC0076",
+          "domain": ".google.com.vn",
+          "path": "/",
+          "expires": 1825570760.511123,
+          "httpOnly": false,
+          "secure": false,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-1PSID",
+          "value": "g.a000DQlIfJOaiekEdb3vEReTYH6s_2aPVlGlSt4WGRbhHaQh9YwFj-qDXi7aYA5_YNm6Gvnl9wACgYKAVMSARMSFQHGX2MimlB02PrDMw3YVL7VuTqpGBoVAUF8yKrcwU3l5QBF32xYU7Q4KCMf0076",
+          "domain": ".google.com.vn",
+          "path": "/",
+          "expires": 1825570760.511142,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-3PSID",
+          "value": "g.a000DQlIfJOaiekEdb3vEReTYH6s_2aPVlGlSt4WGRbhHaQh9YwFDXjakA7ab63hg67XkxYTjwACgYKAR4SARMSFQHGX2Mi2j5k_A-NHCK5Y-qNSwbK6BoVAUF8yKowh_2SOsX98Ajtu-Y3AUAv0076",
+          "domain": ".google.com.vn",
+          "path": "/",
+          "expires": 1825570760.511159,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "__Secure-BUCKET",
+          "value": "CMwH",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1806562760.774574,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "VISITOR_INFO1_LIVE",
+          "value": "PjTz9qQnE9Y",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1806562776.278717,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None",
+          "partitionKey": "https://youtube.com",
+          "_crHasCrossSiteAncestor": false
+        },
+        {
+          "name": "VISITOR_PRIVACY_METADATA",
+          "value": "CgJWThIEGgAgUQ%3D%3D",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1806562776.278755,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None",
+          "partitionKey": "https://youtube.com",
+          "_crHasCrossSiteAncestor": false
+        },
+        {
+          "name": "__Secure-YNID",
+          "value": "22.YT=gaZRd77yQdgTVDV96AOpdkPgzZuQNUTQb51oF6K9B_wGGbULjZKukZFvlpgRRI2lzRrrj26en9DlOis96RHJOtofe3TM_AW95_2ZZRMKNBrU9HX_ENmNCFxZfM96C3ckukqraJBJgCGqfAzDkiM6OhpRhFMWgPPkX2W8A1HW4FUFIlWONS2ZE6_192Kg6QHexbifi9Xbtlw_en0YpQ3DSM0uNOoNtgacWwNWXKxi7tLE6ph5q1WUIVMEco72wSH1sdsV8-LDeczfEYhCsY8eelMZlBQqDICsx93KCKNZlsh3HFzrHWSpiRmiZHV0iQvu9l6ovYoz3l3k6SUjgZBA-A",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1806562760.242837,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None",
+          "partitionKey": "https://youtube.com",
+          "_crHasCrossSiteAncestor": false
+        },
+        {
+          "name": "LOGIN_INFO",
+          "value": "AFmmF2swRgIhAJRMwjOASARHlzqoTy5pKOFZTBs5AisHA3edmS3fAGlAAiEAt-XMoNFM7LU19wFEHQAGZEx1pZUhoFx7JQszxPEXFp4:QUQ3MjNmdzVITjN3S0U2VlljZW03SkdyekdMcFN2NEJhbVFWNFltOVZuRnItWUhWU1AyR3FwdEJEa1ZUNlFMRWFXeFJHMkNqUXA0a3dsdkRBeXI4YTg1T1ZwYmdNSFhtTEJ4VGs1TVdwTnlMQUF5Tk52SmQxUzB5dlB5TXVoeGZBME9McFdkS3BoMFVyWF9kdGZNU3lhZHFPYy1FYkNsSmVR",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1825570761.242952,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "__Secure-ROLLOUT_TOKEN",
+          "value": "CIqF9Zb7yb3_IRDf7IP-op2XAxjG5aL-op2XAw%3D%3D",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1806562761.242987,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None",
+          "partitionKey": "https://youtube.com",
+          "_crHasCrossSiteAncestor": false
+        },
+        {
+          "name": "PREF",
+          "value": "tz=Asia.Saigon",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1825570778.053903,
+          "httpOnly": false,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "VISITOR_INFO1_LIVE",
+          "value": "PjTz9qQnE9Y",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1806562763.150278,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "VISITOR_PRIVACY_METADATA",
+          "value": "CgJWThIEGgAgUQ%3D%3D",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1806562763.150385,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "__Secure-YNID",
+          "value": "22.YT=gaZRd77yQdgTVDV96AOpdkPgzZuQNUTQb51oF6K9B_wGGbULjZKukZFvlpgRRI2lzRrrj26en9DlOis96RHJOtofe3TM_AW95_2ZZRMKNBrU9HX_ENmNCFxZfM96C3ckukqraJBJgCGqfAzDkiM6OhpRhFMWgPPkX2W8A1HW4FUFIlWONS2ZE6_192Kg6QHexbifi9Xbtlw_en0YpQ3DSM0uNOoNtgacWwNWXKxi7tLE6ph5q1WUIVMEco72wSH1sdsV8-LDeczfEYhCsY8eelMZlBQqDICsx93KCKNZlsh3HFzrHWSpiRmiZHV0iQvu9l6ovYoz3l3k6SUjgZBA-A",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1806562760.242837,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "__Secure-ROLLOUT_TOKEN",
+          "value": "CIqF9Zb7yb3_IRDf7IP-op2XAxjG5aL-op2XAw%3D%3D",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1806562761.242987,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "__Host-GAPSTS",
+          "value": "gapsts-Ci0BxkkdjXyy8L1qwzvLxbPFxJ_LZvRwdo_ifsC3uh_lB5KRJ6hoyeD0yGMWSDIQAQ==",
+          "domain": "accounts.google.com",
+          "path": "/",
+          "expires": 1825570776.540428,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-1PSIDTS",
+          "value": "sidts-CjYBkldj_zu3rK6fGIpqCKiEMvVWkk_sZwf-ig6yvJR-DffFezYtCx6h2pbfd9ApJ0qjI2Iq8QwQAA",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1822546776.598502,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-1PSIDRTS",
+          "value": "sidts-CjYBkldj_zu3rK6fGIpqCKiEMvVWkk_sZwf-ig6yvJR-DffFezYtCx6h2pbfd9ApJ0qjI2Iq8QwQAA",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1791011376.598593,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-3PSIDTS",
+          "value": "sidts-CjYBkldj_zu3rK6fGIpqCKiEMvVWkk_sZwf-ig6yvJR-DffFezYtCx6h2pbfd9ApJ0qjI2Iq8QwQAA",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1822546776.598668,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "__Secure-3PSIDRTS",
+          "value": "sidts-CjYBkldj_zu3rK6fGIpqCKiEMvVWkk_sZwf-ig6yvJR-DffFezYtCx6h2pbfd9ApJ0qjI2Iq8QwQAA",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1791011376.598706,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "SIDCC",
+          "value": "AKEyXzUH-PWdZx_mFVUp8L5NrZQW9kY8fcOBNpEKCA402G3TZe6Ixn8MaZe1qEmZ33FLYer2",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1822546776.598741,
+          "httpOnly": false,
+          "secure": false,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-1PSIDCC",
+          "value": "AKEyXzWlfDRLf02Ji-lx614z1gnBCg_VGPJHzsCzMvF7_b84xnggWXZHQlQT1CXVfynY1stK",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1822546776.598774,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-3PSIDCC",
+          "value": "AKEyXzX_tjAd-Jg2uzTjljaW4J06u5nr1aGAkyKJKDvhA-atyJBiPJ66nZdPUuj1LXRfvSrquA",
+          "domain": ".google.com",
+          "path": "/",
+          "expires": 1822546780.647944,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        },
+        {
+          "name": "SIDCC",
+          "value": "AKEyXzVgHk94sddRgiI0op3vIsZ-Wlp2oquhL68iwHpnEI-GJ-dnZdBMw6aqdm-Dxa5mgWRn",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1822546782.549506,
+          "httpOnly": false,
+          "secure": false,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-1PSIDCC",
+          "value": "AKEyXzW8CzsLxHWDF9n4_HLX53IZxsDYQaiSIkhv8xTepsoKD49BGCiKEl2jq9DZIXtYc2n-",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1822546782.549534,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "Lax"
+        },
+        {
+          "name": "__Secure-3PSIDCC",
+          "value": "AKEyXzWvWgRikMY7WReL-mNhxW8Mr1JuWNnT6APFYw5LFRjTqii1siLISh85lqTFtvdy_Rs6",
+          "domain": ".youtube.com",
+          "path": "/",
+          "expires": 1822546782.54956,
+          "httpOnly": true,
+          "secure": true,
+          "sameSite": "None"
+        }
+      ],
+      "in_use_by": null,
+      "in_use_since": null,
+      "last_synced_at": "2026-10-03T13:59:43.056664",
+      "updated_by": "Admin"
+    },
+    "ch_03_yt": {
+      "channel_id": "ch_03_yt",
+      "cookies_data": [],
+      "in_use_by": null,
+      "in_use_since": null,
+      "last_synced_at": null,
+      "updated_by": null
+    },
+    "ch_03_tt": {
+      "channel_id": "ch_03_tt",
+      "cookies_data": [],
+      "in_use_by": null,
+      "in_use_since": null,
+      "last_synced_at": null,
+      "updated_by": null
+    },
+    "ch_03_fb": {
+      "channel_id": "ch_03_fb",
+      "cookies_data": [],
+      "in_use_by": null,
+      "in_use_since": null,
+      "last_synced_at": null,
+      "updated_by": null
+    },
+    "ch_03_ig": {
+      "channel_id": "ch_03_ig",
+      "cookies_data": [],
+      "in_use_by": null,
+      "in_use_since": null,
+      "last_synced_at": null,
+      "updated_by": null
+    },
+    "ch_04_yt": {
+      "channel_id": "ch_04_yt",
+      "cookies_data": [],
+      "in_use_by": null,
+      "in_use_since": null,
+      "last_synced_at": null,
+      "updated_by": null
+    },
+    "ch_04_tt": {
+      "channel_id": "ch_04_tt",
+      "cookies_data": [],
+      "in_use_by": null,
+      "in_use_since": null,
+      "last_synced_at": null,
+      "updated_by": null
+    },
+    "ch_04_fb": {
+      "channel_id": "ch_04_fb",
+      "cookies_data": [],
+      "in_use_by": null,
+      "in_use_since": null,
+      "last_synced_at": null,
+      "updated_by": null
+    },
+    "ch_04_ig": {
+      "channel_id": "ch_04_ig",
+      "cookies_data": [],
+      "in_use_by": null,
+      "in_use_since": null,
+      "last_synced_at": null,
+      "updated_by": null
+    },
+    "ch_05_yt": {
+      "channel_id": "ch_05_yt",
+      "cookies_data": [],
+      "in_use_by": null,
+      "in_use_since": null,
+      "last_synced_at": null,
+      "updated_by": null
+    },
+    "ch_05_tt": {
+      "channel_id": "ch_05_tt",
+      "cookies_data": [],
+      "in_use_by": null,
+      "in_use_since": null,
+      "last_synced_at": null,
+      "updated_by": null
+    },
+    "ch_05_fb": {
+      "channel_id": "ch_05_fb",
+      "cookies_data": [],
+      "in_use_by": null,
+      "in_use_since": null,
+      "last_synced_at": null,
+      "updated_by": null
+    },
+    "ch_05_ig": {
+      "channel_id": "ch_05_ig",
+      "cookies_data": [],
+      "in_use_by": null,
+      "in_use_since": null,
+      "last_synced_at": null,
+      "updated_by": null
+    },
+    "ch_06_yt": {
+      "channel_id": "ch_06_yt",
+      "cookies_data": [],
+      "in_use_by": null,
+      "in_use_since": null,
+      "last_synced_at": null,
+      "updated_by": null
+    },
+    "ch_06_tt": {
+      "channel_id": "ch_06_tt",
+      "cookies_data": [],
+      "in_use_by": null,
+      "in_use_since": null,
+      "last_synced_at": null,
+      "updated_by": null
+    },
+    "ch_06_fb": {
+      "channel_id": "ch_06_fb",
+      "cookies_data": [],
+      "in_use_by": null,
+      "in_use_since": null,
+      "last_synced_at": null,
+      "updated_by": null
+    },
+    "ch_06_ig": {
+      "channel_id": "ch_06_ig",
+      "cookies_data": [],
+      "in_use_by": null,
+      "in_use_since": null,
+      "last_synced_at": null,
+      "updated_by": null
+    }
+  }
+}

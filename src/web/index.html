@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VB-Studio Login</title>
+  <link rel="icon" type="image/png" href="./assets/logo.png">
+  <!-- Tailwind CSS (vendored local -> chạy offline 100%, không phụ thuộc CDN) -->
+  <script src="./vendor/tailwind.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+            },
+            dark: {
+              bg: '#0b0f19',
+              sidebar: '#111827',
+              card: '#161f30',
+              border: '#1f293d',
+              input: '#0d1321'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style id="theme-style"></style>
+  <link rel="stylesheet" href="./css/base.css">
+
+  
+</head>
+<body class="bg-slate-50 dark:bg-dark-bg text-slate-800 dark:text-slate-100 font-sans antialiased h-screen flex overflow-hidden select-none transition-colors duration-200">
+
+  <!-- ============================================================ -->
+  <!-- MÀN ĐĂNG NHẬP HỆ THỐNG (LOGIN SCREEN)                        -->
+  <!-- ============================================================ -->
+  <div id="auth-gate-overlay" class="fixed inset-0 z-[1000] bg-[#0b0f19] flex items-center justify-center p-4 overflow-y-auto">
+    <!-- Hiệu ứng ánh sáng nền công nghệ -->
+    <div class="fixed top-1/4 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="fixed bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+    <div class="bg-[#161f30] border border-[#1f293d] rounded-3xl p-8 max-w-md w-full shadow-2xl shadow-black/60 text-center relative z-10 my-auto">
+      <!-- Logo thương hiệu -->
+      <div class="relative mb-6">
+        <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 p-0.5 shadow-xl shadow-blue-500/20 flex items-center justify-center">
+          <div class="w-full h-full bg-[#161f30] rounded-[14px] flex items-center justify-center">
+            <img src="./assets/logo.png" alt="VB Studio" class="w-12 h-12 object-contain drop-shadow">
+          </div>
+        </div>
+        <h2 class="text-xl font-extrabold mt-4 bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">VB-Studio Login</h2>
+        <p class="text-xs text-slate-400 font-semibold mt-1">Hệ Thống Quản Lý Kênh Tập Trung</p>
+      </div>
+
+      <!-- Thẻ thông tin xác thực -->
+      <div class="mb-6 p-4 rounded-2xl bg-[#0d1321] border border-[#1f293d] text-left">
+        <div class="flex items-center gap-2 mb-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-xs font-bold text-slate-200 uppercase tracking-wider">Hệ Thống Bảo Mật</span>
+        </div>
+        <p class="text-xs text-slate-400 leading-relaxed">
+          Vui lòng đăng nhập bằng tài khoản Google được ủy quyền để truy cập hệ thống.
+        </p>
+      </div>
+
+      <!-- Hộp báo lỗi (khi mail không hợp lệ) -->
+      <div id="auth-gate-error" class="hidden mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold text-left"></div>
+
+      <!-- TRẠNG THÁI 1: Nút đăng nhập ban đầu -->
+      <div id="auth-gate-initial">
+        <button id="btn-gate-google-login" onclick="loginWithGoogle()" class="w-full flex items-center justify-center gap-3 py-3.5 px-4 bg-white hover:bg-slate-100 text-slate-900 rounded-xl font-bold text-sm shadow-lg shadow-blue-500/10 transition-all border border-slate-200 active:scale-[0.99] cursor-pointer">
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 48 48">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          </svg>
+          <span>Đăng nhập với Google</span>
+        </button>
+      </div>
+
+      <!-- TRẠNG THÁI 2: Đang chờ xác thực -->
+      <div id="auth-gate-waiting" class="hidden flex-col items-center gap-3 p-4 bg-[#0d1321] border border-blue-500/30 rounded-2xl">
+        <div class="flex items-center gap-3">
+          <div class="relative flex items-center justify-center">
+            <span class="animate-ping absolute inline-flex h-8 w-8 rounded-full bg-blue-400 opacity-30"></span>
+            <span class="relative inline-flex rounded-full h-6 w-6 bg-blue-600 text-white items-center justify-center font-bold"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg></span>
+          </div>
+          <div class="text-left">
+            <h4 class="text-xs font-bold text-blue-400">Đang chờ xác thực tài khoản Google...</h4>
+            <p class="text-[11px] text-slate-400 mt-0.5">Vui lòng hoàn tất đăng nhập trên cửa sổ xác thực.</p>
+          </div>
+        </div>
+        <div class="w-full flex items-center gap-2 pt-2 border-t border-slate-800">
+          <button onclick="loginWithGoogle()" class="flex-1 py-2 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all">
+            Thử lại
+          </button>
+          <button onclick="cancelBrowserAuth()" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-bold transition-all">
+            Hủy
+          </button>
+        </div>
+      </div>
+
+      <p class="text-[11px] text-slate-400 mt-5">
+        Phiên đăng nhập được duy trì tự động an toàn cho các lần mở ứng dụng tiếp theo.
+      </p>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- LEFT SIDEBAR                                                 -->
+  <!-- ============================================================ -->
+  <aside id="sidebar" class="thm-nav w-64 bg-white dark:bg-dark-sidebar border-r border-slate-200 dark:border-dark-border flex flex-col justify-between shrink-0 z-20">
+    <div class="min-w-0">
+      <!-- Brand Logo Header -->
+      <div class="p-5 flex items-center gap-3 border-b border-slate-100 dark:border-dark-border/60 sb-center">
+        <img src="./assets/logo.png" alt="VB Studio" class="w-10 h-10 object-contain drop-shadow shrink-0">
+        <div class="sb-label min-w-0 flex-1">
+          <h1 class="font-extrabold text-base tracking-tight bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 bg-clip-text text-transparent truncate">VB-Studio Login</h1>
+          <p class="text-xs text-slate-500 dark:text-slate-400 font-medium truncate">Hệ Thống Quản Lý Kênh</p>
+        </div>
+        <button onclick="toggleSidebar()" title="Thu gọn thanh bên" id="sidebar-pin-btn" class="sb-label w-7 h-7 shrink-0 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-dark-card text-slate-400 hover:text-blue-500 transition-all">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+      </div>
+
+      <!-- Operator Name & Google Auth Box -->
+      <div class="p-3 mx-3 my-3 bg-slate-100 dark:bg-dark-input rounded-xl border border-slate-200 dark:border-dark-border">
+        <!-- Đã đăng nhập Google -->
+        <div id="operator-logged-in" class="hidden">
+          <div class="flex items-center gap-2.5 sb-center">
+            <img id="operator-google-avatar" src="" alt="Google Avatar" class="w-8 h-8 rounded-full object-cover shrink-0 ring-1 ring-emerald-500/50">
+            <div class="flex-1 min-w-0 sb-label">
+              <div class="flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span class="text-[9px] uppercase font-bold text-emerald-500 tracking-wider">Google Verified</span>
+              </div>
+              <p id="operator-google-name" class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">Admin</p>
+              <p id="operator-google-email" class="text-[10px] text-slate-400 truncate"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chưa đăng nhập Google (fallback) -->
+        <div id="operator-anonymous">
+          <div class="flex items-center gap-2.5 sb-center">
+            <div id="user-avatar" class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-sm">A</div>
+            <div class="flex-1 min-w-0 sb-label">
+              <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Người thao tác</p>
+              <input type="text" id="input-operator-name" value="Admin" maxlength="30" onchange="saveOperatorName()"
+                     class="bg-transparent text-xs font-bold text-slate-800 dark:text-slate-100 outline-none w-full truncate border-b border-transparent focus:border-blue-500 transition-colors">
+            </div>
+          </div>
+          <!-- Nút đăng nhập Google nhanh -->
+          <button onclick="loginWithGoogle()" class="mt-2.5 w-full flex items-center justify-center gap-2 py-1.5 px-2 bg-white dark:bg-dark-card hover:bg-slate-50 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-dark-border rounded-lg text-[11px] font-bold text-slate-700 dark:text-slate-200 transition-all shadow-xs">
+            <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 48 48">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+            </svg>
+            <span class="sb-label">Đăng nhập Google</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Navigation Menu -->
+      <nav class="px-3 space-y-1">
+        <p class="px-3 pt-2 pb-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider sb-label">Menu quản lý</p>
+        <div class="space-y-1">
+
+        <button id="nav-btn-dashboard" onclick="switchView('DASHBOARD')" class="sb-center w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold transition-all bg-blue-600 text-white shadow-sm shadow-blue-500/20">
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 8.25V6Z"/><path d="M3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25Z"/><path d="M13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6Z"/><path d="M13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"/></svg>
+          <span class="sb-label truncate">Dashboard Kênh</span>
+        </button>
+
+        <button id="nav-btn-table" onclick="switchView('TABLE')" class="sb-center w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-dark-card transition-all">
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9.2h18M3 14.4h18M9.2 9.2V20"/></svg>
+          <span class="sb-label truncate">Bảng Dữ Liệu</span>
+        </button>
+
+        <button id="nav-btn-socials" onclick="switchView('SOCIALS')" class="sb-center w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-dark-card transition-all">
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M8 7.5l2.8 7M16 7.5l-2.8 7M8.5 6h7"/></svg>
+          <span class="sb-label truncate">Mạng Xã Hội</span>
+        </button>
+
+        <button id="nav-btn-health" onclick="switchView('HEALTH')" class="sb-center w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-dark-card transition-all">
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2.5-6 4 12L16 12h5"/></svg>
+          <span class="sb-label truncate">Kiểm Tra Phiên</span>
+          <span id="health-nav-badge" class="sb-label hidden text-[10px] px-1.5 py-0.5 rounded-full bg-red-500/15 text-red-400 border border-red-500/30 font-bold shrink-0"></span>
+        </button>
+
+        </div>
+      </nav>
+
+      <!-- Platform Quick Filters (render động từ registry socials) -->
+      <div class="px-3 mt-4 space-y-1">
+        <p class="px-3 pt-2 pb-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider sb-label">Lọc nền tảng</p>
+        <div id="platform-filter-list" class="space-y-1"></div>
+      </div>
+    </div>
+
+    <!-- Sidebar Footer -->
+    <div class="p-3 border-t border-slate-100 dark:border-dark-border/60 space-y-2">
+      <!-- Cài Đặt Hệ Thống ở dưới cùng -->
+      <button id="nav-btn-settings" onclick="switchView('SETTINGS')" class="sb-center w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-dark-card transition-all">
+        <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 0 1 0 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 0 1 0-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"/><path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
+        <span class="sb-label truncate">Cài Đặt Hệ Thống</span>
+      </button>
+
+      <!-- Dark/Light Mode Switch (ẩn khi theme đơn sắc) -->
+      <div id="theme-toggle-wrap" class="flex items-center justify-between px-3 py-2 bg-slate-100 dark:bg-dark-input rounded-xl sb-center">
+        <span class="sb-label text-xs font-medium text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
+          <span id="theme-icon" class="inline-flex"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.752 15.002A9.718 9.718 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 12 21.75a9.753 9.753 0 0 0 9.752-6.748Z"/></svg></span> <span id="theme-text">Giao diện Tối</span>
+        </span>
+        <button onclick="toggleTheme()" class="w-8 h-4.5 bg-blue-600 rounded-full relative p-0.5 transition-colors shrink-0">
+          <div id="theme-toggle-dot" class="w-3.5 h-3.5 bg-white rounded-full transition-transform translate-x-3.5"></div>
+        </button>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- ============================================================ -->
+  <!-- MAIN WORKSPACE                                               -->
+  <!-- ============================================================ -->
+  <main class="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+
+    <!-- Blocking Loading Overlay (cho các tác vụ không thể tiếp tục thao tác) -->
+    <div id="blocking-loading-overlay" class="fixed inset-0 bg-black/40 backdrop-blur-[1px] z-[999] hidden flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3">
+        <svg class="animate-spin w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="none">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+        </svg>
+        <span id="blocking-loading-text" class="text-xs font-bold text-slate-800 dark:text-slate-100">Đang xử lý, vui lòng chờ...</span>
+      </div>
+    </div>
+
+    <!-- Toast Notifications Container (to, rõ) -->
+    <div id="toast-container" class="absolute top-5 right-5 z-[60] flex flex-col gap-3 w-[400px] max-w-[calc(100%-2.5rem)] pointer-events-none"></div>
+
+    <!-- Bulk Open Progress Panel -->
+    <div id="bulk-panel" class="hidden absolute bottom-5 left-1/2 -translate-x-1/2 z-[60] w-[440px] max-w-[calc(100%-2.5rem)] px-5 py-4 rounded-2xl border-2 border-sky-500/40 bg-sky-900/70 text-sky-100 glass shadow-2xl">
+      <div class="flex items-center gap-3">
+        <svg class="animate-spin w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+        </svg>
+        <span id="bulk-text" class="flex-1 text-sm font-bold">Đang mở...</span>
+        <button id="bulk-stop-btn" onclick="stopBulkOpen()" class="shrink-0 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-bold transition-all">Dừng</button>
+      </div>
+      <div class="mt-3 h-2 rounded-full bg-white/10 overflow-hidden">
+        <div id="bulk-bar" class="h-full bg-sky-400 rounded-full transition-all" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <!-- Confirm Modal thay thế alert/confirm mặc định -->
+    <div id="confirm-modal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4 bg-black/60 glass">
+      <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
+        <h3 id="confirm-title" class="text-base font-extrabold text-slate-800 dark:text-slate-100">Xác nhận</h3>
+        <p id="confirm-message" class="text-sm text-slate-500 dark:text-slate-300 leading-relaxed"></p>
+        <div id="confirm-input-wrap" class="hidden">
+          <input type="text" id="confirm-input" placeholder="Nhập nội dung..."
+                 class="w-full h-11 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-sm outline-none focus:border-blue-500 transition-colors">
+        </div>
+        <div class="flex justify-end gap-2.5 pt-2">
+          <button id="confirm-cancel-btn" class="px-5 py-2.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-xl text-sm font-bold transition-all">Hủy</button>
+          <button id="confirm-ok-btn" class="px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-xl text-sm font-bold transition-all">Đồng ý</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Action Bar -->
+    <header class="thm-header h-16 border-b border-slate-200 dark:border-dark-border px-6 flex items-center justify-between shrink-0 bg-white/80 dark:bg-dark-sidebar/80 glass z-10">
+      <div class="flex items-center gap-3">
+        <h2 id="top-title" class="font-extrabold text-base tracking-tight">Tất cả các kênh (<span id="top-count">0</span>)</h2>
+        <!-- Async Background Activity Indicator (vòng quay nhỏ ở góc phải header) -->
+        <div id="async-spinner" class="hidden flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500 dark:text-blue-400 text-[11px] font-bold">
+          <svg class="animate-spin w-3 h-3 text-blue-500" viewBox="0 0 24 24" fill="none">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+          </svg>
+          <span id="async-spinner-text">Đang đồng bộ...</span>
+        </div>
+      </div>
+
+      <!-- Search, Account Filter, Sort, Add Account & Refresh -->
+      <div class="flex items-center gap-2.5">
+        <!-- Search Input -->
+        <div class="relative">
+          <input type="text" id="input-search" placeholder="Tìm kiếm kênh, Gmail..." oninput="onSearchInput()" 
+                 class="w-48 lg:w-56 h-9 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-lg px-3 text-xs outline-none focus:border-blue-500 dark:focus:border-blue-500 transition-colors">
+        </div>
+
+        <!-- Google Account Filter -->
+        <select id="select-account-filter" onchange="onAccountFilterChange()" class="h-9 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-lg px-3 text-xs outline-none font-medium cursor-pointer max-w-[160px] truncate">
+          <option value="ALL">Tất cả Google Acc</option>
+        </select>
+
+        <!-- Add Account Button (Text-only) -->
+        <button onclick="openAddAccountModal()" class="h-9 px-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold shadow-sm shadow-emerald-600/20 transition-all">
+          Thêm Acc
+        </button>
+
+        <!-- Refresh Button (Icon độc lập) -->
+        <button onclick="refreshData()" title="Làm mới dữ liệu" class="w-9 h-9 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg flex items-center justify-center transition-all">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+        </button>
+
+        <!-- Notification Bell: yêu cầu xin mở kênh (Đợt 1) -->
+        <div class="relative">
+          <button id="notif-bell-btn" onclick="toggleNotifPanel()" title="Yêu cầu xin mở kênh" class="w-9 h-9 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg flex items-center justify-center transition-all relative">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
+            <span id="notif-badge" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">0</span>
+          </button>
+          <div id="notif-panel" class="hidden absolute right-0 mt-2 w-[360px] max-w-[calc(100vw-3rem)] bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-2xl shadow-2xl overflow-hidden z-50">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-dark-border/60">
+              <p class="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">Yêu cầu xin mở kênh</p>
+              <button onclick="refreshAccessRequests()" class="text-[11px] font-bold text-blue-500 hover:text-blue-400">Làm mới</button>
+            </div>
+            <div id="notif-list" class="max-h-[380px] overflow-y-auto"></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT VIEWS WRAPPER -->
+    <div class="flex-1 overflow-y-auto p-6" id="main-scroll-container">
+
+      <!-- ======================================================== -->
+      <!-- VIEW 1: DASHBOARD (Cards Grid)                           -->
+      <!-- ======================================================== -->
+      <div id="view-dashboard" class="space-y-6">
+        <!-- KPI Metric Cards Bar -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="thm-panel bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border p-4 rounded-xl shadow-xs">
+            <p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Tổng số kênh</p>
+            <p class="text-2xl font-black mt-1 text-blue-500" id="stat-total">0</p>
+          </div>
+          <div class="thm-panel bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border p-4 rounded-xl shadow-xs">
+            <p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Sẵn sàng</p>
+            <p class="text-2xl font-black mt-1 text-emerald-500" id="stat-ready">0</p>
+          </div>
+          <div class="thm-panel bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border p-4 rounded-xl shadow-xs">
+            <p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Chưa Setup</p>
+            <p class="text-2xl font-black mt-1 text-amber-500" id="stat-not-setup">0</p>
+          </div>
+          <div class="thm-panel bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border p-4 rounded-xl shadow-xs">
+            <p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Đang mở phiên</p>
+            <p class="text-2xl font-black mt-1 text-sky-500" id="stat-in-use">0</p>
+          </div>
+        </div>
+
+        <!-- Dashboard Toolbar: Sắp xếp, Lọc trạng thái & Tùy chọn Hiển thị (Cuộn ngang cột Acc / Lưới) -->
+        <div class="thm-panel flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl p-3 shadow-xs">
+          <!-- Nhóm nút sắp xếp (Order) -->
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mr-1">Sắp xếp:</span>
+            <button onclick="setDashboardSort('DEFAULT')" id="sort-btn-DEFAULT" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-xs transition-all">Mặc định</button>
+            <button onclick="setDashboardSort('DATE_DESC')" id="sort-btn-DATE_DESC" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 transition-all inline-flex items-center gap-1">Ngày nhập <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+            <button onclick="setDashboardSort('DATE_ASC')" id="sort-btn-DATE_ASC" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 transition-all inline-flex items-center gap-1">Ngày nhập <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg></button>
+            <button onclick="setDashboardSort('PLATFORM')" id="sort-btn-PLATFORM" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">Nền tảng</button>
+            <button onclick="setDashboardSort('STATUS')" id="sort-btn-STATUS" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">Trạng thái</button>
+            <button onclick="setDashboardSort('ACCOUNT')" id="sort-btn-ACCOUNT" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">Tài khoản</button>
+          </div>
+
+          <!-- Nhóm lọc trạng thái nhanh -->
+          <div class="flex items-center gap-1.5">
+            <span class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mr-1">Trạng thái:</span>
+            <div class="bg-slate-100 dark:bg-dark-input p-0.5 rounded-lg flex gap-1">
+              <button onclick="setDashboardStatusFilter('ALL')" id="status-btn-ALL" class="px-2 py-1 rounded-md text-xs font-bold bg-blue-600 text-white shadow-xs transition-all">Tất cả</button>
+              <button onclick="setDashboardStatusFilter('READY')" id="status-btn-READY" class="px-2 py-1 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-emerald-500 transition-all inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>Sẵn sàng</button>
+              <button onclick="setDashboardStatusFilter('NOT_SETUP')" id="status-btn-NOT_SETUP" class="px-2 py-1 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-amber-500 transition-all inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-400"></span>Chưa setup</button>
+              <button onclick="setDashboardStatusFilter('IN_USE')" id="status-btn-IN_USE" class="px-2 py-1 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-sky-500 transition-all inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-sky-400"></span>Đang mở</button>
+              <button onclick="setDashboardStatusFilter('EXPIRED')" id="status-btn-EXPIRED" class="px-2 py-1 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-red-500 transition-all inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-red-400"></span>Hết hạn</button>
+            </div>
+          </div>
+
+          <!-- Nhóm nút tùy chọn hiển thị: Lưới vs Cuộn ngang + Nút cuộn -->
+          <div class="flex items-center gap-2 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-100 dark:border-dark-border">
+            <span class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mr-1">Hiển thị:</span>
+            <div class="bg-slate-100 dark:bg-dark-input p-0.5 rounded-lg flex gap-1">
+              <button onclick="setDisplayMode('GRID')" id="display-mode-GRID" class="px-2.5 py-1 rounded-md text-xs font-bold bg-blue-600 text-white shadow-xs transition-all">Lưới</button>
+              <button onclick="setDisplayMode('HORIZONTAL')" id="display-mode-HORIZONTAL" class="px-2.5 py-1 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all">Cuộn ngang</button>
+            </div>
+
+            <!-- Nút cuộn trái/phải cho chế độ Cuộn ngang -->
+            <div id="horizontal-scroll-controls" class="hidden items-center gap-1 ml-1">
+              <button onclick="scrollColumns(-340)" title="Cuộn sang trái" class="w-7 h-7 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg flex items-center justify-center transition-all shadow-xs"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+              <button onclick="scrollColumns(340)" title="Cuộn sang phải" class="w-7 h-7 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg flex items-center justify-center transition-all shadow-xs"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+            </div>
+
+            <!-- Mật độ hiển thị: Rộng / Gọn -->
+            <div class="flex items-center gap-1.5 ml-1">
+              <span class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Mật độ:</span>
+              <div class="bg-slate-100 dark:bg-dark-input p-0.5 rounded-lg flex gap-1">
+                <button onclick="setDensity('COMFORT')" id="density-COMFORT" class="px-2.5 py-1 rounded-md text-xs font-bold bg-blue-600 text-white shadow-xs transition-all">Rộng</button>
+                <button onclick="setDensity('COMPACT')" id="density-COMPACT" class="px-2.5 py-1 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all">Gọn</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Filter Indicator Bar (hiển thị khi có bộ lọc đang chạy) -->
+        <div id="active-filter-bar" class="hidden flex flex-wrap items-center justify-between gap-2 px-3.5 py-2 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/40 rounded-xl text-xs text-blue-700 dark:text-blue-300 shadow-xs">
+          <div class="flex flex-wrap items-center gap-2" id="active-filter-chips"></div>
+          <button onclick="clearFilters()" class="font-bold underline hover:text-blue-800 dark:hover:text-blue-200 transition-colors ml-auto">Xóa tất cả lọc</button>
+        </div>
+
+        <!-- Channels Container (Grid hoặc Cuộn ngang theo cột tài khoản) -->
+        <div id="cards-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <!-- Dynamically populated cards or columns -->
+        </div>
+
+        <!-- Empty State Container -->
+        <div id="empty-state" class="hidden text-center py-16 bg-white dark:bg-dark-card rounded-2xl border border-slate-200 dark:border-dark-border">
+          <p class="text-slate-300 dark:text-slate-600 flex justify-center"><svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></p>
+          <h3 class="text-base font-bold mt-3">Không tìm thấy kênh phù hợp</h3>
+          <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Thử xóa bộ lọc hoặc tìm kiếm bằng từ khóa khác.</p>
+          <button onclick="clearFilters()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-500 transition-all">
+            Xóa bộ lọc và xem tất cả
+          </button>
+        </div>
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- VIEW 2: TABLE VIEW                                       -->
+      <!-- ======================================================== -->
+      <div id="view-table" class="hidden space-y-4">
+        <!-- Table toolbar: realtime filter -->
+        <div class="thm-panel bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl p-4 flex flex-wrap items-center gap-3">
+          <div class="relative flex-1 min-w-[200px]">
+            <input type="text" id="table-search" placeholder="Lọc nhanh trong bảng (tên, ID, email)..." oninput="onTableFilterInput()"
+                   class="w-full h-10 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-lg px-3 text-sm outline-none focus:border-blue-500 transition-colors">
+          </div>
+          <select id="table-status-filter" onchange="onTableFilterInput()" class="h-10 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-lg px-3 text-sm font-semibold cursor-pointer">
+            <option value="ALL">Mọi trạng thái</option>
+            <option value="READY">Sẵn sàng</option>
+            <option value="NOT_SETUP">Chưa Setup</option>
+            <option value="IN_USE">Đang mở</option>
+            <option value="EXPIRED">Hết hạn</option>
+          </select>
+          <select id="table-platform-filter" onchange="onTableFilterInput()" class="h-10 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-lg px-3 text-sm font-semibold cursor-pointer">
+            <option value="ALL">Mọi nền tảng</option>
+          </select>
+          <button onclick="clearTableFilters()" class="h-10 px-4 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg text-sm font-bold transition-all">Xóa lọc</button>
+          <span id="table-result-count" class="text-sm font-bold text-slate-500 dark:text-slate-300 ml-auto">Hiển thị 0 / 0 kênh</span>
+        </div>
+        <div class="thm-panel bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl overflow-hidden shadow-xs">
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-[860px] text-left text-sm">
+              <thead class="bg-slate-50 dark:bg-dark-input border-b border-slate-200 dark:border-dark-border text-slate-400 uppercase text-[11px] font-bold tracking-wider">
+                <tr>
+                  <th class="py-3.5 px-4 cursor-pointer select-none hover:text-blue-500 transition-colors whitespace-nowrap" onclick="sortTableBy('platform')">Nền tảng <span id="sort-platform"></span></th>
+                  <th class="py-3.5 px-4 cursor-pointer select-none hover:text-blue-500 transition-colors" onclick="sortTableBy('channel_name')">Tên Kênh & ID <span id="sort-channel_name"></span></th>
+                  <th class="py-3.5 px-4 cursor-pointer select-none hover:text-blue-500 transition-colors" onclick="sortTableBy('account')">Google Account Gốc <span id="sort-account"></span></th>
+                  <th class="py-3.5 px-4 cursor-pointer select-none hover:text-blue-500 transition-colors" onclick="sortTableBy('status')">Trạng thái <span id="sort-status"></span></th>
+                  <th class="py-3.5 px-4 text-right">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="table-body" class="divide-y divide-slate-100 dark:divide-dark-border">
+                <!-- Dynamically populated rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- VIEW 3: MẠNG XÃ HỘI (quản lý socials)                     -->
+      <!-- ======================================================== -->
+      <div id="view-socials" class="hidden w-full space-y-4">
+        <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl p-5 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Danh sách mạng xã hội</h4>
+              <p class="text-[11px] text-slate-400 mt-0.5">Thêm/sửa/xóa social. Social mới tự có logo + URL mở mặc định cho kênh phân nhánh.</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="resetPlatforms()" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg text-xs font-bold transition-all">Khôi phục 4 mặc định</button>
+              <button onclick="openPlatformModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all">+ Thêm social</button>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="relative flex-1 min-w-[200px]">
+              <input type="text" id="social-search" placeholder="Tìm social (tên, mã, URL)..." oninput="onSocialSearchInput()"
+                     class="w-full h-10 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-lg px-3 text-sm outline-none focus:border-blue-500 transition-colors">
+            </div>
+            <span id="social-result-count" class="text-xs font-bold text-slate-500 dark:text-slate-300 ml-auto"></span>
+          </div>
+          <div class="overflow-x-auto -mx-1 px-1">
+            <table class="w-full min-w-[760px] text-left text-sm">
+              <thead class="bg-slate-50 dark:bg-dark-input border-b border-slate-200 dark:border-dark-border text-slate-400 uppercase text-[11px] font-bold tracking-wider">
+                <tr>
+                  <th class="py-3 px-4 whitespace-nowrap cursor-pointer select-none hover:text-blue-500 transition-colors" onclick="sortSocialBy('name')">Social <span id="sort-soc-name"></span></th>
+                  <th class="py-3 px-4 whitespace-nowrap cursor-pointer select-none hover:text-blue-500 transition-colors" onclick="sortSocialBy('code')">Mã / Prefix <span id="sort-soc-code"></span></th>
+                  <th class="py-3 px-4">URL mặc định</th>
+                  <th class="py-3 px-4 text-center whitespace-nowrap cursor-pointer select-none hover:text-blue-500 transition-colors" onclick="sortSocialBy('channels')">Kênh <span id="sort-soc-channels"></span></th>
+                  <th class="py-3 px-4 text-right whitespace-nowrap">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="socials-tbody" class="divide-y divide-slate-100 dark:divide-dark-border"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ======================================================== -->
+      <!-- VIEW: KIỂM TRA PHIÊN (health runs + report)              -->
+      <!-- ======================================================== -->
+      <div id="view-health" class="hidden w-full space-y-4">
+        <div class="thm-panel bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl p-5 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Kiểm tra phiên đăng nhập</h4>
+              <p class="text-[11px] text-slate-400 mt-0.5">Soi cookies offline — không mở trình duyệt, không gọi mạng, an toàn tuyệt đối. Kênh đang mở bị bỏ qua. Ca nghi ngờ: bấm Mở Studio để mắt thường xác minh. Mọi đợt chạy đều lưu report.</p>
+            </div>
+            <div class="flex gap-2">
+              <button id="health-stop-btn" onclick="stopHealthCheck()" class="hidden px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-bold transition-all">Dừng đợt chạy</button>
+              <button onclick="startHealthAll()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-all inline-flex items-center gap-1.5"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>Kiểm tra tất cả kênh</button>
+            </div>
+          </div>
+          <div id="health-progress-wrap" class="hidden">
+            <div class="flex items-center justify-between text-[11px] font-bold text-slate-400 mb-1.5">
+              <span id="health-progress-text">Đang kiểm tra...</span>
+              <span id="health-progress-pct">0%</span>
+            </div>
+            <div class="h-2 rounded-full bg-slate-100 dark:bg-dark-input overflow-hidden">
+              <div id="health-progress-bar" class="h-full bg-emerald-500 rounded-full transition-all" style="width: 0%"></div>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
+            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-dark-input/60 border border-slate-200 dark:border-dark-border">
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tổng số kênh</p>
+              <p class="text-xl font-black mt-0.5" id="health-sum-total">-</p>
+            </div>
+            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-dark-input/60 border border-slate-200 dark:border-dark-border">
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>Còn sống</p>
+              <p class="text-xl font-black mt-0.5 text-emerald-500" id="health-sum-alive">-</p>
+            </div>
+            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-dark-input/60 border border-slate-200 dark:border-dark-border">
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-red-400"></span>Hết hạn</p>
+              <p class="text-xl font-black mt-0.5 text-red-400" id="health-sum-dead">-</p>
+            </div>
+            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-dark-input/60 border border-slate-200 dark:border-dark-border">
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-400"></span>Lỗi / trống</p>
+              <p class="text-xl font-black mt-0.5 text-amber-500" id="health-sum-error">-</p>
+            </div>
+            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-dark-input/60 border border-slate-200 dark:border-dark-border">
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-slate-400"></span>Bỏ qua</p>
+              <p class="text-xl font-black mt-0.5 text-slate-400" id="health-sum-skipped">-</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="thm-panel bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl p-5 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Lịch sử các đợt kiểm tra (30 gần nhất)</h4>
+            <button onclick="refreshHealth(true)" class="text-[11px] font-bold text-blue-500 hover:text-blue-400">Làm mới</button>
+          </div>
+          <div class="overflow-x-auto -mx-1 px-1">
+            <table class="w-full min-w-[760px] text-left text-sm">
+              <thead class="bg-slate-50 dark:bg-dark-input border-b border-slate-200 dark:border-dark-border text-slate-400 uppercase text-[11px] font-bold tracking-wider">
+                <tr>
+                  <th class="py-3 px-4 whitespace-nowrap">Bắt đầu</th>
+                  <th class="py-3 px-4 whitespace-nowrap">Người chạy</th>
+                  <th class="py-3 px-4 whitespace-nowrap">Phạm vi</th>
+                  <th class="py-3 px-4 text-center whitespace-nowrap">Sống / Hết hạn / Lỗi / Bỏ qua</th>
+                  <th class="py-3 px-4 text-center whitespace-nowrap">Trạng thái</th>
+                  <th class="py-3 px-4 text-right whitespace-nowrap">Report</th>
+                </tr>
+              </thead>
+              <tbody id="health-runs-tbody" class="divide-y divide-slate-100 dark:divide-dark-border"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="health-detail-card" class="hidden thm-panel bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl p-5 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Chi tiết đợt: <span id="health-detail-title" class="text-blue-500 font-mono"></span></h4>
+            <button onclick="closeHealthDetail()" class="text-[11px] font-bold text-slate-400 hover:text-slate-200 inline-flex items-center gap-1">Đóng <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18 18 6M6 6l12 12"/></svg></button>
+          </div>
+          <div class="overflow-x-auto -mx-1 px-1">
+            <table class="w-full min-w-[680px] text-left text-sm">
+              <thead class="bg-slate-50 dark:bg-dark-input border-b border-slate-200 dark:border-dark-border text-slate-400 uppercase text-[11px] font-bold tracking-wider">
+                <tr>
+                  <th class="py-3 px-4">Kênh</th>
+                  <th class="py-3 px-4 text-center whitespace-nowrap">Kết quả</th>
+                  <th class="py-3 px-4">Chi tiết</th>
+                  <th class="py-3 px-4 text-right whitespace-nowrap">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="health-detail-tbody" class="divide-y divide-slate-100 dark:divide-dark-border"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ======================================================== -->
+      <!-- VIEW 4: SETTINGS HUB                                     -->
+      <!-- ======================================================== -->
+      <div id="view-settings" class="hidden max-w-6xl w-full space-y-6">
+        <!-- Settings Tabs -->
+        <div class="flex flex-wrap border-b border-slate-200 dark:border-dark-border gap-x-6 gap-y-1 text-xs font-bold">
+          <button onclick="switchSettingsTab('tab-firebase')" id="btn-tab-firebase" class="pb-3 border-b-2 border-blue-500 text-blue-500">Tài khoản</button>
+          <button onclick="switchSettingsTab('tab-browser')" id="btn-tab-browser" class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">Trình duyệt</button>
+          <button onclick="switchSettingsTab('tab-vault')" id="btn-tab-vault" class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">Bảo mật Cookies</button>
+          <button onclick="switchSettingsTab('tab-theme')" id="btn-tab-theme" class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">Giao diện</button>
+          <button onclick="switchSettingsTab('tab-data')" id="btn-tab-data" class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">Dữ liệu</button>
+          <button onclick="switchSettingsTab('tab-app')" id="btn-tab-app" class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">Hệ thống & Cập nhật</button>
+        </div>
+
+        <!-- Tab 1: Cloud Sync & Authentication -->
+        <div id="tab-firebase" class="space-y-4">
+          <!-- Card 1: Account Status -->
+          <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Tài khoản quản trị</h4>
+                <p class="text-[11px] text-slate-400 mt-0.5">Thông tin tài khoản đang quản trị và vận hành ứng dụng.</p>
+              </div>
+              <span id="firebase-auth-status-pill" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 dark:bg-dark-input text-slate-400">
+                Chưa đăng nhập
+              </span>
+            </div>
+
+            <!-- Khi đã đăng nhập Google -->
+            <div id="settings-auth-logged-in" class="hidden bg-slate-50 dark:bg-dark-input/60 border border-slate-200 dark:border-dark-border rounded-xl p-4 flex flex-wrap items-center justify-between gap-4">
+              <div class="flex items-center gap-3">
+                <img id="settings-auth-avatar" src="" class="w-12 h-12 rounded-full object-cover ring-2 ring-emerald-500/50 shadow-sm">
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <h5 id="settings-auth-name" class="font-extrabold text-sm text-slate-800 dark:text-slate-100">User</h5>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Verified</span>
+                  </div>
+                  <p id="settings-auth-email" class="text-xs text-slate-500 dark:text-slate-400 font-medium">email@gmail.com</p>
+                  <p id="settings-auth-uid" class="text-[10px] text-slate-400 font-mono mt-0.5">ID: -</p>
+                </div>
+              </div>
+              <button onclick="logoutGoogle()" class="px-4 py-2 bg-slate-200 dark:bg-dark-card hover:bg-red-500/20 text-slate-600 dark:text-slate-300 hover:text-red-500 rounded-lg text-xs font-bold transition-all">
+                Đăng xuất
+              </button>
+            </div>
+
+            <!-- Khi chưa đăng nhập Google -->
+            <div id="settings-auth-logged-out" class="space-y-3">
+              <button onclick="loginWithGoogle()" class="flex items-center justify-center gap-2.5 px-5 py-2.5 bg-white dark:bg-dark-input hover:bg-slate-100 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-dark-border rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 transition-all shadow-xs">
+                <svg class="w-4 h-4 shrink-0" viewBox="0 0 48 48">
+                  <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                  <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                  <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                  <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                </svg>
+                <span>Đăng nhập với Google</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+
+        <!-- Tab 2: Browser Settings -->
+        <div id="tab-browser" class="hidden space-y-4">
+          <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl p-5 space-y-4">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Cấu Hình Trình Duyệt</h4>
+            <div class="space-y-1">
+              <label class="text-[11px] text-slate-400 font-semibold">Thư mục hồ sơ trình duyệt:</label>
+              <div class="flex gap-2">
+                <input type="text" id="cfg-browser-dir" value="./profiles" class="flex-1 h-9 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-lg px-3 text-xs">
+                <button onclick="browseProfilesFolder()" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-xs font-bold transition-all">Chọn thư mục</button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-2">
+              <div>
+                <p class="text-xs font-bold">Bảo vệ phiên đăng nhập</p>
+                <p class="text-[11px] text-slate-400">Tối ưu chống nhận diện tự động khi sử dụng trình duyệt</p>
+              </div>
+              <input type="checkbox" id="cfg-browser-stealth" checked class="w-4 h-4 accent-blue-600">
+            </div>
+
+            <button onclick="saveBrowserSettings()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all">
+              Lưu cấu hình
+            </button>
+          </div>
+        </div>
+
+        <!-- Tab: Bảo mật Cookies (vault mã hóa) -->
+        <div id="tab-vault" class="hidden space-y-4">
+          <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl p-5 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Kho Cookies mã hóa</h4>
+                <p class="text-[11px] text-slate-400 mt-0.5" id="vault-summary">Cookies được mã hóa trước khi ghi đĩa (DPAPI Windows).</p>
+              </div>
+              <div class="flex gap-2">
+                <button onclick="renderVaultStatus()" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg text-xs font-bold transition-all">Làm mới</button>
+                <button onclick="encryptAllCookies()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-all">Mã hóa toàn bộ</button>
+              </div>
+            </div>
+            <div class="overflow-x-auto -mx-1 px-1">
+              <table class="w-full min-w-[680px] text-left text-sm">
+                <thead class="bg-slate-50 dark:bg-dark-input border-b border-slate-200 dark:border-dark-border text-slate-400 uppercase text-[11px] font-bold tracking-wider">
+                  <tr>
+                    <th class="py-3 px-4">Kênh</th>
+                    <th class="py-3 px-4 text-center whitespace-nowrap">Cookies</th>
+                    <th class="py-3 px-4 text-center whitespace-nowrap">Vault</th>
+                    <th class="py-3 px-4 whitespace-nowrap">Sync cuối</th>
+                    <th class="py-3 px-4 text-right whitespace-nowrap">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="vault-tbody" class="divide-y divide-slate-100 dark:divide-dark-border"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Giao diện -->
+        <div id="tab-theme" class="hidden space-y-4">
+          <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl p-5 space-y-4">
+            <div>
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Giao diện</h4>
+              <p class="text-[11px] text-slate-400 mt-0.5">Chọn bộ màu. Theme 2 chế độ dùng được cả sáng/tối, theme đơn sắc sẽ khóa nút chuyển sáng/tối.</p>
+            </div>
+            <div id="theme-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3"></div>
+          </div>
+        </div>
+
+        <!-- Tab: Dữ liệu (sao lưu + thùng rác) -->
+        <div id="tab-data" class="hidden space-y-4">
+          <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl p-5 space-y-4">
+            <div>
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Sao lưu & Khôi phục</h4>
+              <p class="text-[11px] text-slate-400 mt-0.5">Đóng toàn bộ dữ liệu (tài khoản, kênh, phiên, cấu hình) thành 1 file zip. Mật khẩu là tùy chọn. Lưu ý: phiên đăng nhập gắn với máy này, sang máy khác cần đăng nhập lại.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Mật khẩu zip (tùy chọn)</label>
+                <input type="password" id="backup-password" placeholder="Để trống = không đặt mật khẩu" autocomplete="new-password" class="w-full h-11 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-sm mt-1.5 outline-none focus:border-blue-500 transition-colors">
+              </div>
+              <div class="flex items-end gap-2 pb-0.5">
+                <label class="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-300 cursor-pointer select-none">
+                  <input type="checkbox" id="backup-include-profiles" class="w-4 h-4 accent-blue-600">
+                  Kèm profiles trình duyệt (nặng)
+                </label>
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-2.5">
+              <button onclick="exportBackup()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-all">Xuất backup (.zip)</button>
+              <button onclick="importBackup()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all">Nhập backup (.zip)</button>
+            </div>
+            <p id="backup-feedback" class="text-xs font-semibold"></p>
+          </div>
+        <div class="thm-panel bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl p-5 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Thùng rác (giữ 30 ngày)</h4>
+              <p class="text-[11px] text-slate-400 mt-0.5">Khôi phục kênh/tài khoản đã xóa kèm cookies và phiên. Quá hạn tự dọn.</p>
+            </div>
+            <button onclick="purgeTrash()" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg text-xs font-bold transition-all">Dọn mục quá hạn</button>
+          </div>
+          <div class="overflow-x-auto -mx-1 px-1">
+            <table class="w-full min-w-[720px] text-left text-sm">
+              <thead class="bg-slate-50 dark:bg-dark-input border-b border-slate-200 dark:border-dark-border text-slate-400 uppercase text-[11px] font-bold tracking-wider">
+                <tr>
+                  <th class="py-3 px-4 whitespace-nowrap">Loại</th>
+                  <th class="py-3 px-4">Tên</th>
+                  <th class="py-3 px-4 whitespace-nowrap">Xóa lúc</th>
+                  <th class="py-3 px-4 text-center whitespace-nowrap">Còn lại</th>
+                  <th class="py-3 px-4 text-right whitespace-nowrap">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="trash-tbody" class="divide-y divide-slate-100 dark:divide-dark-border"></tbody>
+            </table>
+          </div>
+        </div>
+        </div>
+
+        <!-- Tab 3: App & About & Updates -->
+        <div id="tab-app" class="hidden space-y-4">
+
+          <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl p-5 space-y-4">
+            <div>
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Âm thanh & Thông báo hệ thống</h4>
+              <p class="text-[11px] text-slate-400 mt-0.5">Âm báo phát bằng Web Audio offline (không file ngoài). Taskbar nhấp nháy + beep Windows khi app đang minimize — không cần xin quyền overlay.</p>
+            </div>
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p class="text-xs font-bold">Âm thanh thông báo</p>
+                <p class="text-[11px] text-slate-400">Phát tiếng bíp khi có toast, có người xin mở kênh, được nhường kênh</p>
+              </div>
+              <input type="checkbox" id="cfg-sound-enabled" onchange="setSoundEnabled(this.checked)" class="w-4 h-4 accent-blue-600">
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button onclick="previewSound('request')" class="px-3 py-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg text-xs font-bold transition-all">Nghe thử: xin mở</button>
+              <button onclick="previewSound('approve')" class="px-3 py-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg text-xs font-bold transition-all">Nghe thử: được duyệt</button>
+              <button onclick="previewSound('error')" class="px-3 py-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg text-xs font-bold transition-all">Nghe thử: lỗi</button>
+            </div>
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-dark-border/60">
+              <div>
+                <p class="text-xs font-bold">Popup nổi khi có người xin mở kênh</p>
+                <p class="text-[11px] text-slate-400">Cửa sổ nhỏ hiện lên trên mọi app khác, duyệt/từ chối ngay không cần mở app chính</p>
+              </div>
+              <input type="checkbox" id="cfg-popup-enabled" onchange="setRequestPopup(this.checked)" class="w-4 h-4 accent-blue-600">
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button onclick="testRequestPopup()" class="px-3 py-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg text-xs font-bold transition-all">Hiện popup thử</button>
+            </div>
+          </div>
+
+          <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl p-5 space-y-3">
+            <div class="flex items-center justify-between">
+              <div>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Thông tin Ứng dụng & Cập nhật</h4>
+                <p class="text-sm font-bold text-slate-800 dark:text-slate-100 mt-1">VB-Studio Login</p>
+                <p class="text-xs text-slate-400 mt-0.5">Phiên bản hiện tại: <span id="app-current-version-label" class="font-bold text-blue-500">v1.0.0</span></p>
+              </div>
+              <button onclick="checkForUpdates()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                Kiểm tra cập nhật
+              </button>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ============================================================ -->
+  <!-- CHANNEL DRAWER (slide-over chi tiết kênh, 2 tab)             -->
+  <!-- ============================================================ -->
+  <div id="channel-drawer-overlay" class="hidden fixed inset-0 z-[54] bg-black/40" onclick="closeChannelDrawer()"></div>
+  <aside id="channel-drawer" class="hidden fixed top-0 right-0 h-full w-[400px] max-w-[calc(100vw-2rem)] z-[55] bg-white dark:bg-dark-card border-l border-slate-200 dark:border-dark-border shadow-2xl flex flex-col translate-x-full transition-transform duration-180">
+    <div class="flex items-start justify-between gap-2 px-5 pt-4 pb-3 border-b border-slate-100 dark:border-dark-border/60">
+      <div class="min-w-0 flex-1">
+        <h3 id="drawer-title" class="flex items-center gap-2 text-sm font-extrabold text-slate-800 dark:text-slate-100 min-w-0"></h3>
+        <p id="drawer-sub" class="text-[11px] text-slate-400 mt-0.5 truncate"></p>
+      </div>
+      <button onclick="closeChannelDrawer()" class="w-8 h-8 shrink-0 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18 18 6M6 6l12 12"/></svg></button>
+    </div>
+    <div id="drawer-tabs" class="flex gap-4 px-5 pt-3"></div>
+    <div id="drawer-body" class="flex-1 overflow-y-auto"></div>
+  </aside>
+
+  <!-- ============================================================ -->
+  <!-- MODALS (Add Account & Edit Channel)                          -->
+  <!-- ============================================================ -->
+
+  <!-- Add Account Modal (phóng to đồng bộ) -->
+  <div id="modal-add-account" class="fixed inset-0 bg-black/60 glass z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border w-full max-w-xl rounded-2xl p-8 shadow-2xl space-y-5 transition-all">
+      <h3 class="text-xl font-extrabold">Thêm Tài Khoản Google & Phân Nhánh</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Tên hiển thị</label>
+          <input type="text" id="modal-acc-name" placeholder="VD: Tài khoản chính #01" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
+        </div>
+        <div>
+          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Gmail chính</label>
+          <input type="email" id="modal-acc-email" placeholder="VD: yourname@gmail.com" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
+        </div>
+        <div>
+          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Chủ đề / Ghi chú</label>
+          <input type="text" id="modal-acc-notes" placeholder="VD: Review công nghệ, Vlog..." class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
+        </div>
+        <div>
+          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Logo nhận dạng <span class="font-normal text-slate-400">— ảnh nhỏ giúp phân biệt tài khoản</span></label>
+          <div class="flex items-center gap-3 mt-1.5">
+            <img id="modal-acc-logo-preview" src="" alt="" class="hidden w-14 h-14 rounded-xl object-cover border border-slate-200 dark:border-dark-border shadow-xs">
+            <div class="flex-1 flex gap-2">
+              <label for="modal-acc-logo" class="flex-1 h-11 flex items-center justify-center gap-2 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 border border-dashed border-slate-300 dark:border-slate-600 rounded-xl text-sm font-bold cursor-pointer transition-all">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.824 1.316Z"/><path d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z"/></svg> Chọn logo
+              </label>
+              <input type="file" id="modal-acc-logo" accept="image/*" class="hidden" onchange="previewAccountLogo(this, 'modal-acc-logo-preview')">
+              <button type="button" onclick="clearAccountLogo('modal-acc-logo', 'modal-acc-logo-preview')" class="h-11 px-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-xl text-sm font-bold transition-all">Xóa</button>
+            </div>
+          </div>
+        </div>
+        <div class="pt-1">
+          <div class="flex items-center justify-between">
+            <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Phân nhánh kênh</label>
+            <div class="flex gap-2">
+              <button type="button" onclick="setBranchPlatforms(true)" class="px-3 py-1.5 bg-blue-600/10 hover:bg-blue-600/20 text-blue-500 rounded-lg text-xs font-bold transition-all">Chọn tất cả</button>
+              <button type="button" onclick="setBranchPlatforms(false)" class="px-3 py-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg text-xs font-bold transition-all">Bỏ chọn</button>
+            </div>
+          </div>
+          <div id="branch-platform-grid" class="grid grid-cols-2 gap-2.5 mt-2.5"></div>
+          <p class="text-xs text-slate-400 mt-2">Không chọn = chỉ tạo tài khoản, chưa tạo kênh nào. Có thể sửa kênh sau.</p>
+        </div>
+      </div>
+      <div class="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-dark-border">
+        <button onclick="closeModal('modal-add-account')" class="px-6 py-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-xl text-base font-bold transition-all">Hủy</button>
+        <button onclick="submitAddAccount()" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-base font-bold transition-all">Lưu tài khoản</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Account Modal (sửa tên + đổi logo nhận dạng) -->
+  <div id="modal-edit-account" class="fixed inset-0 bg-black/60 glass z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border w-full max-w-xl rounded-2xl p-8 shadow-2xl space-y-5 transition-all">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-extrabold">Sửa Tài Khoản Google</h3>
+        <button onclick="closeModal('modal-edit-account')" class="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18 18 6M6 6l12 12"/></svg></button>
+      </div>
+      <input type="hidden" id="modal-editacc-id">
+      <div class="space-y-4">
+        <div>
+          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Tên hiển thị</label>
+          <input type="text" id="modal-editacc-name" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
+        </div>
+        <div>
+          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Gmail chính</label>
+          <input type="email" id="modal-editacc-email" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
+        </div>
+        <div>
+          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Chủ đề / Ghi chú</label>
+          <input type="text" id="modal-editacc-notes" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
+        </div>
+        <div>
+          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Logo nhận dạng</label>
+          <div class="flex items-center gap-3 mt-1.5">
+            <img id="modal-editacc-logo-preview" src="" alt="" class="hidden w-14 h-14 rounded-xl object-cover border border-slate-200 dark:border-dark-border shadow-xs">
+            <div class="flex-1 flex gap-2">
+              <label for="modal-editacc-logo" class="flex-1 h-11 flex items-center justify-center gap-2 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 border border-dashed border-slate-300 dark:border-slate-600 rounded-xl text-sm font-bold cursor-pointer transition-all">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.824 1.316Z"/><path d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z"/></svg> Đổi logo
+              </label>
+              <input type="file" id="modal-editacc-logo" accept="image/*" class="hidden" onchange="previewAccountLogo(this, 'modal-editacc-logo-preview')">
+              <button type="button" onclick="clearAccountLogo('modal-editacc-logo', 'modal-editacc-logo-preview')" class="h-11 px-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-xl text-sm font-bold transition-all">Xóa</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-between gap-3 pt-4 border-t border-slate-100 dark:border-dark-border">
+        <button onclick="deleteAccount(document.getElementById('modal-editacc-id').value)" class="px-6 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl text-base font-bold transition-all">Xóa tài khoản</button>
+        <div class="flex gap-3">
+          <button onclick="closeModal('modal-edit-account')" class="px-6 py-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-xl text-base font-bold transition-all">Hủy</button>
+          <button onclick="submitEditAccount()" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-base font-bold transition-all">Lưu thay đổi</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Platform Modal (thêm/sửa social) -->
+  <div id="modal-platform" class="fixed inset-0 bg-black/60 glass z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border w-full max-w-xl rounded-2xl p-8 shadow-2xl space-y-5 transition-all">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-extrabold" id="modal-platform-title">Thêm mạng xã hội</h3>
+        <button onclick="closeModal('modal-platform')" class="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18 18 6M6 6l12 12"/></svg></button>
+      </div>
+      <input type="hidden" id="modal-plat-editing" value="">
+      <div class="space-y-4">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Mã social (A-Z, 0-9, _)</label>
+            <input type="text" id="modal-plat-code" placeholder="VD: SHOPEE" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors font-mono uppercase">
+          </div>
+          <div>
+            <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Tiền tố ID kênh</label>
+            <input type="text" id="modal-plat-prefix" placeholder="VD: sh" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors font-mono lowercase">
+          </div>
+        </div>
+        <div>
+          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Tên hiển thị</label>
+          <input type="text" id="modal-plat-name" placeholder="VD: Shopee" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
+        </div>
+        <div>
+          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Logo social</label>
+          <div class="flex items-center gap-3 mt-1.5">
+            <img id="modal-plat-logo-preview" src="" alt="" class="hidden w-14 h-14 rounded-xl object-cover border border-slate-200 dark:border-dark-border shadow-xs">
+            <div class="flex-1 flex gap-2">
+              <label for="modal-plat-logo" class="flex-1 h-11 flex items-center justify-center gap-2 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 border border-dashed border-slate-300 dark:border-slate-600 rounded-xl text-sm font-bold cursor-pointer transition-all"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.824 1.316Z"/><path d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z"/></svg> Chọn logo</label>
+              <input type="file" id="modal-plat-logo" accept="image/*" class="hidden" onchange="previewAccountLogo(this, 'modal-plat-logo-preview')">
+              <button type="button" onclick="clearAccountLogo('modal-plat-logo', 'modal-plat-logo-preview')" class="h-11 px-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-xl text-sm font-bold transition-all">Xóa</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">URL mở mặc định (Studio / trang chủ)</label>
+          <input type="text" id="modal-plat-studio" placeholder="https://..." class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
+        </div>
+        <div>
+          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">URL đăng nhập <span class="font-normal text-slate-400">— để trống = dùng URL trên</span></label>
+          <input type="text" id="modal-plat-login" placeholder="https://..." class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
+        </div>
+      </div>
+      <div class="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-dark-border">
+        <button onclick="closeModal('modal-platform')" class="px-6 py-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-xl text-base font-bold transition-all">Hủy</button>
+        <button onclick="submitPlatform()" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-base font-bold transition-all">Lưu social</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Channel Modal (thêm kênh lẻ cho 1 tài khoản) -->
+  <div id="modal-add-channel" class="fixed inset-0 bg-black/60 glass z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border w-full max-w-lg rounded-2xl p-8 shadow-2xl space-y-5 transition-all">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-extrabold">Thêm kênh</h3>
+        <button onclick="closeModal('modal-add-channel')" class="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18 18 6M6 6l12 12"/></svg></button>
+      </div>
+      <p id="modal-addch-subtitle" class="text-sm text-slate-500 dark:text-slate-400 -mt-3"></p>
+      <input type="hidden" id="modal-addch-account" value="">
+      <div class="space-y-4">
+        <div>
+          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Mạng xã hội</label>
+          <select id="modal-addch-platform" onchange="previewAddChannel()" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 font-semibold outline-none focus:border-blue-500 cursor-pointer"></select>
+        </div>
+        <div id="modal-addch-preview" class="flex items-center gap-3 p-3 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl"></div>
+      </div>
+      <div class="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-dark-border">
+        <button onclick="closeModal('modal-add-channel')" class="px-6 py-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-xl text-base font-bold transition-all">Hủy</button>
+        <button onclick="submitAddChannel()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-base font-bold transition-all">Thêm kênh</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Channel Modal (phóng to, font lớn dễ nhìn) -->
+  <div id="modal-edit-channel" class="fixed inset-0 bg-black/60 glass z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border w-full max-w-2xl rounded-2xl p-8 shadow-2xl space-y-5 transition-all">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-extrabold" id="modal-edit-title">Chỉnh Sửa Kênh</h3>
+        <button onclick="closeModal('modal-edit-channel')" class="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18 18 6M6 6l12 12"/></svg></button>
+      </div>
+      <p id="modal-edit-subtitle" class="text-sm text-slate-500 dark:text-slate-400 -mt-3"></p>
+      <input type="hidden" id="modal-edit-id">
+      <div class="space-y-4">
+        <div>
+          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Mạng xã hội</label>
+          <select id="modal-edit-platform" onchange="onEditChannelPlatformChange()" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 font-semibold outline-none focus:border-blue-500 cursor-pointer"></select>
+        </div>
+        <div>
+          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Tên kênh hiển thị</label>
+          <input type="text" id="modal-edit-name" placeholder="VD: YouTube #01 (Chủ đề...)"
+                 class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
+        </div>
+        <div>
+          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Studio URL <span class="font-normal text-slate-400">— đường dẫn vào thẳng trang quản trị</span></label>
+          <input type="text" id="modal-edit-studio" placeholder="https://..."
+                 class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
+        </div>
+        <div>
+          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Login URL <span class="font-normal text-slate-400">— đường dẫn setup lần đầu</span></label>
+          <input type="text" id="modal-edit-login" placeholder="https://..."
+                 class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
+        </div>
+        <div>
+          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Google Account liên kết</label>
+          <select id="modal-edit-acc-select" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 font-semibold outline-none focus:border-blue-500 cursor-pointer">
+          </select>
+        </div>
+      </div>
+      <div class="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-dark-border">
+        <button onclick="closeModal('modal-edit-channel')" class="px-6 py-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-xl text-base font-bold transition-all">Hủy</button>
+        <button onclick="submitEditChannel()" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-base font-bold shadow-sm shadow-blue-600/20 transition-all">Lưu cập nhật</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- FLOATING ACTION BUTTON (FAB) CLUSTER: XẢ PHIÊN & ĐẾM PHIÊN    -->
+  <!-- ============================================================ -->
+  <div id="fab-sessions-cluster" class="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2 pointer-events-auto select-none">
+    <button id="fab-release-btn" onclick="releaseMySessions()" title="Xả các phiên đang mở (Đóng tab & giải phóng kênh)"
+            class="group relative h-12 px-4 rounded-full flex items-center gap-2.5 transition-all duration-300 shadow-2xl glass font-bold text-xs bg-slate-900/90 dark:bg-dark-card/95 hover:scale-[1.03] active:scale-[0.98] text-slate-200 border border-slate-700/60 dark:border-dark-border cursor-pointer">
+      <!-- Chấm nhấp nháy khi có phiên đang mở -->
+      <span id="fab-pulse-dot" class="hidden absolute -top-1 -right-1 flex h-3.5 w-3.5">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-rose-500"></span>
+      </span>
+
+      <!-- Icon đồng bộ từ ICON_PATHS: 'release' -->
+      <span class="w-7 h-7 rounded-full bg-rose-500/20 text-rose-400 group-hover:bg-rose-500 group-hover:text-white flex items-center justify-center shrink-0 transition-all duration-200">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M5.636 5.636a9 9 0 1 0 12.728 0M12 3v9"/>
+        </svg>
+      </span>
+
+      <span class="font-extrabold tracking-wide">Xả phiên</span>
+
+      <!-- Biến đếm các phiên đang mở -->
+      <span id="fab-held-count" class="px-2 py-0.5 rounded-full text-[11px] font-black bg-rose-500 text-white shadow-xs min-w-[20px] text-center transition-all">
+        0
+      </span>
+    </button>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- MODAL CẬP NHẬT ỨNG DỤNG (GitHub Releases)                    -->
+  <!-- ============================================================ -->
+  <div id="modal-update-dialog" class="fixed inset-0 bg-black/60 glass z-[60] hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border w-full max-w-lg rounded-2xl p-6 shadow-2xl space-y-4 transition-all">
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-600/10 text-blue-500 flex items-center justify-center shrink-0">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-slate-800 dark:text-slate-100">Đã có phiên bản mới!</h3>
+            <p class="text-xs text-slate-400 mt-0.5">Phiên bản <span id="update-new-version" class="font-bold text-emerald-500">v1.0.1</span> (Hiện tại: <span id="update-cur-version">v1.0.0</span>)</p>
+          </div>
+        </div>
+        <button onclick="closeUpdateDialog()" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-all">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div>
+        <label class="text-xs font-bold text-slate-500 dark:text-slate-400">Nội dung cập nhật (Release Notes):</label>
+        <div id="update-release-notes" class="mt-1.5 p-3.5 bg-slate-50 dark:bg-dark-input rounded-xl text-xs text-slate-600 dark:text-slate-300 font-mono whitespace-pre-wrap max-h-48 overflow-y-auto border border-slate-200 dark:border-dark-border leading-relaxed"></div>
+      </div>
+
+      <!-- Download Progress Bar (Ẩn mặc định) -->
+      <div id="update-progress-container" class="hidden space-y-1.5">
+        <div class="flex justify-between text-xs font-bold text-slate-500 dark:text-slate-300">
+          <span>Đang tải bản cập nhật...</span>
+          <span id="update-progress-percent">0%</span>
+        </div>
+        <div class="w-full h-2.5 bg-slate-100 dark:bg-dark-input rounded-full overflow-hidden border border-slate-200 dark:border-dark-border">
+          <div id="update-progress-bar" class="h-full bg-blue-600 transition-all duration-150" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100 dark:border-dark-border/60">
+        <button type="button" onclick="closeUpdateDialog()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-all">Để sau</button>
+        <button type="button" onclick="openGitHubRelease()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-all flex items-center gap-1.5">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Xem trên GitHub
+        </button>
+        <button type="button" id="btn-apply-update" onclick="applyUpdateNow()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-extrabold shadow-md shadow-blue-600/20 transition-all flex items-center gap-2">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Cập nhật ngay</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+
+  <!-- JAVASCRIPT APPLICATION LOGIC                                 -->
+  <!-- ============================================================ -->
+  <script src="./js/state.js"></script>
+  <script src="./js/ui.js"></script>
+  <script src="./js/themes.js"></script>
+  <script src="./js/sidebar.js"></script>
+  <script src="./js/auth.js"></script>
+  <script src="./js/dashboard.js"></script>
+  <script src="./js/table.js"></script>
+  <script src="./js/accounts.js"></script>
+  <script src="./js/socials.js"></script>
+  <script src="./js/vault.js"></script>
+  <script src="./js/trash.js"></script>
+  <script src="./js/health.js"></script>
+  <script src="./js/sound.js"></script>
+  <script src="./js/channel_drawer.js"></script>
+  <script src="./js/presence.js"></script>
+  <script src="./js/settings.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.log
+
+# Environment variables & secrets
+.env
+.env.local
+.env.production
+
+# Profiles and persistent browser sessions
+profiles/
+data/local_db.json
+data/settings.json
+data/sessions.json
+data/social_platforms.json
+data/trash.json
+data/backup/
+data/*.db
+data/*.json
+
+# Keep data directory structure with .gitkeep
+!data/.gitkeep
+
+# Build & packaging
+build/
+dist/
+release_pkg/
+*.spec
+*.new
+apply_update.bat
+
+# IDE
+.vscode/
+.idea/
+
