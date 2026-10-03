@@ -106,7 +106,7 @@
       if (counter) counter.innerText = `Hiển thị ${rows.length} / ${appState.channels.length} kênh`;
 
       if (rows.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="py-12 px-4 text-center text-slate-400 text-sm">Không có kênh nào khớp bộ lọc.<br><button onclick="clearTableFilters()" class="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold">Xóa lọc bảng</button></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="py-12 px-4 text-center text-slate-400 text-sm">Không có kênh nào khớp bộ lọc.<br><button onclick="clearTableFilters()" class="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold">Xóa lọc bảng</button></td></tr>`;
         return;
       }
 
@@ -149,12 +149,21 @@
                <span>${isExpired ? 'Setup lại' : 'Setup'}</span>
              </button>`;
 
+        const gmail = ch.account_email || ch.account_display_name || '—';
         const accCell = accLogo
-          ? `<span class="flex items-center gap-2"><img src="${accLogo}" class="w-6 h-6 rounded-lg object-cover shrink-0 ring-1 ring-slate-200 dark:ring-dark-border"><span class="min-w-0"><span class="block font-semibold text-slate-700 dark:text-slate-200 truncate">${ch.account_display_name || 'Acc'}</span><span class="block text-xs truncate">${ch.account_email || ''}</span></span></span>`
-          : `${ch.account_display_name || 'Acc'} • ${ch.account_email || ''}`;
+          ? `<span class="flex items-center gap-2 min-w-0"><img src="${accLogo}" class="w-6 h-6 rounded-lg object-cover shrink-0 ring-1 ring-slate-200 dark:ring-dark-border"><span class="font-medium text-slate-700 dark:text-slate-200 truncate" title="${gmail}">${gmail}</span></span>`
+          : `<span class="font-medium text-slate-700 dark:text-slate-200 truncate" title="${gmail}">${gmail}</span>`;
+
+        const rowHighlight = ch.pinned
+          ? 'bg-amber-50/50 dark:bg-amber-950/20 hover:bg-amber-100/50 dark:hover:bg-amber-900/30 border-l-4 border-l-amber-400'
+          : 'hover:bg-slate-50/50 dark:hover:bg-dark-input/50';
+        const pinBtn = `<button onclick="togglePin('${ch.id}')" title="${ch.pinned ? 'Bỏ ghim' : 'Ghim lên đầu'}" class="h-8 w-8 inline-flex items-center justify-center rounded-lg transition-colors ${ch.pinned ? 'text-amber-500 hover:text-amber-600' : 'text-slate-300 dark:text-slate-600 hover:text-amber-500'}">${icon(ch.pinned ? 'star-solid' : 'star', 'w-4 h-4')}</button>`;
 
         return `
-          <tr class="hover:bg-slate-50/50 dark:hover:bg-dark-input/50 transition-colors">
+          <tr class="${rowHighlight} transition-colors">
+            <td class="py-3 px-3 text-center whitespace-nowrap">
+              ${pinBtn}
+            </td>
             <td class="py-3 px-4 font-bold text-sm whitespace-nowrap">
               <span class="flex items-center gap-2">
                 ${platBadge(ch.platform, 'w-5 h-5')}
@@ -166,7 +175,6 @@
             <td class="py-3 px-4 font-bold text-sm whitespace-nowrap">${statusText}</td>
             <td class="py-3 px-4 text-right whitespace-nowrap">
               <div class="inline-flex items-center gap-1.5">
-                <button onclick="togglePin('${ch.id}')" title="${ch.pinned ? 'Bỏ ghim' : 'Ghim kênh'}" class="h-8 w-8 inline-flex items-center justify-center ${ch.pinned ? 'text-amber-500' : 'text-slate-400 hover:text-amber-500'} transition-colors">${icon(ch.pinned ? 'star-solid' : 'star', 'w-4 h-4')}</button>
                 ${actBtn}
                 <select onchange="handleTableAction(this, '${ch.id}')" title="Thao tác khác" class="no-native-arrow h-8 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-dark-border rounded-lg pl-2.5 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none cursor-pointer transition-colors">
                   <option value="" selected disabled>Thao tác</option>

@@ -921,15 +921,13 @@ class WebBridge:
         req_id = (req or {}).get("id", "")
         if not req_id:
             return {"success": False, "message": "Thiếu request id."}
-        existing = self._popups.get(req_id)
-        try:
-            if existing:
-                existing[0].show()
-                existing[0].restore()
-                return {"success": True, "reused": True}
-        except Exception:
-            self._popups.pop(req_id, None)
-        title = f"VB-Studio \u2022 Xin mở kênh ({(req.get('channel_name') or req.get('channel_id', ''))[:30]})"
+        existing = self._popups.pop(req_id, None)
+        if existing:
+            try:
+                existing[0].destroy()
+            except Exception:
+                pass
+        title = f"VBLogin \u2022 Xin mở kênh ({(req.get('channel_name') or req.get('channel_id', ''))[:30]})"
         try:
             html = self._render_popup_html(req)
             win = webview.create_window(
@@ -941,6 +939,10 @@ class WebBridge:
                 on_top=True,
             )
             self._popups[req_id] = (win, req.get("channel_id", ""))
+            try:
+                win.events.closed += lambda: self._popups.pop(req_id, None)
+            except Exception:
+                pass
             # Đai an toàn: ép topmost qua Win32 nếu backend webview chưa áp on_top
             try:
                 from src.services.notify_service import set_topmost_by_title

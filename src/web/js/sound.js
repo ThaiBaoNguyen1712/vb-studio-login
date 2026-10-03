@@ -5,9 +5,9 @@
 
   function soundEnabled() {
     try {
-      return !!(appState && appState.settings && appState.settings.general
-        && appState.settings.general.enable_sound_notifications);
-    } catch (e) { return false; }
+      if (!appState || !appState.settings || !appState.settings.general) return true;
+      return appState.settings.general.enable_sound_notifications !== false;
+    } catch (e) { return true; }
   }
 
   function ctx() {

@@ -14,7 +14,7 @@ DEFAULT_SETTINGS = {
         "default_user": "Nam",
         "auto_refresh_seconds": 15,
         "language": "vi",
-        "enable_sound_notifications": False,
+        "enable_sound_notifications": True,
         "enable_request_popup": True
     },
     "app_info": {

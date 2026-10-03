@@ -28,7 +28,7 @@
       const stealthInput = document.getElementById('cfg-browser-stealth');
       if (stealthInput) stealthInput.checked = browser.disable_bot_detection !== false;
       const soundInput = document.getElementById('cfg-sound-enabled');
-      if (soundInput) soundInput.checked = !!(appState.settings.general && appState.settings.general.enable_sound_notifications);
+      if (soundInput) soundInput.checked = !appState.settings.general || appState.settings.general.enable_sound_notifications !== false;
       const popupInput = document.getElementById('cfg-popup-enabled');
       if (popupInput) popupInput.checked = !appState.settings.general || appState.settings.general.enable_request_popup !== false;
       const verEl = document.getElementById('app-current-version-label');
@@ -54,16 +54,17 @@
       }
     }
 
-    // Hiện popup thử (dữ liệu demo, bấm Nhường/Từ chối sẽ báo không tìm thấy yêu cầu)
+    // Hiện popup thử (dữ liệu mock demo, có thể bấm thử nhiều lần liên tục)
     async function testRequestPopup() {
       try {
-        const res = await window.pywebview.api.show_request_popup({
-          id: '__demo__',
-          channel_id: 'ch_demo',
-          channel_name: 'Kênh Demo (thử popup)',
-          requester: 'Đồng đội Demo',
-          message: 'Cho mình mượn kênh 10 phút nhé!'
-        });
+        const mockReq = {
+          id: '__demo_' + Date.now(),
+          channel_id: 'ch_demo_101',
+          channel_name: 'YouTube Shorts - Kênh Demo 01',
+          requester: 'Đồng đội (Demo User)',
+          message: 'Cho mình mượn kênh 15 phút để kiểm tra và upload video nhé!'
+        };
+        const res = await window.pywebview.api.show_request_popup(mockReq);
         if (!(res && res.success)) showToast((res && res.message) || 'Không mở được popup!', 'error');
       } catch (err) {
         showToast('Lỗi mở popup: ' + err, 'error');
@@ -74,7 +75,7 @@
 
     async function checkForUpdates() {
       showAsyncLoading('Kiểm tra cập nhật...');
-      showToast('Đang kiểm tra cập nhật từ GitHub Releases...', 'info');
+      showToast('Đang kiểm tra cập nhật...', 'info');
       try {
         const res = await window.pywebview.api.check_for_updates();
         latestUpdateInfo = res;
