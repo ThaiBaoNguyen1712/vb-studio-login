@@ -1,6 +1,7 @@
 // ui.js — loading overlays, toast, confirm/prompt modal thay alert() mặc định.
 // Bộ icon SVG dùng chung toàn app (stroke 1.8 đồng bộ với nav sidebar).
 // Icon thương hiệu (logo MXH, chữ G Google) KHÔNG nằm ở đây — giữ nguyên.
+
 const ICON_PATHS = {
   'check': '<path d="m5 13 4 4L19 7"/>',
   'x': '<path d="M6 18 18 6M6 6l12 12"/>',
@@ -32,6 +33,7 @@ const ICON_PATHS = {
   'release': '<path d="M5.636 5.636a9 9 0 1 0 12.728 0M12 3v9"/>',
 };
 const ICON_FILL = { 'play': true, 'star-solid': true };
+
 function icon(name, cls) {
   const p = ICON_PATHS[name];
   if (!p) return '';
@@ -39,126 +41,446 @@ function icon(name, cls) {
   if (ICON_FILL[name]) return `<svg class="${cls}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">${p}</svg>`;
   return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
 }
+
 // Chấm trạng thái dùng chung cho bảng/report.
 const STATUS_DOT_COLOR = { READY: 'bg-emerald-400', NOT_SETUP: 'bg-amber-400', IN_USE: 'bg-sky-400', EXPIRED: 'bg-red-400' };
 function statusDot(status, label) {
   const color = STATUS_DOT_COLOR[status] || 'bg-slate-400';
-  return `<span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full ${color} shrink-0"></span><span>${label || status}</span></span>`;
+  return `<span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full ${color} shrink-0"></span><span>${escapeHtml(label || status)}</span></span>`;
 }
-    // Loading Indicators (Blocking & Non-blocking Async)
-    function showBlockingLoading(text = 'Đang xử lý, vui lòng chờ...') {
-      const overlay = document.getElementById('blocking-loading-overlay');
-      const txt = document.getElementById('blocking-loading-text');
-      if (txt) txt.innerText = text;
-      if (overlay) overlay.classList.remove('hidden');
+
+// =============================================================================
+// R1: Safe HTML Escaping & DOM Construction Helpers
+// =============================================================================
+
+/**
+ * Escapes &, <, >, ", ', and ` while preserving Vietnamese diacritics.
+ * Converts null/undefined to empty strings. Numbers and booleans are stringified safely.
+ */
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  const text = String(str);
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/`/g, '&#96;');
+}
+
+/**
+ * Declarative DOM element builder helper with attributes and child nodes.
+ */
+function createElement(tag, attrs = {}, children = []) {
+  const el = document.createElement(tag);
+  if (attrs) {
+    for (const [key, val] of Object.entries(attrs)) {
+      if (val === undefined || val === null) continue;
+      if (key.startsWith('on') && typeof val === 'function') {
+        el.addEventListener(key.slice(2).toLowerCase(), val);
+      } else if (key === 'className' || key === 'class') {
+        el.className = val;
+      } else if (key === 'textContent' || key === 'text') {
+        el.textContent = val;
+      } else if (key === 'innerHTML') {
+        el.innerHTML = val;
+      } else if (key === 'style' && typeof val === 'object') {
+        Object.assign(el.style, val);
+      } else {
+        el.setAttribute(key, String(val));
+      }
+    }
+  }
+  if (children) {
+    const list = Array.isArray(children) ? children : [children];
+    for (const child of list) {
+      if (child === null || child === undefined) continue;
+      if (typeof child === 'string' || typeof child === 'number') {
+        el.appendChild(document.createTextNode(String(child)));
+      } else if (child instanceof Node) {
+        el.appendChild(child);
+      }
+    }
+  }
+  return el;
+}
+
+// =============================================================================
+// R2: Centralized OverlayController & Focus Management
+// =============================================================================
+
+const OverlayController = {
+  activeStack: [],
+
+  open(modalId, options = {}) {
+    const modal = typeof modalId === 'string' ? document.getElementById(modalId) : modalId;
+    if (!modal) return null;
+    const id = modal.id || modalId;
+
+    // Close any previous open instance with same id to preserve stack integrity
+    const existingIdx = this.activeStack.findIndex(entry => entry.id === id);
+    if (existingIdx !== -1) {
+      this.close(id);
     }
 
-    function hideBlockingLoading() {
-      const overlay = document.getElementById('blocking-loading-overlay');
-      if (overlay) overlay.classList.add('hidden');
+    const triggerEl = options.triggerEl || (document.activeElement && document.activeElement !== document.body ? document.activeElement : null);
+    const opener = triggerEl;
+
+    // Show modal
+    modal.classList.remove('hidden');
+    if (id === 'channel-drawer') {
+      modal.classList.remove('translate-x-full');
+      const drawerOverlay = document.getElementById('channel-drawer-overlay');
+      if (drawerOverlay) drawerOverlay.classList.remove('hidden');
+    } else if (modal.tagName.toLowerCase() !== 'aside') {
+      // Mọi overlay (kể cả fixed inset-0 căn giữa bằng flex) đều cần display:flex
+      // khi mở. Nhánh cũ bỏ qua fixed nên sau 1 chu kỳ đóng (close gỡ flex)
+      // modal mở lại ở dạng block -> hộp thoại lệch trái thay vì căn giữa.
+      modal.classList.add('flex');
     }
 
-    let asyncLoadingCount = 0;
-    function showAsyncLoading(text = 'Đang đồng bộ...') {
-      asyncLoadingCount++;
-      const spinner = document.getElementById('async-spinner');
-      const txt = document.getElementById('async-spinner-text');
-      if (txt && text) txt.innerText = text;
-      if (spinner) spinner.classList.remove('hidden');
+    // Body scroll lock
+    document.body.style.overflow = 'hidden';
+
+    // Background inert management
+    this._setInert(true, modal);
+
+    const entry = {
+      id,
+      modalEl: modal,
+      triggerEl,
+      opener,
+      options
+    };
+    this.activeStack.push(entry);
+
+    // Focus first sensible element or modal container
+    setTimeout(() => {
+      let focusTarget = null;
+      if (options.initialFocusEl) {
+        focusTarget = typeof options.initialFocusEl === 'string' ? document.querySelector(options.initialFocusEl) : options.initialFocusEl;
+      }
+      if (!focusTarget) {
+        const focusables = this.getFocusableElements(modal);
+        focusTarget = focusables[0];
+      }
+      if (!focusTarget) {
+        if (!modal.hasAttribute('tabindex')) modal.setAttribute('tabindex', '-1');
+        focusTarget = modal;
+      }
+      if (focusTarget && typeof focusTarget.focus === 'function') {
+        focusTarget.focus();
+      }
+    }, 40);
+
+    return entry;
+  },
+
+  close(modalId) {
+    if (!modalId && this.activeStack.length > 0) {
+      modalId = this.activeStack[this.activeStack.length - 1].id;
+    }
+    const idx = this.activeStack.findIndex(entry => entry.id === modalId);
+    let entry = null;
+
+    if (idx !== -1) {
+      entry = this.activeStack.splice(idx, 1)[0];
     }
 
-    function hideAsyncLoading() {
-      asyncLoadingCount = Math.max(0, asyncLoadingCount - 1);
-      if (asyncLoadingCount === 0) {
-        const spinner = document.getElementById('async-spinner');
-        if (spinner) spinner.classList.add('hidden');
+    const modal = entry?.modalEl || (typeof modalId === 'string' ? document.getElementById(modalId) : modalId);
+    if (modal) {
+      if (modal.id === 'channel-drawer') {
+        modal.classList.add('translate-x-full');
+        const drawerOverlay = document.getElementById('channel-drawer-overlay');
+        if (drawerOverlay) drawerOverlay.classList.add('hidden');
+        setTimeout(() => modal.classList.add('hidden'), 180);
+      } else {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
       }
     }
 
-    // Kiểm tra kết nối ngầm (không hiển thị badge đồng bộ để tránh lộ thông tin)
-    // Confirm / Prompt dạng toast-modal (thay alert/confirm/prompt mặc định)
-    let _confirmResolve = null;
-    function _closeConfirm(result) {
-      const modal = document.getElementById('confirm-modal');
-      if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
-      if (_confirmResolve) { _confirmResolve(result); _confirmResolve = null; }
+    // Scroll lock and background inert release
+    if (this.activeStack.length === 0) {
+      document.body.style.overflow = '';
+      this._setInert(false);
+    } else {
+      const topModal = this.activeStack[this.activeStack.length - 1].modalEl;
+      this._setInert(true, topModal);
     }
-    function showConfirm({ title = 'Xác nhận', message = '', okText = 'Đồng ý', okDanger = true } = {}) {
-      return new Promise((resolve) => {
-        const modal = document.getElementById('confirm-modal');
-        document.getElementById('confirm-title').innerText = title;
-        document.getElementById('confirm-message').innerText = message;
-        document.getElementById('confirm-input-wrap').classList.add('hidden');
-        const okBtn = document.getElementById('confirm-ok-btn');
-        okBtn.innerText = okText;
-        okBtn.className = okDanger
-          ? 'px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-xl text-sm font-bold transition-all'
-          : 'px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-bold transition-all';
-        document.getElementById('confirm-cancel-btn').onclick = () => _closeConfirm(false);
-        okBtn.onclick = () => _closeConfirm(true);
-        modal.onclick = (e) => { if (e.target === modal) _closeConfirm(false); };
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        _confirmResolve = resolve;
-      });
+
+    // Return focus to opener
+    const returnTarget = entry?.triggerEl || entry?.opener;
+    if (returnTarget && typeof returnTarget.focus === 'function') {
+      try { returnTarget.focus(); } catch (e) {}
     }
-    function showPromptToast({ title = 'Nhập nội dung', message = '', placeholder = '', okText = 'Xác nhận' } = {}) {
-      return new Promise((resolve) => {
-        const modal = document.getElementById('confirm-modal');
-        document.getElementById('confirm-title').innerText = title;
-        document.getElementById('confirm-message').innerText = message;
-        const wrap = document.getElementById('confirm-input-wrap');
-        const inp = document.getElementById('confirm-input');
-        wrap.classList.remove('hidden');
-        inp.value = '';
-        inp.placeholder = placeholder;
-        const okBtn = document.getElementById('confirm-ok-btn');
-        okBtn.innerText = okText;
-        okBtn.className = 'px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-bold transition-all';
-        document.getElementById('confirm-cancel-btn').onclick = () => _closeConfirm(null);
-        okBtn.onclick = () => _closeConfirm(inp.value);
-        modal.onclick = (e) => { if (e.target === modal) _closeConfirm(null); };
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        _confirmResolve = resolve;
-        setTimeout(() => inp.focus(), 80);
-      });
+
+    if (typeof entry?.options?.onClose === 'function') {
+      entry.options.onClose();
     }
+
+    return entry;
+  },
+
+  getFocusableElements(container) {
+    if (!container) return [];
+    const selector = 'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])';
+    return Array.from(container.querySelectorAll(selector)).filter(el => {
+      return el.offsetWidth > 0 || el.offsetHeight > 0 || el === document.activeElement;
+    });
+  },
+
+  trapFocus(e) {
+    if (this.activeStack.length === 0) return;
+    const topEntry = this.activeStack[this.activeStack.length - 1];
+    const modal = topEntry.modalEl;
+    if (!modal) return;
+
+    const focusables = this.getFocusableElements(modal);
+    if (focusables.length === 0) {
+      e.preventDefault();
+      modal.focus();
+      return;
+    }
+
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+
+    if (e.shiftKey) {
+      if (document.activeElement === first || !modal.contains(document.activeElement)) {
+        e.preventDefault();
+        last.focus();
+      }
+    } else {
+      if (document.activeElement === last || !modal.contains(document.activeElement)) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  },
+
+  _setInert(inert, activeModal = null) {
+    // Chỉ inert các khối nền NGANG HÀNG với overlay (header, sidebar, nội dung
+    // cuộn, fab). Cấm inert `main`/`aside` vì modal/drawer nằm TRONG main —
+    // inert tổ tiên sẽ vô hiệu hóa luôn cả overlay đang mở (không bấm được
+    // nút Lưu/Hủy, focus() thất bại).
+    const targets = document.querySelectorAll(
+      'header.thm-header, #sidebar, #main-scroll-container, #fab-sessions-cluster'
+    );
+    targets.forEach(el => {
+      if (inert) {
+        el.setAttribute('aria-hidden', 'true');
+        try { el.inert = true; } catch (e) {}
+      } else {
+        el.removeAttribute('aria-hidden');
+        try { el.inert = false; } catch (e) {}
+      }
+    });
+  },
+
+  setupGlobalListeners() {
+    // Global Escape dismissal for top-most overlay
     document.addEventListener('keydown', (e) => {
-      const modal = document.getElementById('confirm-modal');
-      if (modal && !modal.classList.contains('hidden') && e.key === 'Escape') _closeConfirm(false);
+      if (e.key === 'Escape' || e.key === 'Esc') {
+        if (this.activeStack.length > 0) {
+          e.preventDefault();
+          const topEntry = this.activeStack[this.activeStack.length - 1];
+          if (topEntry.options?.disableEscape) return;
+          this.close(topEntry.id);
+        }
+      } else if (e.key === 'Tab') {
+        if (this.activeStack.length > 0) {
+          this.trapFocus(e);
+        }
+      }
     });
 
-    // Toast Functionality (to, rõ, tỉ lệ chuẩn) + âm thanh hệ thống (nếu bật)
-    function showToast(message, type = 'info') {
-      try {
-        if (typeof playSound === 'function') {
-          playSound(type === 'info' ? 'info' : type);
+    // Backdrop click dismissal
+    document.addEventListener('click', (e) => {
+      if (this.activeStack.length > 0) {
+        const topEntry = this.activeStack[this.activeStack.length - 1];
+        if (topEntry.options?.disableBackdropClose) return;
+        if (e.target === topEntry.modalEl) {
+          this.close(topEntry.id);
         }
-      } catch (e) {}
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
+      }
+    });
+  }
+};
 
-      let border = 'border-blue-500/40 bg-blue-900/60 text-blue-100';
-      let iconName = 'info';
-      if (type === 'success') { border = 'border-emerald-500/40 bg-emerald-900/60 text-emerald-100'; iconName = 'check-circle'; }
-      if (type === 'error') { border = 'border-red-500/40 bg-red-900/60 text-red-100'; iconName = 'x-circle'; }
-      if (type === 'warning') { border = 'border-amber-500/40 bg-amber-900/60 text-amber-100'; iconName = 'alert'; }
+// Auto-initialize global listeners
+OverlayController.setupGlobalListeners();
 
-      toast.className = `px-5 py-4 rounded-2xl border-2 ${border} glass shadow-2xl flex items-center gap-3 text-base font-bold pointer-events-auto transform transition-all duration-300 translate-y-3 opacity-0 leading-snug`;
-      toast.innerHTML = `<span class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0">${icon(iconName, 'w-4 h-4')}</span><span class="flex-1">${message}</span><button onclick="this.parentElement.remove()" class="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 opacity-70 hover:opacity-100 transition-all">${icon('x', 'w-4 h-4')}</button>`;
+// =============================================================================
+// Loading Indicators (Blocking & Non-blocking Async)
+// =============================================================================
 
-      container.appendChild(toast);
-      // Giới hạn tối đa 4 toast cùng lúc
-      while (container.children.length > 4) container.firstChild.remove();
-      setTimeout(() => { toast.classList.remove('translate-y-3', 'opacity-0'); }, 10);
-      setTimeout(() => {
-        toast.classList.add('opacity-0', 'translate-y-3');
-        setTimeout(() => toast.remove(), 300);
-      }, 4500);
+function showBlockingLoading(text = 'Đang xử lý, vui lòng chờ...') {
+  const overlay = document.getElementById('blocking-loading-overlay');
+  const txt = document.getElementById('blocking-loading-text');
+  if (txt) txt.innerText = text;
+  if (overlay) overlay.classList.remove('hidden');
+}
+
+function hideBlockingLoading() {
+  const overlay = document.getElementById('blocking-loading-overlay');
+  if (overlay) overlay.classList.add('hidden');
+}
+
+let asyncLoadingCount = 0;
+function showAsyncLoading(text = 'Đang đồng bộ...') {
+  asyncLoadingCount++;
+  const spinner = document.getElementById('async-spinner');
+  const txt = document.getElementById('async-spinner-text');
+  if (txt && text) txt.innerText = text;
+  if (spinner) spinner.classList.remove('hidden');
+}
+
+function hideAsyncLoading() {
+  asyncLoadingCount = Math.max(0, asyncLoadingCount - 1);
+  if (asyncLoadingCount === 0) {
+    const spinner = document.getElementById('async-spinner');
+    if (spinner) spinner.classList.add('hidden');
+  }
+}
+
+// =============================================================================
+// Confirm / Prompt Modal Overlay
+// =============================================================================
+
+let _confirmResolve = null;
+
+function _closeConfirm(result) {
+  // CLAIM resolver trước khi đóng: OverlayController.close() sẽ kích onClose
+  // (fallback resolve(false) cho Esc/backdrop). Nếu không claim trước, nút
+  // Đồng ý cũng bị onClose "cướp" resolve(false) -> mọi xác nhận đều thành Hủy.
+  const cb = _confirmResolve;
+  _confirmResolve = null;
+  try { OverlayController.close('confirm-modal'); } catch (e) {}
+  if (cb) cb(result);
+}
+
+function showConfirm({ title = 'Xác nhận', message = '', okText = 'Đồng ý', okDanger = true } = {}) {
+  return new Promise((resolve) => {
+    document.getElementById('confirm-title').innerText = title;
+    document.getElementById('confirm-message').innerText = message;
+    document.getElementById('confirm-input-wrap').classList.add('hidden');
+    const okBtn = document.getElementById('confirm-ok-btn');
+    okBtn.innerText = okText;
+    okBtn.className = okDanger
+      ? 'px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-xl text-sm font-bold transition-all'
+      : 'px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-bold transition-all';
+    
+    _confirmResolve = resolve;
+    document.getElementById('confirm-cancel-btn').onclick = () => _closeConfirm(false);
+    okBtn.onclick = () => _closeConfirm(true);
+
+    OverlayController.open('confirm-modal', {
+      initialFocusEl: '#confirm-cancel-btn',
+      onClose: () => {
+        if (_confirmResolve) {
+          const cb = _confirmResolve;
+          _confirmResolve = null;
+          cb(false);
+        }
+      }
+    });
+  });
+}
+
+function showPromptToast({ title = 'Nhập nội dung', message = '', placeholder = '', okText = 'Xác nhận' } = {}) {
+  return new Promise((resolve) => {
+    document.getElementById('confirm-title').innerText = title;
+    document.getElementById('confirm-message').innerText = message;
+    const wrap = document.getElementById('confirm-input-wrap');
+    const inp = document.getElementById('confirm-input');
+    wrap.classList.remove('hidden');
+    inp.value = '';
+    inp.placeholder = placeholder;
+    const okBtn = document.getElementById('confirm-ok-btn');
+    okBtn.innerText = okText;
+    okBtn.className = 'px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-bold transition-all';
+    
+    _confirmResolve = resolve;
+    document.getElementById('confirm-cancel-btn').onclick = () => _closeConfirm(null);
+    okBtn.onclick = () => _closeConfirm(inp.value);
+
+    OverlayController.open('confirm-modal', {
+      initialFocusEl: '#confirm-input',
+      onClose: () => {
+        if (_confirmResolve) {
+          const cb = _confirmResolve;
+          _confirmResolve = null;
+          cb(null);
+        }
+      }
+    });
+  });
+}
+
+// =============================================================================
+// Toast Functionality
+// =============================================================================
+
+function showToast(message, type = 'info') {
+  try {
+    if (typeof playSound === 'function') {
+      playSound(type === 'info' ? 'info' : type);
     }
+  } catch (e) {}
+  const container = document.getElementById('toast-container');
+  if (!container) return;
 
-    window.showConfirm = showConfirm;
-    window.showPromptToast = showPromptToast;
-    window.icon = icon;
+  const toast = document.createElement('div');
 
+  let border = 'border-blue-500/40 bg-blue-900/60 text-blue-100';
+  let iconName = 'info';
+  if (type === 'success') { border = 'border-emerald-500/40 bg-emerald-900/60 text-emerald-100'; iconName = 'check-circle'; }
+  if (type === 'error') { border = 'border-red-500/40 bg-red-900/60 text-red-100'; iconName = 'x-circle'; }
+  if (type === 'warning') { border = 'border-amber-500/40 bg-amber-900/60 text-amber-100'; iconName = 'alert'; }
+
+  toast.className = `px-5 py-4 rounded-2xl border-2 ${border} glass shadow-2xl flex items-center gap-3 text-base font-bold pointer-events-auto transform transition-all duration-300 translate-y-3 opacity-0 leading-snug`;
+
+  const iconSpan = createElement('span', { className: 'w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0' });
+  iconSpan.innerHTML = icon(iconName, 'w-4 h-4');
+
+  const textSpan = createElement('span', { className: 'flex-1', text: String(message) });
+
+  const closeBtn = createElement('button', {
+    type: 'button',
+    className: 'shrink-0 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 opacity-70 hover:opacity-100 transition-all',
+    'aria-label': 'Đóng thông báo',
+    onclick: () => toast.remove()
+  });
+  closeBtn.innerHTML = icon('x', 'w-4 h-4');
+
+  toast.appendChild(iconSpan);
+  toast.appendChild(textSpan);
+  toast.appendChild(closeBtn);
+
+  container.appendChild(toast);
+  // Cap at 4 simultaneous toasts
+  while (container.children.length > 4) container.firstChild.remove();
+  setTimeout(() => { toast.classList.remove('translate-y-3', 'opacity-0'); }, 10);
+  setTimeout(() => {
+    toast.classList.add('opacity-0', 'translate-y-3');
+    setTimeout(() => toast.remove(), 300);
+  }, 4500);
+}
+
+// Global Exports
+window.escapeHtml = escapeHtml;
+window.createElement = createElement;
+window.OverlayController = OverlayController;
+window.openModal = (id, options) => OverlayController.open(id, options);
+window.closeModal = (id) => OverlayController.close(id);
+window.showConfirm = showConfirm;
+window.showPromptToast = showPromptToast;
+window.showToast = showToast;
+window.icon = icon;
+window.statusDot = statusDot;
+window.showBlockingLoading = showBlockingLoading;
+window.hideBlockingLoading = hideBlockingLoading;
+window.showAsyncLoading = showAsyncLoading;
+window.hideAsyncLoading = hideAsyncLoading;

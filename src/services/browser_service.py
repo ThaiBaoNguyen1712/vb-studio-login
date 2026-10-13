@@ -1,214 +1,428 @@
 import os
 import sys
+import shutil
+import subprocess
 import threading
 from typing import List, Dict, Any, Callable, Optional
 from pathlib import Path
-from playwright.sync_api import sync_playwright
 
 from src.core.config import Config
 from src.core.logger import logger
+from src.services.cookie_extractor import CookieExtractor
 
-# Đảm bảo đường dẫn driver Playwright trong môi trường đóng gói PyInstaller
-if getattr(sys, "frozen", False):
-    meipass = getattr(sys, "_MEIPASS", "")
-    if meipass:
-        driver_path = Path(meipass) / "playwright" / "driver"
-        if driver_path.exists():
-            os.environ["PLAYWRIGHT_BROWSERS_PATH"] = os.getenv("PLAYWRIGHT_BROWSERS_PATH", "0")
 
 class BrowserService:
     """
-    Manages Playwright browser automation, persistent profiles,
-    cookie injection and extraction upon browser close.
+    Manages Native Chromium browser execution (Google Chrome & Microsoft Edge)
+    using independent user data directories per profile.
+    Completely eliminates external automation drivers and automation flags
+    to avoid bot detection and ensure natural browser fingerprints.
     """
 
+    AUTOSAVE_INTERVAL_SEC: int = 300
+
     def __init__(self):
-        self._active_contexts: Dict[str, Any] = {}
+        self._active_processes: Dict[str, subprocess.Popen] = {}
+        self._worker_threads: Dict[str, threading.Thread] = {}
+        self._lock: threading.RLock = threading.RLock()
+        self._channel_locks: Dict[str, threading.Lock] = {}
+
+    def _get_channel_lock(self, channel_id: str) -> threading.Lock:
+        """Retrieves or creates a dedicated mutex lock for channel operations."""
+        with self._lock:
+            if channel_id not in self._channel_locks:
+                self._channel_locks[channel_id] = threading.Lock()
+            return self._channel_locks[channel_id]
+
+    @property
+    def _active_contexts(self) -> Dict[str, Any]:
+        """
+        Backward compatibility alias for AccountService.release_user_channels
+        which accesses self.browser_service._active_contexts.keys().
+        """
+        self._clean_dead_processes()
+        return self._active_processes
+
+    @_active_contexts.setter
+    def _active_contexts(self, val: Dict[str, Any]):
+        self._active_processes = val
+
+    def _clean_dead_processes(self) -> None:
+        """Removes terminated processes from tracking dictionary."""
+        with self._lock:
+            for ch_id in list(self._active_processes.keys()):
+                p = self._active_processes.get(ch_id)
+                if p is not None and p.poll() is not None:
+                    if self._active_processes.get(ch_id) is p:
+                        self._active_processes.pop(ch_id, None)
+
+    def _find_chrome(self) -> Optional[Path]:
+        """Detects Google Chrome executable on Windows and PATH."""
+        if sys.platform == "win32":
+            try:
+                import winreg
+                for root in (winreg.HKEY_CURRENT_USER, winreg.HKEY_LOCAL_MACHINE):
+                    for subkey in (
+                        r"SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\chrome.exe",
+                        r"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\App Paths\chrome.exe"
+                    ):
+                        try:
+                            with winreg.OpenKey(root, subkey) as k:
+                                val, _ = winreg.QueryValueEx(k, "")
+                                if val and Path(val).is_file():
+                                    return Path(val)
+                        except Exception:
+                            pass
+            except Exception:
+                pass
+
+            env_vars = ["PROGRAMFILES", "PROGRAMFILES(X86)", "LOCALAPPDATA"]
+            for env_var in env_vars:
+                base = os.environ.get(env_var)
+                if base:
+                    cand = Path(base) / "Google" / "Chrome" / "Application" / "chrome.exe"
+                    if cand.is_file():
+                        return cand
+
+            for hardcoded in (
+                r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+                r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+            ):
+                cand = Path(hardcoded)
+                if cand.is_file():
+                    return cand
+
+        for bin_name in ("chrome", "chrome.exe", "google-chrome"):
+            w = shutil.which(bin_name)
+            if w:
+                cand = Path(w)
+                if cand.is_file():
+                    return cand
+
+        return None
+
+    def _find_edge(self) -> Optional[Path]:
+        """Detects Microsoft Edge executable on Windows and PATH."""
+        if sys.platform == "win32":
+            try:
+                import winreg
+                for root in (winreg.HKEY_CURRENT_USER, winreg.HKEY_LOCAL_MACHINE):
+                    for subkey in (
+                        r"SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\msedge.exe",
+                        r"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\App Paths\msedge.exe"
+                    ):
+                        try:
+                            with winreg.OpenKey(root, subkey) as k:
+                                val, _ = winreg.QueryValueEx(k, "")
+                                if val and Path(val).is_file():
+                                    return Path(val)
+                        except Exception:
+                            pass
+            except Exception:
+                pass
+
+            env_vars = ["PROGRAMFILES(X86)", "PROGRAMFILES", "LOCALAPPDATA"]
+            for env_var in env_vars:
+                base = os.environ.get(env_var)
+                if base:
+                    cand = Path(base) / "Microsoft" / "Edge" / "Application" / "msedge.exe"
+                    if cand.is_file():
+                        return cand
+
+            for hardcoded in (
+                r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+                r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
+            ):
+                cand = Path(hardcoded)
+                if cand.is_file():
+                    return cand
+
+        for bin_name in ("msedge", "msedge.exe", "microsoft-edge"):
+            w = shutil.which(bin_name)
+            if w:
+                cand = Path(w)
+                if cand.is_file():
+                    return cand
+
+        return None
+
+    def detect_browser_executable(self=None) -> Optional[Path]:
+        """
+        Detects installed Chromium-based browser on Windows.
+        Priority:
+        1. Google Chrome (preferred)
+        2. Microsoft Edge (fallback, pre-installed on Windows 10/11)
+        3. Generic PATH executables
+        """
+        svc = self if isinstance(self, BrowserService) else BrowserService()
+
+        chrome = svc._find_chrome()
+        if chrome:
+            return chrome
+
+        edge = svc._find_edge()
+        if edge:
+            return edge
+
+        for name in ("google-chrome", "chrome", "chromium", "microsoft-edge", "msedge"):
+            w = shutil.which(name)
+            if w:
+                cand = Path(w)
+                if cand.is_file():
+                    return cand
+
+        return None
 
     def is_channel_open(self, channel_id: str) -> bool:
-        return channel_id in self._active_contexts
+        """Returns True if the browser process for channel_id is currently running."""
+        with self._lock:
+            proc = self._active_processes.get(channel_id)
+            if proc is not None:
+                if proc.poll() is None:
+                    return True
+                if self._active_processes.get(channel_id) is proc:
+                    self._active_processes.pop(channel_id, None)
+            return False
 
-    def close_channel_browser(self, channel_id: str) -> bool:
-        """Đóng context Chromium của một kênh nếu đang mở."""
-        context = self._active_contexts.get(channel_id)
-        if context:
+    def close_channel_browser(self, channel_id: str, wait_timeout: float = 2.0) -> bool:
+        """
+        Forcefully terminates the browser process tree for channel_id using taskkill on Windows.
+        Never holds internal locks while waiting on the OS: snapshot the proc handle
+        under lock, kill + wait WITHOUT locks, then untrack. This keeps
+        release_user_channels responsive (old code held locks during a 5s wait
+        per channel, freezing the pywebview bridge N*5s).
+        Returns True if a running process was terminated, False otherwise.
+        """
+        ch_lock = self._get_channel_lock(channel_id)
+        with ch_lock:
+            with self._lock:
+                proc = self._active_processes.get(channel_id)
+                if proc is None:
+                    return False
+
+                if proc.poll() is not None:
+                    if self._active_processes.get(channel_id) is proc:
+                        self._active_processes.pop(channel_id, None)
+                    return False
+
+        pid = proc.pid
+        logger.info(f"Yêu cầu đóng trình duyệt kênh '{channel_id}' (PID: {pid})...")
+
+        if sys.platform == "win32":
             try:
-                logger.info(f"Yêu cầu đóng trình duyệt kênh '{channel_id}'...")
-                context.close()
-                return True
-            except Exception as e:
-                logger.warning(f"Lỗi khi đóng context Chromium kênh '{channel_id}': {e}")
-        return False
+                subprocess.run(
+                    ["taskkill", "/F", "/T", "/PID", str(pid)],
+                    capture_output=True,
+                    timeout=3
+                )
+            except Exception as te:
+                logger.warning(f"taskkill thất bại cho PID {pid}: {te}, thử dùng proc.kill()")
+                try:
+                    proc.kill()
+                except Exception:
+                    pass
+            try:
+                proc.terminate()
+            except Exception:
+                pass
+        else:
+            try:
+                proc.terminate()
+            except Exception:
+                pass
+
+        try:
+            proc.wait(timeout=wait_timeout)
+        except Exception:
+            try:
+                proc.kill()
+            except Exception:
+                pass
+            try:
+                proc.wait(timeout=1)
+            except Exception:
+                pass
+
+        with ch_lock:
+            with self._lock:
+                if self._active_processes.get(channel_id) is proc:
+                    self._active_processes.pop(channel_id, None)
+                worker_t = self._worker_threads.get(channel_id)
+
+        if worker_t and worker_t.is_alive() and threading.current_thread() != worker_t:
+            try:
+                worker_t.join(timeout=wait_timeout)
+            except Exception:
+                pass
+            with self._lock:
+                self._worker_threads.pop(channel_id, None)
+        return True
 
     def close_all_browsers(self) -> int:
-        """Đóng toàn bộ context Chromium đang mở trên máy này."""
+        """Closes all active channel browser processes and returns count of closed browsers."""
+        with self._lock:
+            channel_ids = list(self._active_processes.keys())
         count = 0
-        for ch_id, context in list(self._active_contexts.items()):
-            try:
-                logger.info(f"Đóng trình duyệt kênh '{ch_id}'...")
-                context.close()
+        for ch_id in channel_ids:
+            if self.close_channel_browser(ch_id):
                 count += 1
-            except Exception as e:
-                logger.warning(f"Lỗi khi đóng context Chromium kênh '{ch_id}': {e}")
         return count
 
-    # Tự lưu cookies mỗi 5 phút khi browser còn mở (không chờ đóng mới lưu)
-    AUTOSAVE_INTERVAL_SEC = 300
+    def get_active_channel_ids(self) -> List[str]:
+        """Returns list of all channel IDs that currently have an active browser process."""
+        with self._lock:
+            channel_ids = list(self._active_processes.keys())
+        return [ch_id for ch_id in channel_ids if self.is_channel_open(ch_id)]
 
-    def _launch_persistent_context(self, playwright, profile_dir: Path, custom_args: List[str]):
-        """
-        Khởi chạy trình duyệt bền vững (Persistent Context).
-        Tự động nhận diện và fallback lần lượt:
-        1. Google Chrome (nếu máy có Chrome)
-        2. Microsoft Edge (có sẵn 100% trên Windows 10/11)
-        3. Playwright Chromium mặc định
-        """
-        launch_args = [
-            "--disable-blink-features=AutomationControlled",
-            "--start-maximized",
-            "--no-first-run",
-            "--no-default-browser-check",
-            "--test-type"
-        ] + custom_args
-
-        last_error = None
-        # Thử lần lượt các trình duyệt Chromium phổ biến trên máy người dùng
-        for channel in ["chrome", "msedge", None]:
-            try:
-                kwargs = {
-                    "user_data_dir": str(profile_dir),
-                    "headless": False,
-                    "no_viewport": True,
-                    "args": launch_args,
-                    "ignore_default_args": ["--enable-automation", "--no-sandbox"],
-                }
-                if channel:
-                    kwargs["channel"] = channel
-                context = playwright.chromium.launch_persistent_context(**kwargs)
-                logger.info(f"Đã mở trình duyệt thành công (channel: {channel or 'default chromium'})")
-                return context
-            except Exception as e:
-                last_error = e
-                logger.warning(f"Không thể mở với channel='{channel}': {e}")
-
-        raise RuntimeError(f"Không thể khởi chạy trình duyệt: {last_error}")
+    def get_active_pid(self, channel_id: str) -> Optional[int]:
+        """Returns the PID of the browser process for channel_id, or None if not running."""
+        with self._lock:
+            proc = self._active_processes.get(channel_id)
+            if proc and proc.poll() is None:
+                return proc.pid
+            return None
 
     def launch_channel_browser(
         self,
         channel_id: str,
-        target_url: str,
+        target_url: str = "https://accounts.google.com",
         cookies: Optional[List[Dict[str, Any]]] = None,
         on_started: Optional[Callable[[], None]] = None,
         on_closed: Optional[Callable[[List[Dict[str, Any]]], None]] = None,
         on_error: Optional[Callable[[Exception], None]] = None,
-        on_autosave: Optional[Callable[[List[Dict[str, Any]]], None]] = None
-    ):
+        on_autosave: Optional[Callable[[List[Dict[str, Any]]], None]] = None,
+        on_heartbeat: Optional[Callable[[], None]] = None
+    ) -> None:
         """
-        Launches a Chromium persistent context in a separate thread.
+        Launches a native browser process in a separate monitor thread.
+        - Isolates profile by --user-data-dir="<profile_dir>"
+        - Completely natural flags without any automation flags (CDP, webdriver)
+        - Monitors process lifecycle and periodically autosaves cookies
+        - Extracts cookies upon browser exit and invokes on_closed callback
         """
         def _worker():
-            playwright = None
-            context = None
+            proc: Optional[subprocess.Popen] = None
+            profile_dir: Optional[Path] = None
+            ch_lock = self._get_channel_lock(channel_id)
             try:
-                profile_dir = Config.get_profile_path(channel_id)
-                logger.info(f"Khởi động Chromium cho kênh '{channel_id}' tại profile: {profile_dir}")
-
-                playwright = sync_playwright().start()
-
-                # Launch persistent context with smart channel fallback (Chrome -> Edge -> Chromium)
-                context = self._launch_persistent_context(playwright, profile_dir, [])
-
-                self._active_contexts[channel_id] = context
-
-                # Inject existing cookies if provided
-                if cookies and len(cookies) > 0:
-                    try:
-                        clean_cookies = self._sanitize_cookies(cookies)
-                        context.add_cookies(clean_cookies)
-                        logger.info(f"Đã inject {len(clean_cookies)} cookies vào context.")
-                    except Exception as ce:
-                        logger.warning(f"Lỗi khi nạp cookies (sẽ tiếp tục mở trang): {ce}")
-
-                # Open or reuse main page
-                pages = context.pages
-                page = pages[0] if pages else context.new_page()
-
-                # Notify UI that browser successfully opened
-                if on_started:
-                    on_started()
-
-                # Navigate to the target Studio or Login URL
-                logger.info(f"Điều hướng tới URL: {target_url}")
-                page.goto(target_url, wait_until="commit", timeout=60000)
-
-                # Event loop waiting for user to close browser window.
-                from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
-                browser_closed = False
-                while not browser_closed:
-                    try:
-                        page.wait_for_event("close", timeout=self.AUTOSAVE_INTERVAL_SEC * 1000)
-                        browser_closed = True
-                    except PlaywrightTimeoutError:
-                        # Còn mở -> tự lưu snapshot cookies hiện tại
-                        if on_autosave and context:
+                with ch_lock:
+                    if self.is_channel_open(channel_id):
+                        logger.warning(f"Trình duyệt cho kênh '{channel_id}' đã đang chạy.")
+                        if on_started:
                             try:
-                                snapshot = context.cookies()
-                                logger.info(f"Tự lưu {len(snapshot)} cookies cho kênh đang mở '{channel_id}'.")
-                                on_autosave(snapshot)
+                                on_started()
                             except Exception as se:
-                                logger.warning(f"Tự lưu cookies '{channel_id}' lỗi (bỏ qua): {se}")
-                    except Exception as e:
-                        error_msg = str(e).lower()
-                        if "target closed" in error_msg or "context closed" in error_msg:
-                            logger.info(f"Trình duyệt kênh '{channel_id}' đã được người dùng đóng.")
-                            browser_closed = True
-                        else:
-                            raise
+                                logger.warning(f"Lỗi callback on_started: {se}")
+                        return
+
+                    browser_exe = self.detect_browser_executable()
+                    if not browser_exe:
+                        raise RuntimeError("Không tìm thấy trình duyệt Google Chrome hoặc Microsoft Edge trên máy tính.")
+
+                    profile_dir = Config.get_profile_path(channel_id)
+                    profile_dir.mkdir(parents=True, exist_ok=True)
+                    logger.info(f"Khởi động Native Browser ({browser_exe.name}) cho kênh '{channel_id}' tại: {profile_dir}")
+
+                    cmd = [
+                        str(browser_exe),
+                        f"--user-data-dir={profile_dir.resolve()}",
+                        "--no-first-run",
+                        "--no-default-browser-check",
+                        "--start-maximized",
+                        "--hide-crash-restore-bubble",
+                        target_url
+                    ]
+
+                    proc = subprocess.Popen(
+                        cmd,
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL
+                    )
+                    with self._lock:
+                        self._active_processes[channel_id] = proc
+                    logger.info(f"Tiến trình trình duyệt kênh '{channel_id}' đã khởi động thành công (PID: {proc.pid})")
+
+                    if on_started:
+                        try:
+                            on_started()
+                        except Exception as se:
+                            logger.warning(f"Lỗi callback on_started: {se}")
+
+                # Monitor process until user closes window or taskkill terminates
+                import time as _pytime
+                last_autosave = _pytime.time()
+                while proc.poll() is None:
+                    try:
+                        proc.wait(timeout=20)
+                    except subprocess.TimeoutExpired:
+                        if on_heartbeat:
+                            try:
+                                on_heartbeat()
+                            except Exception:
+                                pass
+                        now_t = _pytime.time()
+                        if on_autosave and profile_dir and (now_t - last_autosave >= self.AUTOSAVE_INTERVAL_SEC):
+                            last_autosave = now_t
+                            try:
+                                snapshot = CookieExtractor.extract_cookies_for_profile(profile_dir)
+                                if snapshot:
+                                    logger.info(f"Tự lưu {len(snapshot)} cookies cho kênh đang mở '{channel_id}'.")
+                                    on_autosave(snapshot)
+                            except Exception as ae:
+                                logger.debug(f"Lỗi autosave snapshot kênh '{channel_id}': {ae}")
 
             except Exception as e:
-                error_msg = str(e).lower()
-                if "target closed" in error_msg or "context closed" in error_msg:
-                    logger.info(f"Trình duyệt kênh '{channel_id}' đã được người dùng đóng.")
-                else:
-                    logger.error(f"Lỗi trong quá trình chạy trình duyệt kênh '{channel_id}': {e}")
-                    if on_error:
+                logger.error(f"Lỗi khởi chạy trình duyệt kênh '{channel_id}': {e}")
+                if proc is not None:
+                    with self._lock:
+                        if self._active_processes.get(channel_id) is proc:
+                            self._active_processes.pop(channel_id, None)
+                if on_error:
+                    try:
                         on_error(e)
-            finally:
-                # Extract all cookies before completely shutting down context
-                extracted_cookies = []
-                if context:
-                    try:
-                        extracted_cookies = context.cookies()
-                        logger.info(f"Đã trích xuất thành công {len(extracted_cookies)} cookies từ phiên.")
-                    except Exception as e:
-                        logger.warning(f"Không thể trích xuất cookies khi đóng: {e}")
-
-                    try:
-                        context.close()
                     except Exception:
                         pass
+                return
 
-                if playwright:
-                    try:
-                        playwright.stop()
-                    except Exception:
-                        pass
+            # Process exited normally or was terminated
+            extracted_cookies: List[Dict[str, Any]] = []
+            if profile_dir:
+                try:
+                    extracted_cookies = CookieExtractor.extract_cookies_for_profile(profile_dir)
+                    logger.info(f"Đã trích xuất {len(extracted_cookies)} cookies từ profile kênh '{channel_id}'.")
+                except Exception as ce:
+                    logger.warning(f"Lỗi trích xuất cookies khi đóng kênh '{channel_id}': {ce}")
 
-                self._active_contexts.pop(channel_id, None)
+            with self._lock:
+                if self._active_processes.get(channel_id) is proc:
+                    self._active_processes.pop(channel_id, None)
 
-                # Callback with extracted cookies
-                if on_closed:
+            if on_closed:
+                try:
                     on_closed(extracted_cookies)
+                except Exception as oe:
+                    logger.warning(f"Lỗi callback on_closed kênh '{channel_id}': {oe}")
 
-        thread = threading.Thread(target=_worker, name=f"BrowserThread-{channel_id}", daemon=True)
+            with self._lock:
+                self._worker_threads.pop(channel_id, None)
+
+        thread = threading.Thread(
+            target=_worker,
+            name=f"BrowserThread-{channel_id}",
+            daemon=True
+        )
+        with self._lock:
+            self._worker_threads[channel_id] = thread
         thread.start()
 
     def _sanitize_cookies(self, cookies: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
-        Playwright requires specific cookie fields. Filters out incompatible fields like sameSite='None' with insecure scheme.
+        Sanitizes cookies structure for internal consistency and backwards compatibility.
         """
         sanitized = []
         for c in cookies:
+            if not isinstance(c, dict):
+                continue
             clean = {
                 "name": c.get("name"),
                 "value": c.get("value"),
@@ -224,7 +438,6 @@ class BrowserService:
             if "sameSite" in c and c["sameSite"] in ["Strict", "Lax", "None"]:
                 clean["sameSite"] = c["sameSite"]
 
-            # Only add if valid name and value
             if clean["name"] is not None and clean["value"] is not None and clean["domain"] is not None:
                 sanitized.append(clean)
         return sanitized

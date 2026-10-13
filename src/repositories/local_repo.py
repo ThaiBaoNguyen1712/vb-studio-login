@@ -1,4 +1,4 @@
-﻿import json
+import json
 import threading
 import uuid
 from datetime import datetime
@@ -123,21 +123,75 @@ class LocalJsonRepository(BaseRepository):
         }
 
     def _read_raw_data(self) -> Dict[str, Any]:
+        # Reader retry: tren Windows, open() doc dung luc writer rename se
+        # PermissionError tam thoi -> thu lai vai lan truoc khi chiu thua.
         with self._lock:
-            try:
-                with open(self.file_path, "r", encoding="utf-8-sig") as f:
-                    return json.load(f)
-            except Exception as e:
-                logger.error(f"Lỗi đọc file local db: {e}")
-                return {"accounts": [], "channels": [], "sessions": {}}
+            last_err = None
+            for _ in range(10):
+                try:
+                    with open(self.file_path, "r", encoding="utf-8-sig") as f:
+                        return json.load(f)
+                except (PermissionError, FileNotFoundError) as e:
+                    last_err = e
+                    try:
+                        import time as _time
+                        _time.sleep(0.02)
+                    except Exception:
+                        pass
+                    continue
+                except Exception as e:
+                    logger.error(f"Lỗi đọc file local db: {e}")
+                    return {"accounts": [], "channels": [], "sessions": {}}
+            logger.error(f"Lỗi đọc file local db (sau retry): {last_err}")
+            return {"accounts": [], "channels": [], "sessions": {}}
 
     def _save_raw_data(self, data: Dict[str, Any]):
+        # Ghi NGUYEN TU (temp + rename) de reader (poll UI, thread khac) khong bao
+        # gio doc phai file viet do -> tranh UI chop rong khi poll nhanh.
+        # Windows: rename se WinError 5/32 neu reader dang mo file -> retry;
+        # het retry thi ghi de truc tiep (dam bao persistence, log warning).
         with self._lock:
+            tmp_path = None
             try:
-                with open(self.file_path, "w", encoding="utf-8") as f:
+                import os
+                import tempfile
+                import time as _time
+                fd, tmp_path = tempfile.mkstemp(
+                    dir=str(self.file_path.parent),
+                    prefix=self.file_path.name + ".",
+                    suffix=".tmp")
+                with os.fdopen(fd, "w", encoding="utf-8") as f:
                     json.dump(data, f, ensure_ascii=False, indent=2)
+                    f.flush()
+                    try:
+                        os.fsync(f.fileno())
+                    except Exception:
+                        pass
+                replaced = False
+                for _ in range(50):
+                    try:
+                        os.replace(tmp_path, self.file_path)
+                        replaced = True
+                        break
+                    except OSError as oe:
+                        if getattr(oe, "winerror", None) not in (5, 32):
+                            raise
+                        _time.sleep(0.02)
+                if replaced:
+                    tmp_path = None
+                else:
+                    logger.warning("Rename bi khoa lien tuc, chuyen sang ghi de truc tiep.")
+                    with open(self.file_path, "w", encoding="utf-8") as f:
+                        json.dump(data, f, ensure_ascii=False, indent=2)
             except Exception as e:
                 logger.error(f"Lỗi ghi file local db: {e}")
+            finally:
+                if tmp_path:
+                    try:
+                        import os
+                        os.unlink(tmp_path)
+                    except Exception:
+                        pass
 
     def get_accounts(self) -> List[Account]:
         data = self._read_raw_data()
@@ -217,6 +271,12 @@ class LocalJsonRepository(BaseRepository):
             sess_raw = sessions_map.get(ch_data["id"])
             session = None
             if sess_raw:
+                # Tự động hóa giải khóa phiên nếu bị mất heartbeat quá hạn stale (shutdown đột ngột)
+                if sess_raw.get("in_use_by") and self._is_lock_stale(sess_raw):
+                    sess_raw["in_use_by"] = None
+                    sess_raw["in_use_since"] = None
+                    sess_raw["last_heartbeat"] = None
+
                 try:
                     hb = datetime.fromisoformat(sess_raw["last_heartbeat"]) if sess_raw.get("last_heartbeat") else None
                 except Exception:
@@ -317,6 +377,24 @@ class LocalJsonRepository(BaseRepository):
         self._save_raw_data(data)
         return True
 
+    LOCK_STALE_TIMEOUT_SEC: float = 60.0
+
+    @classmethod
+    def _is_lock_stale(cls, sess: Optional[Dict[str, Any]]) -> bool:
+        """Kiểm tra xem một phiên khóa có bị hết hạn (stale / mất heartbeat quá lâu) không."""
+        if not sess or not sess.get("in_use_by"):
+            return False
+        hb_str = sess.get("last_heartbeat") or sess.get("in_use_since")
+        if not hb_str:
+            return True
+        try:
+            hb_dt = datetime.fromisoformat(hb_str)
+            now = datetime.now()
+            age_sec = (now - hb_dt).total_seconds()
+            return age_sec > cls.LOCK_STALE_TIMEOUT_SEC
+        except Exception:
+            return True
+
     def acquire_lock(self, channel_id: str, user_name: str) -> Tuple[bool, Optional[str]]:
         data = self._read_raw_data()
         sessions = data.setdefault("sessions", {})
@@ -332,7 +410,16 @@ class LocalJsonRepository(BaseRepository):
 
         current_holder = sess.get("in_use_by")
         if current_holder and current_holder != user_name:
-            return False, current_holder
+            if self._is_lock_stale(sess):
+                logger.warning(
+                    f"Khóa kênh '{channel_id}' của '{current_holder}' đã hết hạn stale (> {self.LOCK_STALE_TIMEOUT_SEC}s không heartbeat), "
+                    f"tự động giải phóng cho '{user_name}' chiếm lại."
+                )
+                sess["in_use_by"] = None
+                sess["in_use_since"] = None
+                sess["last_heartbeat"] = None
+            else:
+                return False, current_holder
 
         now = datetime.now().isoformat()
         sess["in_use_by"] = user_name

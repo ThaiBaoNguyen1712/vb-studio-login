@@ -31,12 +31,14 @@ import src.services
 import src.services.account_service
 import src.services.backup_service
 import src.services.browser_service
+import src.services.cookie_extractor
 import src.services.firebase_auth_service
 import src.services.health_service
 import src.services.notify_service
 import src.services.platform_service
 import src.services.session_service
 import src.services.settings_service
+import src.services.sync_service
 import src.services.trash_service
 import src.services.update_service
 

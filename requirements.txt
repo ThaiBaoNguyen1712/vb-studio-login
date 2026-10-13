@@ -1,6 +1,5 @@
-playwright>=1.40.0
 python-dotenv>=1.0.0
 pywebview>=6.0.0
 packaging>=23.0
-cryptography>=41.0.0  # vault mã hóa cookies at-rest
+cryptography>=41.0.0  # vault mã hóa cookies at-rest và giải mã cookie AES-GCM
 pyzipper>=0.3.6  # AES-256 cho backup zip

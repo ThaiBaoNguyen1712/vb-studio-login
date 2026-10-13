@@ -22,24 +22,40 @@
     }
 
     function clearTableFilters() {
-      document.getElementById('table-search').value = '';
-      document.getElementById('table-status-filter').value = 'ALL';
-      document.getElementById('table-platform-filter').value = 'ALL';
-      appState.table_q = '';
-      appState.table_status = 'ALL';
-      appState.table_platform = 'ALL';
-      renderTableRows();
+      if (typeof clearAllFilters === 'function') {
+        clearAllFilters();
+      } else {
+        const s = document.getElementById('table-search');
+        if (s) s.value = '';
+        const st = document.getElementById('table-status-filter');
+        if (st) st.value = 'ALL';
+        const pl = document.getElementById('table-platform-filter');
+        if (pl) pl.value = 'ALL';
+        appState.table_q = '';
+        appState.table_status = 'ALL';
+        appState.table_platform = 'ALL';
+        renderTableRows();
+      }
     }
 
     function updateSortIndicators() {
       const keys = ['platform', 'channel_name', 'account', 'status'];
       keys.forEach(k => {
-        const el = document.getElementById('sort-' + k);
-        if (!el) return;
-        if (appState.table_sort.key === k) {
-          el.innerHTML = icon(appState.table_sort.dir === 1 ? 'chev-up' : 'chev-down', 'w-3 h-3 inline');
-        } else {
-          el.innerHTML = '';
+        const btn = document.getElementById('btn-sort-' + k);
+        const th = document.getElementById('th-sort-' + k);
+        const iconSpan = document.getElementById('sort-' + k);
+        const isCurrent = appState.table_sort.key === k;
+        const sortVal = isCurrent ? (appState.table_sort.dir === 1 ? 'ascending' : 'descending') : 'none';
+
+        if (th) th.setAttribute('aria-sort', sortVal);
+        if (btn) btn.setAttribute('aria-sort', sortVal);
+
+        if (iconSpan) {
+          if (isCurrent) {
+            iconSpan.innerHTML = icon(appState.table_sort.dir === 1 ? 'chev-up' : 'chev-down', 'w-3 h-3 inline');
+          } else {
+            iconSpan.innerHTML = '<span class="text-slate-300 dark:text-slate-600 text-[10px]">▲▼</span>';
+          }
         }
       });
     }
@@ -94,10 +110,39 @@
       return rows;
     }
 
+    function initTableDelegation(tbody) {
+      if (!tbody || tbody.dataset.bound) return;
+      tbody.dataset.bound = 'true';
+      tbody.addEventListener('click', (e) => {
+        const clearBtn = e.target.closest('[data-action="clear-table-filters"]');
+        if (clearBtn && typeof clearTableFilters === 'function') {
+          clearTableFilters();
+          return;
+        }
+        const launchBtn = e.target.closest('[data-action="launch-channel"]');
+        if (launchBtn && launchBtn.dataset.channelId && typeof launchChannel === 'function') {
+          launchChannel(launchBtn.dataset.channelId);
+          return;
+        }
+        const pinBtn = e.target.closest('[data-action="toggle-pin"]');
+        if (pinBtn && pinBtn.dataset.channelId && typeof togglePin === 'function') {
+          togglePin(pinBtn.dataset.channelId);
+          return;
+        }
+      });
+      tbody.addEventListener('change', (e) => {
+        const selectAction = e.target.closest('select[data-action="table-action"]');
+        if (selectAction && selectAction.dataset.channelId && typeof handleTableAction === 'function') {
+          handleTableAction(selectAction, selectAction.dataset.channelId);
+        }
+      });
+    }
+
     // Render Table View Rows (có filter + sort + đếm realtime)
     function renderTableRows() {
       const tbody = document.getElementById('table-body');
       if (!tbody) return;
+      initTableDelegation(tbody);
       const rows = getTableData();
       updateSortIndicators();
       if (typeof updateMyHeldCountBadge === 'function') updateMyHeldCountBadge();
@@ -106,7 +151,11 @@
       if (counter) counter.innerText = `Hiển thị ${rows.length} / ${appState.channels.length} kênh`;
 
       if (rows.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="py-12 px-4 text-center text-slate-400 text-sm">Không có kênh nào khớp bộ lọc.<br><button onclick="clearTableFilters()" class="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold">Xóa lọc bảng</button></td></tr>`;
+        if (appState.channels.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" class="py-12 px-4 text-center text-slate-400 text-sm">Hệ thống chưa có kênh nào.<br>Vui lòng thêm tài khoản và kênh mới để bắt đầu.</td></tr>`;
+        } else {
+          tbody.innerHTML = `<tr><td colspan="6" class="py-12 px-4 text-center text-slate-400 text-sm">Không tìm thấy kênh phù hợp với bộ lọc hiện tại.<br><button type="button" data-action="clear-table-filters" class="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-bold">Xóa tất cả lọc</button></td></tr>`;
+        }
         return;
       }
 
@@ -114,50 +163,55 @@
       (appState.accounts || []).forEach(a => { accLogoMap[a.id] = a.logo || ''; });
 
       tbody.innerHTML = rows.map(ch => {
-        const platLabel = platName(ch.platform);
+        const platLabel = escapeHtml(platName(ch.platform));
         const isReady = ch.status === 'READY';
         const isInUse = ch.status === 'IN_USE';
-        const accLogo = accLogoMap[ch.account_id] || '';
-
         const isExpired = ch.status === 'EXPIRED';
-        let statusText = isReady ? statusDot('READY', 'Sẵn sàng') : (isExpired ? statusDot('EXPIRED', 'Hết hạn') : statusDot('NOT_SETUP', 'Chưa Setup'));
+        const accLogo = accLogoMap[ch.account_id] || '';
+        const safeId = escapeHtml(ch.id);
+        const safeName = escapeHtml(ch.channel_name || '');
+        const safeLockedBy = escapeHtml(ch.locked_by || 'Session');
+
+        let statusText = isReady ? statusDot('READY', 'Sẵn sàng') : (isExpired ? statusDot('EXPIRED', 'Hết hạn') : statusDot('NOT_SETUP', 'Chưa thiết lập'));
         if (isInUse) {
           let extra = '';
           try {
             const pr = presenceOf(ch);
-            if (pr.since) extra = ` • <span data-presence-since="${ch.in_use_since || ''}">${elapsedText(pr.since)}</span>`;
+            if (pr.since) extra = ` • <span data-presence-since="${escapeHtml(ch.in_use_since || '')}">${elapsedText(pr.since)}</span>`;
             if (pr.stale) extra += ' • treo?';
             if (pr.mine) extra += ' (bạn)';
           } catch (e) {}
+          if (ch.locked_remote) extra += ` • máy khác (${escapeHtml(ch.locked_machine || '?')})`;
           const pend = (ch.pending_requests || []).length;
-          statusText = `${statusDot('IN_USE', `Đang mở (${ch.locked_by})`)}${extra}${pend ? ` <span class="inline-flex items-center gap-0.5 text-amber-500 font-bold">${icon('send', 'w-3 h-3')}${pend}</span>` : ''}`;
+          statusText = `${statusDot('IN_USE', `Đang mở (${ch.locked_by || 'Session'})`)}${extra}${pend ? ` <span class="inline-flex items-center gap-0.5 text-amber-500 font-bold">${icon('send', 'w-3 h-3')}${pend}</span>` : ''}`;
         }
 
-        // Nút hành động chính theo trạng thái: READY -> Mở, chưa setup/hết hạn -> Setup, đang mở -> khóa
+        // Nút hành động chính theo trạng thái: READY -> Mở, chưa thiết lập/hết hạn -> Thiết lập, đang mở -> khóa
         const actBtn = isInUse
-          ? `<button disabled title="Đang mở bởi ${ch.locked_by || 'Session'}" class="h-8 px-3 inline-flex items-center gap-1.5 bg-sky-600/60 text-white/80 cursor-not-allowed rounded-lg text-xs font-bold transition-all shadow-xs">
+          ? `<button disabled title="Đang mở bởi ${safeLockedBy}" class="h-8 px-3 inline-flex items-center gap-1.5 bg-sky-600/60 text-white/80 cursor-not-allowed rounded-lg text-xs font-bold transition-all shadow-xs">
                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>
                <span>Đang mở</span>
              </button>`
           : isReady
-          ? `<button onclick="launchChannel('${ch.id}')" title="Mở trình duyệt" class="h-8 px-3 inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-all shadow-xs">
+          ? `<button type="button" data-action="launch-channel" data-channel-id="${safeId}" title="Mở trình duyệt" class="h-8 px-3 inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-all shadow-xs">
                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>
                <span>Mở</span>
              </button>`
-          : `<button onclick="launchChannel('${ch.id}')" title="${isExpired ? 'Đăng nhập lại (phiên đã hết hạn)' : 'Thiết lập đăng nhập lần đầu'}" class="h-8 px-3 inline-flex items-center gap-1.5 ${isExpired ? 'bg-red-600 hover:bg-red-500' : 'bg-amber-600 hover:bg-amber-500'} text-white rounded-lg text-xs font-bold transition-all shadow-xs">
+          : `<button type="button" data-action="launch-channel" data-channel-id="${safeId}" title="${isExpired ? 'Đăng nhập lại (phiên đã hết hạn)' : 'Thiết lập đăng nhập lần đầu'}" class="h-8 px-3 inline-flex items-center gap-1.5 ${isExpired ? 'bg-red-600 hover:bg-red-500' : 'bg-amber-600 hover:bg-amber-500'} text-white rounded-lg text-xs font-bold transition-all shadow-xs">
                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4.5 4.5 0 0 0-6 6L3 18l3 3 5.7-5.7a4.5 4.5 0 0 0 6-6L14 13l-3-3 3.7-3.7Z"/></svg>
-               <span>${isExpired ? 'Setup lại' : 'Setup'}</span>
+               <span>${isExpired ? 'Thiết lập lại' : 'Thiết lập'}</span>
              </button>`;
 
-        const gmail = ch.account_email || ch.account_display_name || '—';
+        const rawGmail = ch.account_email || ch.account_display_name || '—';
+        const safeGmail = escapeHtml(rawGmail);
         const accCell = accLogo
-          ? `<span class="flex items-center gap-2 min-w-0"><img src="${accLogo}" class="w-6 h-6 rounded-lg object-cover shrink-0 ring-1 ring-slate-200 dark:ring-dark-border"><span class="font-medium text-slate-700 dark:text-slate-200 truncate" title="${gmail}">${gmail}</span></span>`
-          : `<span class="font-medium text-slate-700 dark:text-slate-200 truncate" title="${gmail}">${gmail}</span>`;
+          ? `<span class="flex items-center gap-2 min-w-0"><img src="${escapeHtml(accLogo)}" class="w-6 h-6 rounded-lg object-cover shrink-0 ring-1 ring-slate-200 dark:ring-dark-border"><span class="font-medium text-slate-700 dark:text-slate-200 truncate" title="${safeGmail}">${safeGmail}</span></span>`
+          : `<span class="font-medium text-slate-700 dark:text-slate-200 truncate" title="${safeGmail}">${safeGmail}</span>`;
 
         const rowHighlight = ch.pinned
           ? 'bg-amber-50/50 dark:bg-amber-950/20 hover:bg-amber-100/50 dark:hover:bg-amber-900/30 border-l-4 border-l-amber-400'
           : 'hover:bg-slate-50/50 dark:hover:bg-dark-input/50';
-        const pinBtn = `<button onclick="togglePin('${ch.id}')" title="${ch.pinned ? 'Bỏ ghim' : 'Ghim lên đầu'}" class="h-8 w-8 inline-flex items-center justify-center rounded-lg transition-colors ${ch.pinned ? 'text-amber-500 hover:text-amber-600' : 'text-slate-300 dark:text-slate-600 hover:text-amber-500'}">${icon(ch.pinned ? 'star-solid' : 'star', 'w-4 h-4')}</button>`;
+        const pinBtn = `<button type="button" data-action="toggle-pin" data-channel-id="${safeId}" title="${ch.pinned ? 'Bỏ ghim' : 'Ghim lên đầu'}" class="h-8 w-8 inline-flex items-center justify-center rounded-lg transition-colors ${ch.pinned ? 'text-amber-500 hover:text-amber-600' : 'text-slate-300 dark:text-slate-600 hover:text-amber-500'}">${icon(ch.pinned ? 'star-solid' : 'star', 'w-4 h-4')}</button>`;
 
         return `
           <tr class="${rowHighlight} transition-colors">
@@ -170,13 +224,13 @@
                 <span>${platLabel}</span>
               </span>
             </td>
-            <td class="py-3 px-4 font-bold text-sm text-slate-800 dark:text-slate-100">${ch.channel_name} <span class="text-slate-400 font-normal text-xs">(#${ch.id})</span></td>
+            <td class="py-3 px-4 font-bold text-sm text-slate-800 dark:text-slate-100">${safeName} <span class="text-slate-400 font-normal text-xs">(#${safeId})</span></td>
             <td class="py-3 px-4 text-sm text-slate-500 dark:text-slate-400">${accCell}</td>
             <td class="py-3 px-4 font-bold text-sm whitespace-nowrap">${statusText}</td>
             <td class="py-3 px-4 text-right whitespace-nowrap">
               <div class="inline-flex items-center gap-1.5">
                 ${actBtn}
-                <select onchange="handleTableAction(this, '${ch.id}')" title="Thao tác khác" class="no-native-arrow h-8 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-dark-border rounded-lg pl-2.5 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none cursor-pointer transition-colors">
+                <select data-action="table-action" data-channel-id="${safeId}" title="Thao tác khác" class="no-native-arrow h-8 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-dark-border rounded-lg pl-2.5 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none cursor-pointer transition-colors">
                   <option value="" selected disabled>Thao tác</option>
                   <option value="detail">Chi tiết</option>
                   <option value="edit">Chỉnh sửa</option>
@@ -277,7 +331,11 @@
       document.getElementById('bulk-text').innerText = finished
         ? (stopped ? `Đã dừng: mở ${opened}/${total} kênh (${accName})` : `Xong: mở ${opened}/${total} kênh, bỏ qua ${skipped || 0} (${accName})`)
         : `Đang mở ${done + 1}/${total} (${accName})${currentId ? ' — ' + currentId : ''}`;
-      document.getElementById('bulk-bar').style.width = pct + '%';
+      const bar = document.getElementById('bulk-bar');
+      if (bar) {
+        bar.style.width = pct + '%';
+        bar.setAttribute('aria-valuenow', pct);
+      }
       const stopBtn = document.getElementById('bulk-stop-btn');
       stopBtn.classList.toggle('hidden', !!finished);
       stopBtn.onclick = stopBulkOpen;
@@ -292,9 +350,9 @@
       updateBulkPanel(d.account_id, d.done, d.total, d.current_id, d.stopped, d.finished, d.opened, d.skipped);
     });
 
-    // Kiểm tra 1 kênh (kết quả ghi vào report ở module Kiểm Tra Phiên)
+    // Kiểm tra 1 kênh (kết quả ghi vào báo cáo ở module Kiểm Tra Phiên)
     async function checkChannel(channelId) {
-      showToast(`Đang phân tích cookies kênh #${channelId} (an toàn, không mở trình duyệt)...`, 'info');
+      showToast(`Đang phân tích cookies kênh #${channelId} (ngoại tuyến, không mở trình duyệt)...`, 'info');
       try {
         const res = await window.pywebview.api.check_channel(channelId, appState.active_user);
         if (!(res && res.success)) showToast((res && res.message) || 'Lỗi kiểm tra!', 'error');
@@ -304,7 +362,6 @@
     }
 
     async function launchChannel(channelId) {
-      showToast(`Đang mở trình duyệt Chromium cho kênh #${channelId}...`, 'info');
       showAsyncLoading(`Khởi động kênh #${channelId}...`);
       try {
         const res = await window.pywebview.api.launch_channel(channelId, appState.active_user);

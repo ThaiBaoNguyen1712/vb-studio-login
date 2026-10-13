@@ -39,11 +39,190 @@ class WebBridge:
         self._bulk_running = False
         self._window = None  # Injected after window creation
         self._popups = {}  # request_id -> popup Window (overlay nổi trên mọi app)
+        self._sync_service = None  # Gan qua attach_sync() trong run_web_gui
         self._auth_service = FirebaseAuthService(
             settings_service=self._settings_service,
             on_auth_success=self._on_auth_success
         )
         self._update_service = UpdateService(settings_service=self._settings_service)
+
+    # ================= Sync online lien may (Firebase RTDB) =================
+    def attach_sync(self, sync_service) -> None:
+        """Dau sync service + providers + callbacks roi chay thread nen."""
+        self._sync_service = sync_service
+        if sync_service is None:
+            return
+        sync_service.set_providers(
+            identity=self._sync_identity,
+            holders=self._sync_holders,
+        )
+        sync_service.on_remote_request = self._on_sync_remote_request
+        sync_service.on_request_update = self._on_sync_request_update
+        sync_service.on_release_signal = self._on_sync_release_signal
+        sync_service.on_locks_changed = self._on_sync_locks_changed
+        sync_service.on_sync_state = self._on_sync_state_changed
+        try:
+            sync_service.start()
+        except Exception as e:
+            logger.warning(f"Sync thread khong chay duoc: {e}")
+
+    def _sync_identity(self) -> Dict[str, Any]:
+        names: List[str] = []
+        try:
+            cur = (self._current_user() or "").strip()
+            if cur:
+                names.append(cur)
+        except Exception:
+            pass
+        try:
+            auth = (self._auth_service.get_auth_state().get("user") or {})
+            for k in ("displayName", "email"):
+                v = (auth.get(k) or "").strip()
+                if v and v not in names:
+                    names.append(v)
+        except Exception:
+            pass
+        try:
+            d = (self._settings_service.get("general", "default_user", "") or "").strip()
+            if d and d not in names:
+                names.append(d)
+        except Exception:
+            pass
+        email = ""
+        try:
+            auth = (self._auth_service.get_auth_state().get("user") or {})
+            email = auth.get("email") or ""
+        except Exception:
+            pass
+        return {"user": names[0] if names else "", "email": email, "aliases": names}
+
+    def _sync_holders(self) -> Dict[str, str]:
+        try:
+            items = self._account_service.get_channel_items()
+            active_ids = set(self._account_service.browser_service.get_active_channel_ids())
+            return {it.channel.id: (it.locked_by or "")
+                    for it in items if it.locked_by and it.channel.id in active_ids}
+        except Exception:
+            return {}
+
+    def get_sync_status(self) -> Dict[str, Any]:
+        sync = self._sync_service
+        if sync is None:
+            return {"enabled": False, "online": False, "message": "Chua cau hinh sync."}
+        try:
+            st = sync.status()
+            if st.get("online"):
+                st["message"] = "Online: hien dien + khoa lien may dang dong bo."
+            elif st.get("last_error"):
+                st["message"] = f"Ngoai tuyen ({st['last_error']}). Che do local-only."
+            else:
+                st["message"] = "Ngoai tuyen. Che do local-only."
+            return st
+        except Exception as e:
+            return {"enabled": False, "online": False, "message": str(e)}
+
+    def _on_sync_state_changed(self, online: bool) -> None:
+        self.notify_frontend("sync_state_changed", {"online": bool(online)})
+
+    def _on_sync_locks_changed(self, channel_ids: List[str]) -> None:
+        """Lock online doi -> day UI cap nhat kenh do trong <=1 chu ky (~10s)."""
+        try:
+            for ch_id in channel_ids or []:
+                self._push_channel_status(ch_id)
+        except Exception as e:
+            logger.debug(f"locks_changed bo qua: {e}")
+
+    def _channel_name_map(self) -> Dict[str, str]:
+        try:
+            return {it.channel.id: it.channel.channel_name
+                    for it in self._account_service.get_channel_items()}
+        except Exception:
+            return {}
+
+    def _on_sync_remote_request(self, req: Dict[str, Any]) -> None:
+        """May khac xin mo kenh toi dang giu -> dung flow chuong/popup co san."""
+        try:
+            self.notify_frontend("access_request_changed", {
+                "request_id": f"rdb_{req.get('id')}",
+                "channel_id": req.get("channel_id"),
+                "requester": req.get("requester"),
+                "holder": req.get("holder"),
+                "remote": True,
+            })
+        except Exception as e:
+            logger.debug(f"notify remote request bo qua: {e}")
+
+    def _my_names(self) -> List[str]:
+        ident = self._sync_identity()
+        return [n for n in ([ident.get("user")] + (ident.get("aliases") or [])) if n]
+
+    def _on_sync_request_update(self, req: Dict[str, Any]) -> None:
+        """Theo doi outbox: request cua toi da duoc duyet/tu choi."""
+        try:
+            me = {(n or "").strip().lower() for n in self._my_names() if n}
+            mine = (req.get("requester") or "").strip().lower() in me
+            action = "approve" if req.get("status") == "approved" else "deny"
+            if mine:
+                self.notify_frontend("access_request_changed", {
+                    "request_id": f"rdb_{req.get('id')}",
+                    "channel_id": req.get("channel_id"),
+                    "requester": req.get("requester"),
+                    "holder": req.get("holder"),
+                    "action": action,
+                    "approver": req.get("resolved_by"),
+                    "remote": True,
+                })
+            # Neu toi la holder va dang mo kenh nay -> tu dong nhuong (dong browser)
+            holder_mine = (req.get("holder") or "").strip().lower() in me
+            if req.get("status") == "approved" and holder_mine:
+                self._sync_auto_yield(req)
+            try:
+                self._push_channel_status(req.get("channel_id", ""))
+            except Exception:
+                pass
+        except Exception as e:
+            logger.debug(f"on_request_update bo qua: {e}")
+
+    def _sync_auto_yield(self, req: Dict[str, Any]) -> None:
+        """Holder duyet (tu may khac) -> may nay tu dong dong browser + nha lock."""
+        ch_id = req.get("channel_id", "")
+        if not ch_id:
+            return
+        try:
+            items = self._account_service.get_channel_items()
+            it = next((x for x in items if x.channel.id == ch_id), None)
+            if not it or not it.locked_by:
+                return
+            logger.warning(f"Tu dong nhuong kenh '{ch_id}' cho '{req.get('requester')}' (duyet tu may khac).")
+            try:
+                self._account_service.browser_service.close_channel_browser(ch_id)
+            except Exception as e:
+                logger.debug(f"auto-yield close bo qua: {e}")
+            try:
+                self._account_service.force_release_channel(ch_id)
+            except Exception as e:
+                logger.debug(f"auto-yield release bo qua: {e}")
+            try:
+                sync = self._sync_service
+                if sync is not None:
+                    sync.forget_lock(ch_id)
+            except Exception:
+                pass
+            self.notify_frontend("channel_status_changed", {
+                "channel_id": ch_id,
+                "status": ChannelStatus.READY.value,
+                "locked_by": None
+            })
+        except Exception as e:
+            logger.debug(f"auto-yield bo qua: {e}")
+
+    def _on_sync_release_signal(self, sig: Dict[str, Any]) -> None:
+        """Nhan tin hieu nhuong tu may holder chinh (duyet o may khac)."""
+        try:
+            self._sync_auto_yield({"channel_id": sig.get("channel_id", ""),
+                                   "requester": sig.get("requester", "")})
+        except Exception as e:
+            logger.debug(f"release_signal bo qua: {e}")
 
 
     def _branch_platforms(self) -> List[Dict[str, Any]]:
@@ -172,6 +351,8 @@ class WebBridge:
                 "account_email": ch.account_email,
                 "status": it.current_status.value,
                 "locked_by": it.locked_by,
+                "locked_remote": False,
+                "locked_machine": None,
                 "in_use_since": since,
                 "last_heartbeat": hb,
                 "pending_requests": pend_by_ch.get(ch.id, []),
@@ -179,7 +360,70 @@ class WebBridge:
                 "cookies_count": len(sess.cookies_data) if sess and sess.cookies_data else 0,
                 "last_synced_at": sess.last_synced_at.strftime("%H:%M %d/%m") if sess and sess.last_synced_at else None
             })
+        self._merge_remote_into_channels(results)
         return results
+
+    def _merge_remote_into_channels(self, results: List[Dict[str, Any]]) -> None:
+        """Phu lock + request online len danh sach kenh (doc cache, khong I/O)."""
+        sync = self._sync_service
+        if sync is None:
+            return
+        try:
+            by_id = {r.get("id"): r for r in results}
+            try:
+                remote = sync.remote_locks_snapshot()
+            except Exception:
+                remote = {}
+            for ch_id, lk in remote.items():
+                r = by_id.get(ch_id)
+                if r is None or r.get("locked_by"):
+                    continue  # local uu tien; kenh la thi giu nguyen
+                r["status"] = ChannelStatus.IN_USE.value
+                r["locked_by"] = lk.get("holder")
+                r["locked_remote"] = True
+                r["locked_machine"] = lk.get("machine")
+            # Yeu cau TOI gui di (outbox) -> hien "Dang cho ... duyet"
+            try:
+                outbox = sync.outbox_snapshot()
+            except Exception:
+                outbox = []
+            for o in outbox:
+                r = by_id.get(o.get("channel_id"))
+                if r is None:
+                    continue
+                r.setdefault("pending_requests", []).append({
+                    "id": f"rdb_{o.get('id')}",
+                    "channel_id": o.get("channel_id"),
+                    "channel_name": r.get("channel_name"),
+                    "requester": o.get("requester"),
+                    "holder": o.get("holder"),
+                    "message": o.get("message", ""),
+                    "status": "pending",
+                    "created_at": o.get("created_at"),
+                    "remote": True,
+                })
+            # Yeu cau may khac gui TOI (inbox) -> gan vao kenh toi dang giu local
+            try:
+                inbox = sync.inbox_snapshot()
+            except Exception:
+                inbox = []
+            for q in inbox:
+                r = by_id.get(q.get("channel_id"))
+                if r is None:
+                    continue
+                r.setdefault("pending_requests", []).append({
+                    "id": f"rdb_{q.get('id')}",
+                    "channel_id": q.get("channel_id"),
+                    "channel_name": r.get("channel_name"),
+                    "requester": q.get("requester"),
+                    "holder": q.get("holder"),
+                    "message": q.get("message", ""),
+                    "status": "pending",
+                    "created_at": q.get("created_at"),
+                    "remote": True,
+                })
+        except Exception as e:
+            logger.debug(f"merge remote bo qua: {e}")
 
     # ---------- Presence + Xin mở kênh (Đợt 1) ----------
     def heartbeat(self, channel_id: str, user_name: str) -> Dict[str, Any]:
@@ -192,13 +436,70 @@ class WebBridge:
 
     def get_access_requests(self, status: str = "pending") -> List[Dict[str, Any]]:
         try:
-            return self._account_service.list_access_requests(status=status or "pending")
+            local = self._account_service.list_access_requests(status=status or "pending")
         except Exception as e:
             logger.error(f"get_access_requests failed: {e}")
-            return []
+            local = []
+        # Gop inbox/outbox online (chi khi loc pending/ALL)
+        try:
+            if (status or "pending") in ("pending", "ALL") and self._sync_service is not None:
+                names = self._channel_name_map()
+                for q in self._sync_service.inbox_snapshot():
+                    local.append({
+                        "id": f"rdb_{q.get('id')}",
+                        "channel_id": q.get("channel_id"),
+                        "channel_name": names.get(q.get("channel_id"), q.get("channel_id")),
+                        "requester": q.get("requester"),
+                        "holder": q.get("holder"),
+                        "message": q.get("message", ""),
+                        "status": "pending",
+                        "created_at": q.get("created_at"),
+                        "remote": True,
+                    })
+                for o in self._sync_service.outbox_snapshot():
+                    local.append({
+                        "id": f"rdb_{o.get('id')}",
+                        "channel_id": o.get("channel_id"),
+                        "channel_name": names.get(o.get("channel_id"), o.get("channel_id")),
+                        "requester": o.get("requester"),
+                        "holder": o.get("holder"),
+                        "message": o.get("message", ""),
+                        "status": "pending",
+                        "created_at": o.get("created_at"),
+                        "remote": True,
+                    })
+        except Exception as e:
+            logger.debug(f"merge remote requests bo qua: {e}")
+        return local
 
     def request_access(self, channel_id: str, requester: str, message: str = "") -> Dict[str, Any]:
         try:
+            # Kenh do may KHAC giu -> gui thang vao inbox online cua holder.
+            sync = self._sync_service
+            if sync is not None:
+                try:
+                    rl = self._account_service._remote_lock_other(channel_id)
+                except Exception:
+                    rl = None
+                if rl:
+                    holder = rl.get("holder") or ""
+                    rid = sync.send_request(holder, {
+                        "channel_id": channel_id,
+                        "requester": requester,
+                        "message": message or "",
+                    })
+                    if rid:
+                        self.notify_frontend("access_request_changed", {
+                            "channel_id": channel_id,
+                            "requester": requester,
+                            "holder": holder,
+                            "remote": True,
+                        })
+                        return {"success": True, "request_id": f"rdb_{rid}",
+                                "holder": holder, "remote": True,
+                                "message": f"Đã gửi yêu cầu tới {holder} (máy {rl.get('machine')}). Vui lòng chờ duyệt."}
+                    return {"success": False,
+                            "message": "Không gửi được yêu cầu online (mất mạng?). Thử lại sau."}
             res = self._account_service.request_access(channel_id, requester, message or "")
             if res.get("success"):
                 self.notify_frontend("access_request_changed", {
@@ -224,6 +525,9 @@ class WebBridge:
 
     def resolve_access_request(self, request_id: str, approver: str, action: str) -> Dict[str, Any]:
         try:
+            # Yeu cau online (rdb_) -> resolve tren RTDB + ban giao lock.
+            if (request_id or "").startswith("rdb_"):
+                return self._resolve_remote_request(request_id[4:], approver, action)
             # Lấy channel_id trước khi resolve để push event sau
             ch_id = None
             try:
@@ -250,6 +554,69 @@ class WebBridge:
             logger.error(f"resolve_access_request {request_id} failed: {e}")
             return {"success": False, "message": str(e)}
 
+    def _resolve_remote_request(self, req_id: str, approver: str, action: str) -> Dict[str, Any]:
+        """Duyet/tu choi yeu cau online: ghi RTDB, approve thi nha lock + bao may holder."""
+        sync = self._sync_service
+        if sync is None:
+            return {"success": False, "message": "Sync online chưa sẵn sàng."}
+        try:
+            cur = None
+            for q in sync.inbox_snapshot():
+                if q.get("id") == req_id:
+                    cur = q
+                    break
+            ch_id = (cur or {}).get("channel_id", "")
+            holder_machine = None
+            if action == "approve" and ch_id:
+                try:
+                    rl = sync.remote_lock_of(ch_id)
+                    if rl:
+                        holder_machine = rl.get("machine")
+                except Exception:
+                    pass
+            ok = sync.resolve_request(req_id, action, approver)
+            if not ok:
+                return {"success": False, "message": "Yêu cầu đã được xử lý hoặc mất mạng."}
+            msg = ""
+            if action == "approve" and ch_id:
+                # Nha kenh o may nay (neu dang giu) + xoa lock remote CUA MINH.
+                # Lock cua may khac giu nguyen — may do se tu dong nhuong khi
+                # nhan release-signal (tranh 2 may mo cung luc).
+                try:
+                    self._account_service.browser_service.close_channel_browser(ch_id)
+                except Exception:
+                    pass
+                try:
+                    self._account_service.force_release_channel(ch_id)
+                except Exception:
+                    pass
+                # Bao may holder chinh (neu khac may nay) tu dong dong browser.
+                try:
+                    if holder_machine and holder_machine != sync.machine_id:
+                        sync.send_release_signal(holder_machine, ch_id, (cur or {}).get("requester", ""))
+                except Exception:
+                    pass
+                msg = f"Đã nhường kênh cho {(cur or {}).get('requester')} (đồng bộ liên máy)."
+                self.notify_frontend("channel_status_changed", {
+                    "channel_id": ch_id,
+                    "status": ChannelStatus.READY.value,
+                    "locked_by": None
+                })
+            else:
+                msg = f"Đã từ chối yêu cầu của {(cur or {}).get('requester')}."
+            self.notify_frontend("access_request_changed", {
+                "request_id": f"rdb_{req_id}", "action": action, "approver": approver,
+                "channel_id": ch_id, "remote": True,
+            })
+            try:
+                self._push_channel_status(ch_id)
+            except Exception:
+                pass
+            return {"success": True, "message": msg}
+        except Exception as e:
+            logger.error(f"resolve remote {req_id} failed: {e}")
+            return {"success": False, "message": str(e)}
+
     def toggle_pin(self, channel_id: str) -> Dict[str, Any]:
         """Ghim/bỏ ghim kênh yêu thích."""
         try:
@@ -268,13 +635,20 @@ class WebBridge:
     # Channel Actions (1-Click Launch, Unlock, Reset)
     # ========================================================
     def launch_channel(self, channel_id: str, user_name: str) -> Dict[str, Any]:
-        """Launches Playwright Chromium session in a background thread (non-blocking, never throws to JS)"""
+        """Launches Native Browser session in a background thread (non-blocking, never throws to JS)"""
         def _on_status_change(ch_id, new_status, in_use_by):
-            self.notify_frontend("channel_status_changed", {
+            payload = {
                 "channel_id": ch_id,
                 "status": new_status.value,
                 "locked_by": in_use_by
-            })
+            }
+            if new_status != ChannelStatus.IN_USE:
+                # Dong browser: neu remote dang giu (may khac) thi bao UI ngay.
+                payload.update(self._remote_flags(ch_id))
+            else:
+                payload["locked_remote"] = False
+                payload["locked_machine"] = None
+            self.notify_frontend("channel_status_changed", payload)
 
         def _on_error(ch_id, error_msg):
             self.notify_frontend("channel_error", {
@@ -307,7 +681,29 @@ class WebBridge:
         who = (user_name or "").strip()
         if reason:
             logger.warning(f"Force unlock kênh '{channel_id}' bởi '{who or '?'}' — lý do: {reason[:200]}")
-        success = self._account_service.force_release_channel(channel_id)
+        # Cuong che: dong browser local (neu mo o may nay) + xoa ca lock remote.
+        # Doc may holder truoc de bao no tu dong dong browser (ban giao sach).
+        holder_machine = None
+        try:
+            sync = self._sync_service
+            if sync is not None and sync.is_online():
+                rl = sync.remote_lock_of(channel_id)
+                if rl:
+                    holder_machine = rl.get("machine")
+        except Exception:
+            pass
+        try:
+            self._account_service.browser_service.close_channel_browser(channel_id)
+        except Exception as e:
+            logger.debug(f"force_unlock close bo qua: {e}")
+        success = self._account_service.force_release_channel(channel_id, remote_force=True)
+        if success and holder_machine:
+            try:
+                sync = self._sync_service
+                if sync is not None and holder_machine != sync.machine_id:
+                    sync.send_release_signal(holder_machine, channel_id, who)
+            except Exception:
+                pass
         if success:
             self.notify_frontend("channel_status_changed", {
                 "channel_id": channel_id,
@@ -323,10 +719,20 @@ class WebBridge:
     def release_my_sessions(self, user_name: str = "") -> Dict[str, Any]:
         """
         Đóng các trình duyệt và xả toàn bộ khóa phiên do người dùng hiện tại đang giam.
+        Không bao giờ ném exception ra JS (pywebview promise luôn được settle
+        để UI không treo ở trạng thái "không phản hồi").
         """
+        import time as _time
+        _start = _time.time()
         who = (user_name or self._current_user()).strip()
-        released_ids = self._account_service.release_user_channels(who)
-        logger.info(f"Người dùng '{who}' đã xả {len(released_ids)} phiên: {released_ids}")
+        try:
+            released_ids = self._account_service.release_user_channels(who)
+        except Exception as e:
+            logger.error(f"release_my_sessions '{who}' failed: {e}")
+            return {"success": False, "message": f"Lỗi giải phóng phiên: {e}",
+                    "released_count": 0, "released_ids": []}
+        elapsed = _time.time() - _start
+        logger.info(f"Người dùng '{who}' đã xả {len(released_ids)} phiên ({elapsed:.1f}s): {released_ids}")
         for ch_id in released_ids:
             self.notify_frontend("channel_status_changed", {
                 "channel_id": ch_id,
@@ -339,6 +745,51 @@ class WebBridge:
             "released_count": len(released_ids),
             "released_ids": released_ids
         }
+
+    def release_all_sessions(self) -> Dict[str, Any]:
+        """
+        Đóng toàn bộ trình duyệt và giải phóng tất cả phiên kênh trên máy này.
+        """
+        try:
+            who = self._current_user()
+            released_ids = self._account_service.release_all_sessions(user_name=who)
+            for ch_id in released_ids:
+                self.notify_frontend("channel_status_changed", {
+                    "channel_id": ch_id,
+                    "status": ChannelStatus.READY.value,
+                    "locked_by": None
+                })
+                self._push_channel_status(ch_id)
+            return {
+                "success": True,
+                "released_count": len(released_ids),
+                "released_ids": released_ids
+            }
+        except Exception as e:
+            logger.error(f"release_all_sessions failed: {e}")
+            return {
+                "success": False,
+                "message": f"Lỗi giải phóng toàn bộ phiên: {e}",
+                "released_count": 0,
+                "released_ids": []
+            }
+
+    def shutdown(self) -> None:
+        """Dọn dẹp và giải phóng tài nguyên toàn bộ phiên khi tắt app."""
+        try:
+            self._bulk_stop.set()
+        except Exception:
+            pass
+        try:
+            for req_id in list(self._popups.keys()):
+                self._destroy_popup(req_id)
+        except Exception:
+            pass
+        try:
+            who = self._current_user()
+            self._account_service.cleanup_on_shutdown(user_name=who)
+        except Exception as e:
+            logger.error(f"Lỗi khi giải phóng phiên trong WebBridge.shutdown: {e}")
 
     # Giãn cách giữa các lần mở hàng loạt: nền tảng đánh dấu hành vi đều đặn
     # như máy (mở dồn dập đúng chu kỳ) -> nghỉ ngẫu nhiên để giống người dùng.
@@ -455,18 +906,53 @@ class WebBridge:
             self._account_service.repository.append_health_result(run_id, channel_id, st, detail)
         except Exception as e:
             logger.error(f"append_health_result {channel_id} failed: {e}")
+        # Day verdict online cho may khac tham khao (best-effort, khong block).
+        try:
+            sync = self._sync_service
+            if sync is not None and sync.is_online() and st in ("alive", "dead", "empty"):
+                who = ""
+                try:
+                    who = self._current_user()
+                except Exception:
+                    pass
+                sync.push_health(channel_id, {"status": st, "detail": detail}, who)
+        except Exception:
+            pass
         return st
+
+    def _remote_flags(self, channel_id: str) -> Dict[str, Any]:
+        """Flag lock remote hien tai de kem vao event/UI (khong I/O)."""
+        try:
+            sync = self._sync_service
+            if sync is not None and channel_id:
+                lk = sync.remote_lock_of(channel_id)
+                if lk:
+                    return {"locked_remote": True, "locked_machine": lk.get("machine")}
+        except Exception:
+            pass
+        return {"locked_remote": False, "locked_machine": None}
 
     def _push_channel_status(self, channel_id: str):
         try:
             items = self._account_service.get_channel_items()
             it = next((x for x in items if x.channel.id == channel_id), None)
             if it:
-                self.notify_frontend("channel_status_changed", {
+                payload = {
                     "channel_id": channel_id,
                     "status": it.current_status.value,
                     "locked_by": it.locked_by
-                })
+                }
+                # Kenh local trong nhung remote dang giu -> bao UI hien "may khac".
+                if not it.locked_by:
+                    payload.update(self._remote_flags(channel_id))
+                    if payload.get("locked_remote"):
+                        payload["status"] = ChannelStatus.IN_USE.value
+                        try:
+                            lk = self._sync_service.remote_lock_of(channel_id)
+                            payload["locked_by"] = (lk or {}).get("holder")
+                        except Exception:
+                            pass
+                self.notify_frontend("channel_status_changed", payload)
         except Exception as e:
             logger.error(f"health notify {channel_id} failed: {e}")
 
@@ -517,6 +1003,17 @@ class WebBridge:
         targets = [it.channel.id for it in items
                    if (it.session and it.session.cookies_data) and not it.locked_by]
         if not targets:
+            # Không có gì để kiểm tra: giải thích rõ nguyên nhân để user biết
+            # phải làm gì (thay vì toast chung chung gây tưởng "không phản hồi").
+            try:
+                locked_with_cookies = [it.channel.id for it in items
+                                       if it.locked_by and it.session and it.session.cookies_data]
+            except Exception:
+                locked_with_cookies = []
+            if locked_with_cookies:
+                return {"success": False, "message": (
+                    f"Kênh có cookies ({', '.join(locked_with_cookies)}) đang mở — "
+                    f"hãy 'Giải phóng phiên' trước rồi kiểm tra lại.")}
             return {"success": False, "message": "Không có kênh nào có cookies để kiểm tra."}
         try:
             run_id = self._account_service.repository.create_health_run(

@@ -13,19 +13,51 @@
       theme: {
         extend: {
           colors: {
+            // Semantic tokens mapped to CSS custom properties
+            'bg-app': 'var(--bg-app)',
+            'bg-surface': 'var(--bg-surface)',
+            'bg-elevated': 'var(--bg-elevated)',
+            'text-primary': 'var(--text-primary)',
+            'text-secondary': 'var(--text-secondary)',
+            'text-muted': 'var(--text-muted)',
+            'border-subtle': 'var(--border-subtle)',
+            'border-default': 'var(--border-default)',
+            'accent-primary': 'var(--accent-primary)',
+            'accent-hover': 'var(--accent-hover)',
+            'status-success': 'var(--status-success)',
+            'status-warning': 'var(--status-warning)',
+            'status-error': 'var(--status-error)',
+            'status-info': 'var(--status-info)',
+            surface: {
+              DEFAULT: 'var(--bg-surface)',
+              app: 'var(--bg-app)',
+              elevated: 'var(--bg-elevated)'
+            },
+            accent: {
+              DEFAULT: 'var(--accent-primary)',
+              primary: 'var(--accent-primary)',
+              hover: 'var(--accent-hover)'
+            },
+            status: {
+              success: 'var(--status-success)',
+              warning: 'var(--status-warning)',
+              error: 'var(--status-error)',
+              info: 'var(--status-info)'
+            },
+            // Legacy / bridge color aliases for seamless compatibility
             brand: {
               50: '#eff6ff',
               100: '#dbeafe',
-              500: '#3b82f6',
-              600: '#2563eb',
-              700: '#1d4ed8',
+              500: 'var(--accent-primary)',
+              600: 'var(--accent-primary)',
+              700: 'var(--accent-hover)'
             },
             dark: {
-              bg: '#0b0f19',
-              sidebar: '#111827',
-              card: '#161f30',
-              border: '#1f293d',
-              input: '#0d1321'
+              bg: 'var(--bg-app)',
+              sidebar: 'var(--bg-surface)',
+              card: 'var(--bg-elevated)',
+              border: 'var(--border-subtle)',
+              input: 'var(--bg-surface)'
             }
           }
         }
@@ -38,45 +70,39 @@
 
   
 </head>
-<body class="bg-slate-50 dark:bg-dark-bg text-slate-800 dark:text-slate-100 font-sans antialiased h-screen flex overflow-hidden select-none transition-colors duration-200">
+<body class="bg-slate-50 dark:bg-dark-bg text-slate-800 dark:text-slate-100 font-sans antialiased h-screen flex overflow-hidden transition-colors duration-200">
 
   <!-- ============================================================ -->
   <!-- MÀN ĐĂNG NHẬP HỆ THỐNG (LOGIN SCREEN)                        -->
   <!-- ============================================================ -->
-  <div id="auth-gate-overlay" class="fixed inset-0 z-[1000] bg-[#0b0f19] flex items-center justify-center p-4 overflow-y-auto">
-    <!-- Hiệu ứng ánh sáng nền công nghệ -->
-    <div class="fixed top-1/4 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-[120px] pointer-events-none"></div>
-    <div class="fixed bottom-1/4 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-[120px] pointer-events-none"></div>
-
-    <div class="bg-[#161f30] border border-[#1f293d] rounded-3xl p-8 max-w-md w-full shadow-2xl shadow-black/60 text-center relative z-10 my-auto">
+  <div id="auth-gate-overlay" class="fixed inset-0 z-[1000] bg-slate-100 dark:bg-dark-bg flex items-center justify-center p-4 overflow-y-auto transition-colors">
+    <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-2xl p-8 max-w-md w-full shadow-xl shadow-black/5 dark:shadow-black/40 text-center relative z-10 my-auto">
       <!-- Logo thương hiệu -->
       <div class="relative mb-6">
-        <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 p-0.5 shadow-xl shadow-blue-500/20 flex items-center justify-center">
-          <div class="w-full h-full bg-[#161f30] rounded-[14px] flex items-center justify-center">
-            <img src="./assets/logo.png" alt="VB Studio" class="w-12 h-12 object-contain drop-shadow">
-          </div>
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border flex items-center justify-center p-2.5 shadow-xs">
+          <img src="./assets/logo.png" alt="VB Studio" class="w-10 h-10 object-contain drop-shadow">
         </div>
-        <h2 class="text-xl font-extrabold mt-4 bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">VB-Studio Login</h2>
-        <p class="text-xs text-slate-400 font-semibold mt-1">Hệ Thống Quản Lý Kênh Tập Trung</p>
+        <h2 class="text-xl font-extrabold mt-4 text-slate-900 dark:text-slate-100 tracking-tight">VB-Studio Login</h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1">Hệ Thống Quản Lý Kênh Tập Trung</p>
       </div>
 
       <!-- Thẻ thông tin xác thực -->
-      <div class="mb-6 p-4 rounded-2xl bg-[#0d1321] border border-[#1f293d] text-left">
+      <div class="mb-6 p-4 rounded-xl bg-slate-50 dark:bg-dark-input border border-slate-200 dark:border-dark-border text-left">
         <div class="flex items-center gap-2 mb-1.5">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span class="text-xs font-bold text-slate-200 uppercase tracking-wider">Hệ Thống Bảo Mật</span>
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span class="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">Hệ Thống Bảo Mật</span>
         </div>
-        <p class="text-xs text-slate-400 leading-relaxed">
+        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
           Vui lòng đăng nhập bằng tài khoản Google được ủy quyền để truy cập hệ thống.
         </p>
       </div>
 
       <!-- Hộp báo lỗi (khi mail không hợp lệ) -->
-      <div id="auth-gate-error" class="hidden mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold text-left"></div>
+      <div id="auth-gate-error" class="hidden mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-xs font-semibold text-left"></div>
 
       <!-- TRẠNG THÁI 1: Nút đăng nhập ban đầu -->
       <div id="auth-gate-initial">
-        <button id="btn-gate-google-login" onclick="loginWithGoogle()" class="w-full flex items-center justify-center gap-3 py-3.5 px-4 bg-white hover:bg-slate-100 text-slate-900 rounded-xl font-bold text-sm shadow-lg shadow-blue-500/10 transition-all border border-slate-200 active:scale-[0.99] cursor-pointer">
+        <button id="btn-gate-google-login" onclick="loginWithGoogle()" class="w-full flex items-center justify-center gap-3 py-3.5 px-4 bg-white dark:bg-dark-input hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-xl font-bold text-sm shadow-md transition-all border border-slate-200 dark:border-dark-border active:scale-[0.99] cursor-pointer">
           <svg class="w-5 h-5 shrink-0" viewBox="0 0 48 48">
             <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
             <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
@@ -88,32 +114,37 @@
       </div>
 
       <!-- TRẠNG THÁI 2: Đang chờ xác thực -->
-      <div id="auth-gate-waiting" class="hidden flex-col items-center gap-3 p-4 bg-[#0d1321] border border-blue-500/30 rounded-2xl">
+      <div id="auth-gate-waiting" class="hidden flex-col items-center gap-3 p-4 bg-slate-50 dark:bg-dark-input border border-blue-500/30 rounded-xl">
         <div class="flex items-center gap-3">
-          <div class="relative flex items-center justify-center">
+          <div class="relative flex items-center justify-center shrink-0">
             <span class="animate-ping absolute inline-flex h-8 w-8 rounded-full bg-blue-400 opacity-30"></span>
-            <span class="relative inline-flex rounded-full h-6 w-6 bg-blue-600 text-white items-center justify-center font-bold"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg></span>
+            <span class="relative inline-flex rounded-full h-6 w-6 bg-blue-600 text-white items-center justify-center font-bold">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>
+            </span>
           </div>
           <div class="text-left">
-            <h4 class="text-xs font-bold text-blue-400">Đang chờ xác thực tài khoản Google...</h4>
-            <p class="text-[11px] text-slate-400 mt-0.5">Vui lòng hoàn tất đăng nhập trên cửa sổ xác thực.</p>
+            <h4 class="text-xs font-bold text-blue-600 dark:text-blue-400">Đang chờ xác thực tài khoản Google...</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Vui lòng hoàn tất đăng nhập trên cửa sổ xác thực.</p>
           </div>
         </div>
-        <div class="w-full flex items-center gap-2 pt-2 border-t border-slate-800">
+        <div class="w-full flex items-center gap-2 pt-2 border-t border-slate-200 dark:border-dark-border">
           <button onclick="loginWithGoogle()" class="flex-1 py-2 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all">
             Thử lại
           </button>
-          <button onclick="cancelBrowserAuth()" class="py-2 px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-bold transition-all">
+          <button onclick="cancelBrowserAuth()" class="py-2 px-3 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-bold transition-all">
             Hủy
           </button>
         </div>
       </div>
 
-      <p class="text-[11px] text-slate-400 mt-5">
+      <p class="text-xs text-slate-500 dark:text-slate-400 mt-5">
         Phiên đăng nhập được duy trì tự động an toàn cho các lần mở ứng dụng tiếp theo.
       </p>
     </div>
   </div>
+
+  <!-- Sidebar Backdrop for Mobile Off-Canvas Drawer (<768px) -->
+  <div id="sidebar-backdrop" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-30 hidden md:hidden" onclick="toggleMobileNav(false)"></div>
 
   <!-- ============================================================ -->
   <!-- LEFT SIDEBAR                                                 -->
@@ -127,7 +158,7 @@
           <h1 class="font-extrabold text-base tracking-tight bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 bg-clip-text text-transparent truncate">VB-Studio Login</h1>
           <p class="text-xs text-slate-500 dark:text-slate-400 font-medium truncate">Hệ Thống Quản Lý Kênh</p>
         </div>
-        <button onclick="toggleSidebar()" title="Thu gọn thanh bên" id="sidebar-pin-btn" class="sb-label w-7 h-7 shrink-0 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-dark-card text-slate-400 hover:text-blue-500 transition-all">
+        <button onclick="toggleSidebar()" title="Thu gọn thanh bên" aria-label="Thu gọn thanh bên" id="sidebar-pin-btn" class="sb-label w-9 h-9 shrink-0 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-dark-card text-slate-400 hover:text-blue-500 transition-all">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="m15 18-6-6 6-6"/></svg>
         </button>
       </div>
@@ -177,7 +208,7 @@
         <p class="px-3 pt-2 pb-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider sb-label">Menu quản lý</p>
         <div class="space-y-1">
 
-        <button id="nav-btn-dashboard" onclick="switchView('DASHBOARD')" class="sb-center w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold transition-all bg-blue-600 text-white shadow-sm shadow-blue-500/20">
+        <button id="nav-btn-dashboard" onclick="switchView('DASHBOARD')" aria-current="page" class="sb-center w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold transition-all bg-blue-600 text-white shadow-sm shadow-blue-500/20">
           <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 8.25V6Z"/><path d="M3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25Z"/><path d="M13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6Z"/><path d="M13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z"/></svg>
           <span class="sb-label truncate">Dashboard Kênh</span>
         </button>
@@ -246,7 +277,7 @@
     </div>
 
     <!-- Toast Notifications Container (to, rõ) -->
-    <div id="toast-container" class="absolute top-5 right-5 z-[60] flex flex-col gap-3 w-[400px] max-w-[calc(100%-2.5rem)] pointer-events-none"></div>
+    <div id="toast-container" aria-live="polite" aria-atomic="true" class="absolute top-5 right-5 z-[60] flex flex-col gap-3 w-[400px] max-w-[calc(100%-2.5rem)] pointer-events-none"></div>
 
     <!-- Bulk Open Progress Panel -->
     <div id="bulk-panel" class="hidden absolute bottom-5 left-1/2 -translate-x-1/2 z-[60] w-[440px] max-w-[calc(100%-2.5rem)] px-5 py-4 rounded-2xl border-2 border-sky-500/40 bg-sky-900/70 text-sky-100 glass shadow-2xl">
@@ -259,20 +290,24 @@
         <button id="bulk-stop-btn" onclick="stopBulkOpen()" class="shrink-0 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-bold transition-all">Dừng</button>
       </div>
       <div class="mt-3 h-2 rounded-full bg-white/10 overflow-hidden">
-        <div id="bulk-bar" class="h-full bg-sky-400 rounded-full transition-all" style="width: 0%"></div>
+        <div id="bulk-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" class="h-full bg-sky-400 rounded-full transition-all" style="width: 0%"></div>
       </div>
     </div>
 
     <!-- Confirm Modal thay thế alert/confirm mặc định -->
-    <div id="confirm-modal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4 bg-black/60 glass">
-      <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4">
-        <h3 id="confirm-title" class="text-base font-extrabold text-slate-800 dark:text-slate-100">Xác nhận</h3>
-        <p id="confirm-message" class="text-sm text-slate-500 dark:text-slate-300 leading-relaxed"></p>
-        <div id="confirm-input-wrap" class="hidden">
-          <input type="text" id="confirm-input" placeholder="Nhập nội dung..."
-                 class="w-full h-11 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-sm outline-none focus:border-blue-500 transition-colors">
+    <div id="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirm-title" tabindex="-1" class="fixed inset-0 z-[70] hidden items-center justify-center p-4 bg-black/60 glass">
+      <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border w-full max-w-md max-h-[calc(100vh-2rem)] flex flex-col rounded-2xl shadow-2xl transition-all">
+        <div class="p-6 pb-2 shrink-0">
+          <h3 id="confirm-title" class="text-base font-extrabold text-slate-800 dark:text-slate-100">Xác nhận</h3>
         </div>
-        <div class="flex justify-end gap-2.5 pt-2">
+        <div id="confirm-modal-body" class="p-6 py-2 overflow-y-auto max-h-[calc(100vh-10rem)] space-y-4 flex-1">
+          <p id="confirm-message" class="text-sm text-slate-500 dark:text-slate-300 leading-relaxed"></p>
+          <div id="confirm-input-wrap" class="hidden">
+            <input type="text" id="confirm-input" placeholder="Nhập nội dung..."
+                   class="w-full h-11 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-sm outline-none focus:border-blue-500 transition-colors">
+          </div>
+        </div>
+        <div class="p-6 pt-2 shrink-0 flex justify-end gap-2.5 border-t border-slate-100 dark:border-dark-border/60">
           <button id="confirm-cancel-btn" class="px-5 py-2.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-xl text-sm font-bold transition-all">Hủy</button>
           <button id="confirm-ok-btn" class="px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-xl text-sm font-bold transition-all">Đồng ý</button>
         </div>
@@ -280,11 +315,20 @@
     </div>
 
     <!-- Top Action Bar -->
-    <header class="thm-header h-16 border-b border-slate-200 dark:border-dark-border px-6 flex items-center justify-between shrink-0 bg-white/80 dark:bg-dark-sidebar/80 glass z-10">
-      <div class="flex items-center gap-3">
-        <h2 id="top-title" class="font-extrabold text-base tracking-tight">Tất cả các kênh (<span id="top-count">0</span>)</h2>
+    <header class="thm-header min-h-16 border-b border-slate-200 dark:border-dark-border px-3 sm:px-6 py-2 flex items-center justify-between shrink-0 bg-white/80 dark:bg-dark-sidebar/80 glass z-10 gap-2">
+      <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+        <!-- Hamburger Menu Button for Mobile (<768px) -->
+        <button id="btn-mobile-menu" type="button" onclick="toggleMobileNav()" title="Mở menu điều hướng" aria-label="Mở menu điều hướng" class="w-9 h-9 flex md:hidden items-center justify-center rounded-lg bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-all shrink-0">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+
+        <h2 id="top-title" class="font-extrabold text-sm sm:text-base tracking-tight truncate">Tất cả các kênh (<span id="top-count">0</span>)</h2>
         <!-- Async Background Activity Indicator (vòng quay nhỏ ở góc phải header) -->
-        <div id="async-spinner" class="hidden flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500 dark:text-blue-400 text-[11px] font-bold">
+        <div id="async-spinner" class="hidden flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-500 dark:text-blue-400 text-xs font-bold shrink-0">
           <svg class="animate-spin w-3 h-3 text-blue-500" viewBox="0 0 24 24" fill="none">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
@@ -294,38 +338,39 @@
       </div>
 
       <!-- Search, Account Filter, Sort, Add Account & Refresh -->
-      <div class="flex items-center gap-2.5">
+      <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0 overflow-visible">
         <!-- Search Input -->
-        <div class="relative">
-          <input type="text" id="input-search" placeholder="Tìm kiếm kênh, Gmail..." oninput="onSearchInput()" 
-                 class="w-48 lg:w-56 h-9 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-lg px-3 text-xs outline-none focus:border-blue-500 dark:focus:border-blue-500 transition-colors">
+        <div id="header-search-input" class="relative shrink-0">
+          <input type="text" id="input-search" placeholder="Tìm kiếm kênh, Gmail..." oninput="onSearchInput()" aria-label="Tìm kiếm kênh"
+                 class="w-24 sm:w-36 md:w-48 lg:w-56 h-9 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-lg px-2.5 sm:px-3 text-xs outline-none focus:border-blue-500 dark:focus:border-blue-500 transition-colors">
         </div>
 
         <!-- Google Account Filter -->
-        <select id="select-account-filter" onchange="onAccountFilterChange()" class="h-9 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-lg px-3 text-xs outline-none font-medium cursor-pointer max-w-[160px] truncate">
-          <option value="ALL">Tất cả Google Acc</option>
+        <select id="select-account-filter" onchange="onAccountFilterChange()" aria-label="Lọc theo tài khoản" class="h-9 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-lg px-2 sm:px-3 text-xs outline-none font-medium cursor-pointer max-w-[90px] sm:max-w-[130px] lg:max-w-[160px] truncate shrink-0">
+          <option value="ALL">Tất cả tài khoản</option>
         </select>
 
-        <!-- Add Account Button (Text-only) -->
-        <button onclick="openAddAccountModal()" class="h-9 px-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold shadow-sm shadow-emerald-600/20 transition-all">
-          Thêm Acc
+        <!-- Add Account Button -->
+        <button id="btn-add-account" onclick="openAddAccountModal()" title="Thêm tài khoản Google" class="h-9 px-2.5 sm:px-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold shadow-sm shadow-emerald-600/20 transition-all flex items-center justify-center shrink-0">
+          <span class="sm:hidden text-sm font-black leading-none">+</span>
+          <span class="hidden sm:inline">Thêm tài khoản</span>
         </button>
 
         <!-- Refresh Button (Icon độc lập) -->
-        <button onclick="refreshData()" title="Làm mới dữ liệu" class="w-9 h-9 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg flex items-center justify-center transition-all">
+        <button onclick="refreshData()" title="Làm mới dữ liệu" aria-label="Làm mới dữ liệu" class="w-9 h-9 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg flex items-center justify-center transition-all shrink-0">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
         </button>
 
         <!-- Notification Bell: yêu cầu xin mở kênh (Đợt 1) -->
-        <div class="relative">
-          <button id="notif-bell-btn" onclick="toggleNotifPanel()" title="Yêu cầu xin mở kênh" class="w-9 h-9 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg flex items-center justify-center transition-all relative">
+        <div class="relative shrink-0">
+          <button id="notif-bell-btn" onclick="toggleNotifPanel()" title="Yêu cầu xin mở kênh" aria-label="Yêu cầu xin mở kênh" class="w-9 h-9 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg flex items-center justify-center transition-all relative">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
-            <span id="notif-badge" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">0</span>
+            <span id="notif-badge" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center">0</span>
           </button>
           <div id="notif-panel" class="hidden absolute right-0 mt-2 w-[360px] max-w-[calc(100vw-3rem)] bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-2xl shadow-2xl overflow-hidden z-50">
             <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-dark-border/60">
               <p class="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-300">Yêu cầu xin mở kênh</p>
-              <button onclick="refreshAccessRequests()" class="text-[11px] font-bold text-blue-500 hover:text-blue-400">Làm mới</button>
+              <button onclick="refreshAccessRequests()" class="text-xs font-bold text-blue-500 hover:text-blue-400">Làm mới</button>
             </div>
             <div id="notif-list" class="max-h-[380px] overflow-y-auto"></div>
           </div>
@@ -351,7 +396,7 @@
             <p class="text-2xl font-black mt-1 text-emerald-500" id="stat-ready">0</p>
           </div>
           <div class="thm-panel bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border p-4 rounded-xl shadow-xs">
-            <p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Chưa Setup</p>
+            <p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Chưa thiết lập</p>
             <p class="text-2xl font-black mt-1 text-amber-500" id="stat-not-setup">0</p>
           </div>
           <div class="thm-panel bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border p-4 rounded-xl shadow-xs">
@@ -363,40 +408,40 @@
         <!-- Dashboard Toolbar: Sắp xếp, Lọc trạng thái & Tùy chọn Hiển thị (Cuộn ngang cột Acc / Lưới) -->
         <div class="thm-panel flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl p-3 shadow-xs">
           <!-- Nhóm nút sắp xếp (Order) -->
-          <div class="flex flex-wrap items-center gap-1.5">
+          <div role="group" aria-label="Sắp xếp danh sách kênh" class="flex flex-wrap items-center gap-1.5">
             <span class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mr-1">Sắp xếp:</span>
-            <button onclick="setDashboardSort('DEFAULT')" id="sort-btn-DEFAULT" class="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-xs whitespace-nowrap transition-all">Mặc định</button>
-            <button onclick="setDashboardSort('DATE_DESC')" id="sort-btn-DATE_DESC" class="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 whitespace-nowrap transition-all">Ngày nhập <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-            <button onclick="setDashboardSort('DATE_ASC')" id="sort-btn-DATE_ASC" class="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 whitespace-nowrap transition-all">Ngày nhập <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg></button>
-            <button onclick="setDashboardSort('PLATFORM')" id="sort-btn-PLATFORM" class="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 whitespace-nowrap transition-all">Nền tảng</button>
-            <button onclick="setDashboardSort('STATUS')" id="sort-btn-STATUS" class="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 whitespace-nowrap transition-all">Trạng thái</button>
-            <button onclick="setDashboardSort('ACCOUNT')" id="sort-btn-ACCOUNT" class="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 whitespace-nowrap transition-all">Tài khoản</button>
+            <button onclick="setDashboardSort('DEFAULT')" id="sort-btn-DEFAULT" aria-pressed="true" class="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-xs whitespace-nowrap transition-all">Mặc định</button>
+            <button onclick="setDashboardSort('DATE_DESC')" id="sort-btn-DATE_DESC" aria-pressed="false" class="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 whitespace-nowrap transition-all">Ngày nhập <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+            <button onclick="setDashboardSort('DATE_ASC')" id="sort-btn-DATE_ASC" aria-pressed="false" class="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 whitespace-nowrap transition-all">Ngày nhập <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg></button>
+            <button onclick="setDashboardSort('PLATFORM')" id="sort-btn-PLATFORM" aria-pressed="false" class="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 whitespace-nowrap transition-all">Nền tảng</button>
+            <button onclick="setDashboardSort('STATUS')" id="sort-btn-STATUS" aria-pressed="false" class="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 whitespace-nowrap transition-all">Trạng thái</button>
+            <button onclick="setDashboardSort('ACCOUNT')" id="sort-btn-ACCOUNT" aria-pressed="false" class="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 whitespace-nowrap transition-all">Tài khoản</button>
           </div>
 
           <!-- Nhóm lọc trạng thái nhanh -->
           <div class="flex items-center gap-1.5">
             <span class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mr-1">Trạng thái:</span>
-            <div class="bg-slate-100 dark:bg-dark-input p-0.5 rounded-lg flex gap-1">
-              <button onclick="setDashboardStatusFilter('ALL')" id="status-btn-ALL" class="px-2 py-1 rounded-md text-xs font-bold bg-blue-600 text-white shadow-xs transition-all">Tất cả</button>
-              <button onclick="setDashboardStatusFilter('READY')" id="status-btn-READY" class="px-2 py-1 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-emerald-500 transition-all inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>Sẵn sàng</button>
-              <button onclick="setDashboardStatusFilter('NOT_SETUP')" id="status-btn-NOT_SETUP" class="px-2 py-1 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-amber-500 transition-all inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-400"></span>Chưa setup</button>
-              <button onclick="setDashboardStatusFilter('IN_USE')" id="status-btn-IN_USE" class="px-2 py-1 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-sky-500 transition-all inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-sky-400"></span>Đang mở</button>
-              <button onclick="setDashboardStatusFilter('EXPIRED')" id="status-btn-EXPIRED" class="px-2 py-1 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-red-500 transition-all inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-red-400"></span>Hết hạn</button>
+            <div role="group" aria-label="Lọc theo trạng thái kênh" class="bg-slate-100 dark:bg-dark-input p-0.5 rounded-lg flex gap-1">
+              <button onclick="setDashboardStatusFilter('ALL')" id="status-btn-ALL" aria-pressed="true" class="px-2 py-1 rounded-md text-xs font-bold bg-blue-600 text-white shadow-xs transition-all">Tất cả</button>
+              <button onclick="setDashboardStatusFilter('READY')" id="status-btn-READY" aria-pressed="false" class="px-2 py-1 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-emerald-500 transition-all inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>Sẵn sàng</button>
+              <button onclick="setDashboardStatusFilter('NOT_SETUP')" id="status-btn-NOT_SETUP" aria-pressed="false" class="px-2 py-1 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-amber-500 transition-all inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-400"></span>Chưa thiết lập</button>
+              <button onclick="setDashboardStatusFilter('IN_USE')" id="status-btn-IN_USE" aria-pressed="false" class="px-2 py-1 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-sky-500 transition-all inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-sky-400"></span>Đang mở</button>
+              <button onclick="setDashboardStatusFilter('EXPIRED')" id="status-btn-EXPIRED" aria-pressed="false" class="px-2 py-1 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-red-500 transition-all inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-red-400"></span>Hết hạn</button>
             </div>
           </div>
 
           <!-- Nhóm nút tùy chọn hiển thị: Lưới vs Cuộn ngang + Nút cuộn -->
           <div class="flex items-center gap-2 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-100 dark:border-dark-border">
             <span class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mr-1">Hiển thị:</span>
-            <div class="bg-slate-100 dark:bg-dark-input p-0.5 rounded-lg flex gap-1">
-              <button onclick="setDisplayMode('GRID')" id="display-mode-GRID" class="px-2.5 py-1 rounded-md text-xs font-bold bg-blue-600 text-white shadow-xs transition-all">Lưới</button>
-              <button onclick="setDisplayMode('HORIZONTAL')" id="display-mode-HORIZONTAL" class="px-2.5 py-1 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all">Cuộn ngang</button>
+            <div role="group" aria-label="Chế độ hiển thị danh sách kênh" class="bg-slate-100 dark:bg-dark-input p-0.5 rounded-lg flex gap-1">
+              <button onclick="setDisplayMode('GRID')" id="display-mode-GRID" aria-pressed="true" class="px-2.5 py-1 rounded-md text-xs font-bold bg-blue-600 text-white shadow-xs transition-all">Lưới</button>
+              <button onclick="setDisplayMode('HORIZONTAL')" id="display-mode-HORIZONTAL" aria-pressed="false" class="px-2.5 py-1 rounded-md text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all">Cuộn ngang</button>
             </div>
 
             <!-- Nút cuộn trái/phải cho chế độ Cuộn ngang -->
             <div id="horizontal-scroll-controls" class="hidden items-center gap-1 ml-1">
-              <button onclick="scrollColumns(-340)" title="Cuộn sang trái" class="w-7 h-7 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg flex items-center justify-center transition-all shadow-xs"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
-              <button onclick="scrollColumns(340)" title="Cuộn sang phải" class="w-7 h-7 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg flex items-center justify-center transition-all shadow-xs"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+              <button onclick="scrollColumns(-340)" title="Cuộn sang trái" aria-label="Cuộn sang trái" class="w-9 h-9 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg flex items-center justify-center transition-all shadow-xs"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+              <button onclick="scrollColumns(340)" title="Cuộn sang phải" aria-label="Cuộn sang phải" class="w-9 h-9 bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg flex items-center justify-center transition-all shadow-xs"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
             </div>
           </div>
         </div>
@@ -404,7 +449,7 @@
         <!-- Active Filter Indicator Bar (hiển thị khi có bộ lọc đang chạy) -->
         <div id="active-filter-bar" class="hidden flex flex-wrap items-center justify-between gap-2 px-3.5 py-2 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/40 rounded-xl text-xs text-blue-700 dark:text-blue-300 shadow-xs">
           <div class="flex flex-wrap items-center gap-2" id="active-filter-chips"></div>
-          <button onclick="clearFilters()" class="font-bold underline hover:text-blue-800 dark:hover:text-blue-200 transition-colors ml-auto">Xóa tất cả lọc</button>
+          <button onclick="clearAllFilters()" class="font-bold underline hover:text-blue-800 dark:hover:text-blue-200 transition-colors ml-auto">Xóa tất cả lọc</button>
         </div>
 
         <!-- Channels Container (Grid hoặc Cuộn ngang theo cột tài khoản) -->
@@ -415,10 +460,10 @@
         <!-- Empty State Container -->
         <div id="empty-state" class="hidden text-center py-16 bg-white dark:bg-dark-card rounded-2xl border border-slate-200 dark:border-dark-border">
           <p class="text-slate-300 dark:text-slate-600 flex justify-center"><svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></p>
-          <h3 class="text-base font-bold mt-3">Không tìm thấy kênh phù hợp</h3>
-          <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Thử xóa bộ lọc hoặc tìm kiếm bằng từ khóa khác.</p>
-          <button onclick="clearFilters()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-500 transition-all">
-            Xóa bộ lọc và xem tất cả
+          <h3 id="empty-state-title" class="text-base font-bold mt-3">Không tìm thấy kênh phù hợp</h3>
+          <p id="empty-state-desc" class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Không tìm thấy kênh phù hợp với bộ lọc hiện tại.</p>
+          <button id="empty-state-btn" onclick="clearAllFilters()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-500 transition-all">
+            Xóa tất cả lọc
           </button>
         </div>
       </div>
@@ -436,7 +481,7 @@
           <select id="table-status-filter" onchange="onTableFilterInput()" class="h-10 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-lg px-3 text-sm font-semibold cursor-pointer">
             <option value="ALL">Mọi trạng thái</option>
             <option value="READY">Sẵn sàng</option>
-            <option value="NOT_SETUP">Chưa Setup</option>
+            <option value="NOT_SETUP">Chưa thiết lập</option>
             <option value="IN_USE">Đang mở</option>
             <option value="EXPIRED">Hết hạn</option>
           </select>
@@ -452,10 +497,26 @@
               <thead class="bg-slate-50 dark:bg-dark-input border-b border-slate-200 dark:border-dark-border text-slate-400 uppercase text-[11px] font-bold tracking-wider">
                 <tr>
                   <th class="py-3.5 px-3 w-10 text-center select-none" title="Ghim"></th>
-                  <th class="py-3.5 px-4 cursor-pointer select-none hover:text-blue-500 transition-colors whitespace-nowrap" onclick="sortTableBy('platform')">Nền tảng <span id="sort-platform"></span></th>
-                  <th class="py-3.5 px-4 cursor-pointer select-none hover:text-blue-500 transition-colors" onclick="sortTableBy('channel_name')">Tên Kênh & ID <span id="sort-channel_name"></span></th>
-                  <th class="py-3.5 px-4 cursor-pointer select-none hover:text-blue-500 transition-colors" onclick="sortTableBy('account')">Gmail Gốc <span id="sort-account"></span></th>
-                  <th class="py-3.5 px-4 cursor-pointer select-none hover:text-blue-500 transition-colors" onclick="sortTableBy('status')">Trạng thái <span id="sort-status"></span></th>
+                  <th scope="col" class="py-3.5 px-4 whitespace-nowrap" aria-sort="none">
+                    <button type="button" id="btn-sort-platform" onclick="sortTableBy('platform')" aria-sort="none" class="flex items-center gap-1.5 uppercase text-[11px] font-bold text-slate-400 hover:text-blue-500 transition-colors tracking-wider">
+                      <span>Nền tảng</span><span id="sort-platform" class="inline-flex items-center"></span>
+                    </button>
+                  </th>
+                  <th scope="col" class="py-3.5 px-4" aria-sort="none">
+                    <button type="button" id="btn-sort-channel_name" onclick="sortTableBy('channel_name')" aria-sort="none" class="flex items-center gap-1.5 uppercase text-[11px] font-bold text-slate-400 hover:text-blue-500 transition-colors tracking-wider">
+                      <span>Tên Kênh & ID</span><span id="sort-channel_name" class="inline-flex items-center"></span>
+                    </button>
+                  </th>
+                  <th scope="col" class="py-3.5 px-4" aria-sort="none">
+                    <button type="button" id="btn-sort-account" onclick="sortTableBy('account')" aria-sort="none" class="flex items-center gap-1.5 uppercase text-[11px] font-bold text-slate-400 hover:text-blue-500 transition-colors tracking-wider">
+                      <span>Gmail Gốc</span><span id="sort-account" class="inline-flex items-center"></span>
+                    </button>
+                  </th>
+                  <th scope="col" class="py-3.5 px-4" aria-sort="none">
+                    <button type="button" id="btn-sort-status" onclick="sortTableBy('status')" aria-sort="none" class="flex items-center gap-1.5 uppercase text-[11px] font-bold text-slate-400 hover:text-blue-500 transition-colors tracking-wider">
+                      <span>Trạng thái</span><span id="sort-status" class="inline-flex items-center"></span>
+                    </button>
+                  </th>
                   <th class="py-3.5 px-4 text-right">Thao tác</th>
                 </tr>
               </thead>
@@ -479,12 +540,12 @@
             </div>
             <div class="flex gap-2">
               <button onclick="resetPlatforms()" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg text-xs font-bold transition-all">Khôi phục 4 mặc định</button>
-              <button onclick="openPlatformModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all">+ Thêm social</button>
+              <button onclick="openPlatformModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all">+ Thêm nền tảng</button>
             </div>
           </div>
           <div class="flex flex-wrap items-center gap-3">
             <div class="relative flex-1 min-w-[200px]">
-              <input type="text" id="social-search" placeholder="Tìm social (tên, mã, URL)..." oninput="onSocialSearchInput()"
+              <input type="text" id="social-search" placeholder="Tìm nền tảng (tên, mã, URL)..." oninput="onSocialSearchInput()"
                      class="w-full h-10 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-lg px-3 text-sm outline-none focus:border-blue-500 transition-colors">
             </div>
             <span id="social-result-count" class="text-xs font-bold text-slate-500 dark:text-slate-300 ml-auto"></span>
@@ -493,10 +554,22 @@
             <table class="w-full min-w-[760px] text-left text-sm">
               <thead class="bg-slate-50 dark:bg-dark-input border-b border-slate-200 dark:border-dark-border text-slate-400 uppercase text-[11px] font-bold tracking-wider">
                 <tr>
-                  <th class="py-3 px-4 whitespace-nowrap cursor-pointer select-none hover:text-blue-500 transition-colors" onclick="sortSocialBy('name')">Social <span id="sort-soc-name"></span></th>
-                  <th class="py-3 px-4 whitespace-nowrap cursor-pointer select-none hover:text-blue-500 transition-colors" onclick="sortSocialBy('code')">Mã / Prefix <span id="sort-soc-code"></span></th>
-                  <th class="py-3 px-4">URL mặc định</th>
-                  <th class="py-3 px-4 text-center whitespace-nowrap cursor-pointer select-none hover:text-blue-500 transition-colors" onclick="sortSocialBy('channels')">Kênh <span id="sort-soc-channels"></span></th>
+                  <th scope="col" class="py-3 px-4 whitespace-nowrap" aria-sort="none">
+                    <button type="button" id="btn-sort-soc-name" onclick="sortSocialBy('name')" aria-sort="none" class="flex items-center gap-1.5 uppercase text-[11px] font-bold text-slate-400 hover:text-blue-500 transition-colors tracking-wider">
+                      <span>Nền tảng</span><span id="sort-soc-name" class="inline-flex items-center"></span>
+                    </button>
+                  </th>
+                  <th scope="col" class="py-3 px-4 whitespace-nowrap" aria-sort="none">
+                    <button type="button" id="btn-sort-soc-code" onclick="sortSocialBy('code')" aria-sort="none" class="flex items-center gap-1.5 uppercase text-[11px] font-bold text-slate-400 hover:text-blue-500 transition-colors tracking-wider">
+                      <span>Mã / Prefix</span><span id="sort-soc-code" class="inline-flex items-center"></span>
+                    </button>
+                  </th>
+                  <th scope="col" class="py-3 px-4">URL mặc định</th>
+                  <th scope="col" class="py-3 px-4 text-center whitespace-nowrap" aria-sort="none">
+                    <button type="button" id="btn-sort-soc-channels" onclick="sortSocialBy('channels')" aria-sort="none" class="flex items-center justify-center gap-1.5 uppercase text-[11px] font-bold text-slate-400 hover:text-blue-500 transition-colors tracking-wider mx-auto">
+                      <span>Kênh</span><span id="sort-soc-channels" class="inline-flex items-center"></span>
+                    </button>
+                  </th>
                   <th class="py-3 px-4 text-right whitespace-nowrap">Thao tác</th>
                 </tr>
               </thead>
@@ -515,10 +588,10 @@
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Kiểm tra phiên đăng nhập</h4>
-              <p class="text-[11px] text-slate-400 mt-0.5">Soi cookies offline — không mở trình duyệt, không gọi mạng, an toàn tuyệt đối. Kênh đang mở bị bỏ qua. Ca nghi ngờ: bấm Mở Studio để mắt thường xác minh. Mọi đợt chạy đều lưu report.</p>
+              <p class="text-[11px] text-slate-400 mt-0.5">Phân tích offline từ tệp dữ liệu cục bộ, không gửi yêu cầu mạng. Kênh đang mở bị bỏ qua. Ca nghi ngờ: bấm Mở Studio để xác minh trực tiếp. Mọi đợt kiểm tra đều lưu báo cáo.</p>
             </div>
             <div class="flex gap-2">
-              <button id="health-stop-btn" onclick="stopHealthCheck()" class="hidden px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-bold transition-all">Dừng đợt chạy</button>
+              <button id="health-stop-btn" onclick="stopHealthCheck()" class="hidden px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-bold transition-all">Dừng đợt kiểm tra</button>
               <button onclick="startHealthAll()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-all inline-flex items-center gap-1.5"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>Kiểm tra tất cả kênh</button>
             </div>
           </div>
@@ -528,7 +601,7 @@
               <span id="health-progress-pct">0%</span>
             </div>
             <div class="h-2 rounded-full bg-slate-100 dark:bg-dark-input overflow-hidden">
-              <div id="health-progress-bar" class="h-full bg-emerald-500 rounded-full transition-all" style="width: 0%"></div>
+              <div id="health-progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" class="h-full bg-emerald-500 rounded-full transition-all" style="width: 0%"></div>
             </div>
           </div>
           <div class="grid grid-cols-2 lg:grid-cols-5 gap-3">
@@ -569,7 +642,7 @@
                   <th class="py-3 px-4 whitespace-nowrap">Phạm vi</th>
                   <th class="py-3 px-4 text-center whitespace-nowrap">Sống / Hết hạn / Lỗi / Bỏ qua</th>
                   <th class="py-3 px-4 text-center whitespace-nowrap">Trạng thái</th>
-                  <th class="py-3 px-4 text-right whitespace-nowrap">Report</th>
+                  <th class="py-3 px-4 text-right whitespace-nowrap">Báo cáo</th>
                 </tr>
               </thead>
               <tbody id="health-runs-tbody" class="divide-y divide-slate-100 dark:divide-dark-border"></tbody>
@@ -604,17 +677,17 @@
       <!-- ======================================================== -->
       <div id="view-settings" class="hidden max-w-6xl w-full space-y-6">
         <!-- Settings Tabs -->
-        <div class="flex flex-wrap border-b border-slate-200 dark:border-dark-border gap-x-6 gap-y-1 text-xs font-bold">
-          <button onclick="switchSettingsTab('tab-firebase')" id="btn-tab-firebase" class="pb-3 border-b-2 border-blue-500 text-blue-500">Tài khoản</button>
-          <button onclick="switchSettingsTab('tab-browser')" id="btn-tab-browser" class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">Trình duyệt</button>
-          <button onclick="switchSettingsTab('tab-vault')" id="btn-tab-vault" class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">Bảo mật Cookies</button>
-          <button onclick="switchSettingsTab('tab-theme')" id="btn-tab-theme" class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">Giao diện</button>
-          <button onclick="switchSettingsTab('tab-data')" id="btn-tab-data" class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">Dữ liệu</button>
-          <button onclick="switchSettingsTab('tab-app')" id="btn-tab-app" class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">Hệ thống & Cập nhật</button>
+        <div role="tablist" aria-label="Cài đặt hệ thống" class="flex flex-wrap border-b border-slate-200 dark:border-dark-border gap-x-6 gap-y-1 text-xs font-bold">
+          <button role="tab" aria-selected="true" aria-controls="tab-firebase" tabindex="0" onclick="switchSettingsTab('tab-firebase')" id="btn-tab-firebase" class="pb-3 border-b-2 border-blue-500 text-blue-500">Tài khoản</button>
+          <button role="tab" aria-selected="false" aria-controls="tab-browser" tabindex="-1" onclick="switchSettingsTab('tab-browser')" id="btn-tab-browser" class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">Trình duyệt</button>
+          <button role="tab" aria-selected="false" aria-controls="tab-vault" tabindex="-1" onclick="switchSettingsTab('tab-vault')" id="btn-tab-vault" class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">Bảo mật Cookies</button>
+          <button role="tab" aria-selected="false" aria-controls="tab-theme" tabindex="-1" onclick="switchSettingsTab('tab-theme')" id="btn-tab-theme" class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">Giao diện</button>
+          <button role="tab" aria-selected="false" aria-controls="tab-data" tabindex="-1" onclick="switchSettingsTab('tab-data')" id="btn-tab-data" class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">Dữ liệu</button>
+          <button role="tab" aria-selected="false" aria-controls="tab-app" tabindex="-1" onclick="switchSettingsTab('tab-app')" id="btn-tab-app" class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">Hệ thống & Cập nhật</button>
         </div>
 
         <!-- Tab 1: Cloud Sync & Authentication -->
-        <div id="tab-firebase" class="space-y-4">
+        <div id="tab-firebase" role="tabpanel" tabindex="0" aria-labelledby="btn-tab-firebase" class="space-y-4">
           <!-- Card 1: Account Status -->
           <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl p-5 space-y-4">
             <div class="flex items-center justify-between">
@@ -634,7 +707,7 @@
                 <div>
                   <div class="flex items-center gap-1.5">
                     <h5 id="settings-auth-name" class="font-extrabold text-sm text-slate-800 dark:text-slate-100">User</h5>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Verified</span>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Đã xác thực</span>
                   </div>
                   <p id="settings-auth-email" class="text-xs text-slate-500 dark:text-slate-400 font-medium">email@gmail.com</p>
                   <p id="settings-auth-uid" class="text-[10px] text-slate-400 font-mono mt-0.5">ID: -</p>
@@ -663,7 +736,7 @@
 
 
         <!-- Tab 2: Browser Settings -->
-        <div id="tab-browser" class="hidden space-y-4">
+        <div id="tab-browser" role="tabpanel" tabindex="0" aria-labelledby="btn-tab-browser" class="hidden space-y-4">
           <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl p-5 space-y-4">
             <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Cấu Hình Trình Duyệt</h4>
             <div class="space-y-1">
@@ -689,7 +762,7 @@
         </div>
 
         <!-- Tab: Bảo mật Cookies (vault mã hóa) -->
-        <div id="tab-vault" class="hidden space-y-4">
+        <div id="tab-vault" role="tabpanel" tabindex="0" aria-labelledby="btn-tab-vault" class="hidden space-y-4">
           <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl p-5 space-y-4">
             <div class="flex flex-wrap items-center justify-between gap-3">
               <div>
@@ -719,7 +792,7 @@
         </div>
 
         <!-- Tab: Giao diện -->
-        <div id="tab-theme" class="hidden space-y-4">
+        <div id="tab-theme" role="tabpanel" tabindex="0" aria-labelledby="btn-tab-theme" class="hidden space-y-4">
           <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl p-5 space-y-4">
             <div>
               <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Giao diện</h4>
@@ -730,7 +803,7 @@
         </div>
 
         <!-- Tab: Dữ liệu (sao lưu + thùng rác + trạng thái đồng bộ) -->
-        <div id="tab-data" class="hidden space-y-4">
+        <div id="tab-data" role="tabpanel" tabindex="0" aria-labelledby="btn-tab-data" class="hidden space-y-4">
           <!-- Trạng thái đồng bộ đám mây (Cloud Sync Status) -->
           <div class="thm-panel bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl p-5 space-y-3 shadow-xs">
             <div class="flex flex-wrap items-center justify-between gap-3">
@@ -770,8 +843,8 @@
               </div>
             </div>
             <div class="flex flex-wrap gap-2.5">
-              <button onclick="exportBackup()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-all">Xuất backup (.zip)</button>
-              <button onclick="importBackup()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all">Nhập backup (.zip)</button>
+              <button onclick="exportBackup()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-all">Sao lưu dữ liệu (.zip)</button>
+              <button onclick="importBackup()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all">Khôi phục dữ liệu (.zip)</button>
             </div>
             <p id="backup-feedback" class="text-xs font-semibold"></p>
           </div>
@@ -801,7 +874,7 @@
         </div>
 
         <!-- Tab 3: App & About & Updates -->
-        <div id="tab-app" class="hidden space-y-4">
+        <div id="tab-app" role="tabpanel" tabindex="0" aria-labelledby="btn-tab-app" class="hidden space-y-4">
 
           <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-xl p-5 space-y-4">
             <div>
@@ -837,7 +910,7 @@
               <div>
                 <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Thông tin Ứng dụng & Cập nhật</h4>
                 <p class="text-sm font-bold text-slate-800 dark:text-slate-100 mt-1">VB-Studio Login</p>
-                <p class="text-xs text-slate-400 mt-0.5">Phiên bản hiện tại: <span id="app-current-version-label" class="font-bold text-blue-500">v1.0.0</span></p>
+                <p class="text-xs text-slate-400 mt-0.5">Phiên bản hiện tại: <span id="app-current-version-label" class="font-bold text-blue-500">v1.1.0</span></p>
               </div>
               <button onclick="checkForUpdates()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1.5">
                 <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
@@ -855,15 +928,15 @@
   <!-- CHANNEL DRAWER (slide-over chi tiết kênh, 2 tab)             -->
   <!-- ============================================================ -->
   <div id="channel-drawer-overlay" class="hidden fixed inset-0 z-[54] bg-black/40" onclick="closeChannelDrawer()"></div>
-  <aside id="channel-drawer" class="hidden fixed top-0 right-0 h-full w-[400px] max-w-[calc(100vw-2rem)] z-[55] bg-white dark:bg-dark-card border-l border-slate-200 dark:border-dark-border shadow-2xl flex flex-col translate-x-full transition-transform duration-180">
-    <div class="flex items-start justify-between gap-2 px-5 pt-4 pb-3 border-b border-slate-100 dark:border-dark-border/60">
+  <aside id="channel-drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title" aria-label="Chi tiết kênh" tabindex="-1" class="hidden fixed top-0 right-0 h-full w-[400px] max-w-[calc(100vw-2rem)] z-[55] bg-white dark:bg-dark-card border-l border-slate-200 dark:border-dark-border shadow-2xl flex flex-col translate-x-full transition-transform duration-180">
+    <div class="flex items-start justify-between gap-2 px-5 pt-4 pb-3 border-b border-slate-100 dark:border-dark-border/60 shrink-0">
       <div class="min-w-0 flex-1">
-        <h3 id="drawer-title" class="flex items-center gap-2 text-sm font-extrabold text-slate-800 dark:text-slate-100 min-w-0"></h3>
+        <h3 id="drawer-title" class="flex items-center gap-2 text-sm font-extrabold text-slate-800 dark:text-slate-100 min-w-0">Chi tiết kênh</h3>
         <p id="drawer-sub" class="text-[11px] text-slate-400 mt-0.5 truncate"></p>
       </div>
-      <button onclick="closeChannelDrawer()" class="w-8 h-8 shrink-0 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18 18 6M6 6l12 12"/></svg></button>
+      <button onclick="closeChannelDrawer()" aria-label="Đóng chi tiết kênh" class="w-8 h-8 shrink-0 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18 18 6M6 6l12 12"/></svg></button>
     </div>
-    <div id="drawer-tabs" class="flex gap-4 px-5 pt-3"></div>
+    <div id="drawer-tabs" class="flex gap-4 px-5 pt-3 shrink-0"></div>
     <div id="drawer-body" class="flex-1 overflow-y-auto"></div>
   </aside>
 
@@ -872,21 +945,27 @@
   <!-- ============================================================ -->
 
   <!-- Add Account Modal (phóng to đồng bộ) -->
-  <div id="modal-add-account" class="fixed inset-0 bg-black/60 glass z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border w-full max-w-xl rounded-2xl p-8 shadow-2xl space-y-5 transition-all">
-      <h3 class="text-xl font-extrabold">Thêm Tài Khoản Google & Phân Nhánh</h3>
-      <div class="space-y-4">
+  <div id="modal-add-account" role="dialog" aria-modal="true" aria-labelledby="modal-add-account-title" tabindex="-1" class="fixed inset-0 bg-black/60 glass z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border w-full max-w-xl max-h-[calc(100vh-2rem)] flex flex-col rounded-2xl shadow-2xl transition-all">
+      <div class="p-6 pb-4 border-b border-slate-100 dark:border-dark-border shrink-0 flex items-center justify-between">
+        <h3 id="modal-add-account-title" class="text-xl font-extrabold text-slate-800 dark:text-slate-100">Thêm Tài Khoản Google & Phân Nhánh</h3>
+        <button onclick="closeModal('modal-add-account')" aria-label="Đóng cửa sổ" class="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18 18 6M6 6l12 12"/></svg></button>
+      </div>
+      <div id="modal-add-account-body" class="p-6 overflow-y-auto max-h-[calc(100vh-12rem)] space-y-4 flex-1">
         <div>
-          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Tên hiển thị</label>
-          <input type="text" id="modal-acc-name" placeholder="VD: Tài khoản chính #01" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
+          <label for="modal-acc-name" class="text-sm font-bold text-slate-500 dark:text-slate-300">Tên hiển thị</label>
+          <input type="text" id="modal-acc-name" aria-describedby="error-modal-acc-name" placeholder="VD: Tài khoản chính #01" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
+          <p id="error-modal-acc-name" class="text-xs text-red-500 mt-1 hidden" role="alert"></p>
         </div>
         <div>
-          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Gmail chính</label>
-          <input type="email" id="modal-acc-email" placeholder="VD: yourname@gmail.com" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
+          <label for="modal-acc-email" class="text-sm font-bold text-slate-500 dark:text-slate-300">Gmail chính</label>
+          <input type="email" id="modal-acc-email" aria-describedby="error-modal-acc-email" placeholder="VD: yourname@gmail.com" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
+          <p id="error-modal-acc-email" class="text-xs text-red-500 mt-1 hidden" role="alert"></p>
         </div>
         <div>
-          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Chủ đề / Ghi chú</label>
-          <input type="text" id="modal-acc-notes" placeholder="VD: Review công nghệ, Vlog..." class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
+          <label for="modal-acc-notes" class="text-sm font-bold text-slate-500 dark:text-slate-300">Chủ đề / Ghi chú</label>
+          <input type="text" id="modal-acc-notes" aria-describedby="error-modal-acc-notes" placeholder="VD: Review công nghệ, Vlog..." class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
+          <p id="error-modal-acc-notes" class="text-xs text-red-500 mt-1 hidden" role="alert"></p>
         </div>
         <div>
           <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Logo nhận dạng <span class="font-normal text-slate-400">— ảnh nhỏ giúp phân biệt tài khoản</span></label>
@@ -913,7 +992,7 @@
           <p class="text-xs text-slate-400 mt-2">Không chọn = chỉ tạo tài khoản, chưa tạo kênh nào. Có thể sửa kênh sau.</p>
         </div>
       </div>
-      <div class="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-dark-border">
+      <div class="p-6 pt-4 border-t border-slate-100 dark:border-dark-border shrink-0 flex justify-end gap-3">
         <button onclick="closeModal('modal-add-account')" class="px-6 py-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-xl text-base font-bold transition-all">Hủy</button>
         <button onclick="submitAddAccount()" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-base font-bold transition-all">Lưu tài khoản</button>
       </div>
@@ -921,25 +1000,28 @@
   </div>
 
   <!-- Edit Account Modal (sửa tên + đổi logo nhận dạng) -->
-  <div id="modal-edit-account" class="fixed inset-0 bg-black/60 glass z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border w-full max-w-xl rounded-2xl p-8 shadow-2xl space-y-5 transition-all">
-      <div class="flex items-center justify-between">
-        <h3 class="text-xl font-extrabold">Sửa Tài Khoản Google</h3>
-        <button onclick="closeModal('modal-edit-account')" class="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18 18 6M6 6l12 12"/></svg></button>
+  <div id="modal-edit-account" role="dialog" aria-modal="true" aria-labelledby="modal-edit-account-title" tabindex="-1" class="fixed inset-0 bg-black/60 glass z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border w-full max-w-xl max-h-[calc(100vh-2rem)] flex flex-col rounded-2xl shadow-2xl transition-all">
+      <div class="p-6 pb-4 border-b border-slate-100 dark:border-dark-border shrink-0 flex items-center justify-between">
+        <h3 id="modal-edit-account-title" class="text-xl font-extrabold text-slate-800 dark:text-slate-100">Sửa Tài Khoản Google</h3>
+        <button onclick="closeModal('modal-edit-account')" aria-label="Đóng cửa sổ" class="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18 18 6M6 6l12 12"/></svg></button>
       </div>
       <input type="hidden" id="modal-editacc-id">
-      <div class="space-y-4">
+      <div id="modal-edit-account-body" class="p-6 overflow-y-auto max-h-[calc(100vh-12rem)] space-y-4 flex-1">
         <div>
-          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Tên hiển thị</label>
-          <input type="text" id="modal-editacc-name" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
+          <label for="modal-editacc-name" class="text-sm font-bold text-slate-500 dark:text-slate-300">Tên hiển thị</label>
+          <input type="text" id="modal-editacc-name" aria-describedby="error-modal-editacc-name" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
+          <p id="error-modal-editacc-name" class="text-xs text-red-500 mt-1 hidden" role="alert"></p>
         </div>
         <div>
-          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Gmail chính</label>
-          <input type="email" id="modal-editacc-email" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
+          <label for="modal-editacc-email" class="text-sm font-bold text-slate-500 dark:text-slate-300">Gmail chính</label>
+          <input type="email" id="modal-editacc-email" aria-describedby="error-modal-editacc-email" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
+          <p id="error-modal-editacc-email" class="text-xs text-red-500 mt-1 hidden" role="alert"></p>
         </div>
         <div>
-          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Chủ đề / Ghi chú</label>
-          <input type="text" id="modal-editacc-notes" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
+          <label for="modal-editacc-notes" class="text-sm font-bold text-slate-500 dark:text-slate-300">Chủ đề / Ghi chú</label>
+          <input type="text" id="modal-editacc-notes" aria-describedby="error-modal-editacc-notes" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
+          <p id="error-modal-editacc-notes" class="text-xs text-red-500 mt-1 hidden" role="alert"></p>
         </div>
         <div>
           <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Logo nhận dạng</label>
@@ -955,7 +1037,7 @@
           </div>
         </div>
       </div>
-      <div class="flex justify-between gap-3 pt-4 border-t border-slate-100 dark:border-dark-border">
+      <div class="p-6 pt-4 border-t border-slate-100 dark:border-dark-border shrink-0 flex justify-between gap-3">
         <button onclick="deleteAccount(document.getElementById('modal-editacc-id').value)" class="px-6 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl text-base font-bold transition-all">Xóa tài khoản</button>
         <div class="flex gap-3">
           <button onclick="closeModal('modal-edit-account')" class="px-6 py-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-xl text-base font-bold transition-all">Hủy</button>
@@ -966,30 +1048,32 @@
   </div>
 
   <!-- Platform Modal (thêm/sửa social) -->
-  <div id="modal-platform" class="fixed inset-0 bg-black/60 glass z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border w-full max-w-xl rounded-2xl p-8 shadow-2xl space-y-5 transition-all">
-      <div class="flex items-center justify-between">
-        <h3 class="text-xl font-extrabold" id="modal-platform-title">Thêm mạng xã hội</h3>
-        <button onclick="closeModal('modal-platform')" class="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18 18 6M6 6l12 12"/></svg></button>
+  <div id="modal-platform" role="dialog" aria-modal="true" aria-labelledby="modal-platform-title" tabindex="-1" class="fixed inset-0 bg-black/60 glass z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border w-full max-w-xl max-h-[calc(100vh-2rem)] flex flex-col rounded-2xl shadow-2xl transition-all">
+      <div class="p-6 pb-4 border-b border-slate-100 dark:border-dark-border shrink-0 flex items-center justify-between">
+        <h3 class="text-xl font-extrabold text-slate-800 dark:text-slate-100" id="modal-platform-title">Thêm mạng xã hội</h3>
+        <button onclick="closeModal('modal-platform')" aria-label="Đóng cửa sổ" class="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18 18 6M6 6l12 12"/></svg></button>
       </div>
       <input type="hidden" id="modal-plat-editing" value="">
-      <div class="space-y-4">
+      <div id="modal-platform-body" class="p-6 overflow-y-auto max-h-[calc(100vh-12rem)] space-y-4 flex-1">
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Mã social (A-Z, 0-9, _)</label>
-            <input type="text" id="modal-plat-code" placeholder="VD: SHOPEE" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors font-mono uppercase">
+            <label for="modal-plat-code" class="text-sm font-bold text-slate-500 dark:text-slate-300">Mã nền tảng (A-Z, 0-9, _)</label>
+            <input type="text" id="modal-plat-code" aria-describedby="error-modal-plat-code" placeholder="VD: SHOPEE" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors font-mono uppercase">
+            <p id="error-modal-plat-code" class="text-xs text-red-500 mt-1 hidden" role="alert"></p>
           </div>
           <div>
-            <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Tiền tố ID kênh</label>
+            <label for="modal-plat-prefix" class="text-sm font-bold text-slate-500 dark:text-slate-300">Tiền tố ID kênh</label>
             <input type="text" id="modal-plat-prefix" placeholder="VD: sh" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors font-mono lowercase">
           </div>
         </div>
         <div>
-          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Tên hiển thị</label>
-          <input type="text" id="modal-plat-name" placeholder="VD: Shopee" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
+          <label for="modal-plat-name" class="text-sm font-bold text-slate-500 dark:text-slate-300">Tên hiển thị</label>
+          <input type="text" id="modal-plat-name" aria-describedby="error-modal-plat-name" placeholder="VD: Shopee" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
+          <p id="error-modal-plat-name" class="text-xs text-red-500 mt-1 hidden" role="alert"></p>
         </div>
         <div>
-          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Logo social</label>
+          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Logo nền tảng</label>
           <div class="flex items-center gap-3 mt-1.5">
             <img id="modal-plat-logo-preview" src="" alt="" class="hidden w-14 h-14 rounded-xl object-cover border border-slate-200 dark:border-dark-border shadow-xs">
             <div class="flex-1 flex gap-2">
@@ -1000,38 +1084,38 @@
           </div>
         </div>
         <div>
-          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">URL mở mặc định (Studio / trang chủ)</label>
+          <label for="modal-plat-studio" class="text-sm font-bold text-slate-500 dark:text-slate-300">URL mở mặc định (Studio / trang chủ)</label>
           <input type="text" id="modal-plat-studio" placeholder="https://..." class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
         </div>
         <div>
-          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">URL đăng nhập <span class="font-normal text-slate-400">— để trống = dùng URL trên</span></label>
+          <label for="modal-plat-login" class="text-sm font-bold text-slate-500 dark:text-slate-300">URL đăng nhập <span class="font-normal text-slate-400">— để trống = dùng URL trên</span></label>
           <input type="text" id="modal-plat-login" placeholder="https://..." class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
         </div>
       </div>
-      <div class="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-dark-border">
+      <div class="p-6 pt-4 border-t border-slate-100 dark:border-dark-border shrink-0 flex justify-end gap-3">
         <button onclick="closeModal('modal-platform')" class="px-6 py-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-xl text-base font-bold transition-all">Hủy</button>
-        <button onclick="submitPlatform()" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-base font-bold transition-all">Lưu social</button>
+        <button onclick="submitPlatform()" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-base font-bold transition-all">Lưu nền tảng</button>
       </div>
     </div>
   </div>
 
   <!-- Add Channel Modal (thêm kênh lẻ cho 1 tài khoản) -->
-  <div id="modal-add-channel" class="fixed inset-0 bg-black/60 glass z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border w-full max-w-lg rounded-2xl p-8 shadow-2xl space-y-5 transition-all">
-      <div class="flex items-center justify-between">
-        <h3 class="text-xl font-extrabold">Thêm kênh</h3>
-        <button onclick="closeModal('modal-add-channel')" class="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18 18 6M6 6l12 12"/></svg></button>
+  <div id="modal-add-channel" role="dialog" aria-modal="true" aria-labelledby="modal-add-channel-title" tabindex="-1" class="fixed inset-0 bg-black/60 glass z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border w-full max-w-lg max-h-[calc(100vh-2rem)] flex flex-col rounded-2xl shadow-2xl transition-all">
+      <div class="p-6 pb-4 border-b border-slate-100 dark:border-dark-border shrink-0 flex items-center justify-between">
+        <h3 id="modal-add-channel-title" class="text-xl font-extrabold text-slate-800 dark:text-slate-100">Thêm kênh</h3>
+        <button onclick="closeModal('modal-add-channel')" aria-label="Đóng cửa sổ" class="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18 18 6M6 6l12 12"/></svg></button>
       </div>
-      <p id="modal-addch-subtitle" class="text-sm text-slate-500 dark:text-slate-400 -mt-3"></p>
-      <input type="hidden" id="modal-addch-account" value="">
-      <div class="space-y-4">
+      <div id="modal-add-channel-body" class="p-6 overflow-y-auto max-h-[calc(100vh-12rem)] space-y-4 flex-1">
+        <p id="modal-addch-subtitle" class="text-sm text-slate-500 dark:text-slate-400"></p>
+        <input type="hidden" id="modal-addch-account" value="">
         <div>
-          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Mạng xã hội</label>
+          <label for="modal-addch-platform" class="text-sm font-bold text-slate-500 dark:text-slate-300">Mạng xã hội</label>
           <select id="modal-addch-platform" onchange="previewAddChannel()" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 font-semibold outline-none focus:border-blue-500 cursor-pointer"></select>
         </div>
         <div id="modal-addch-preview" class="flex items-center gap-3 p-3 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl"></div>
       </div>
-      <div class="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-dark-border">
+      <div class="p-6 pt-4 border-t border-slate-100 dark:border-dark-border shrink-0 flex justify-end gap-3">
         <button onclick="closeModal('modal-add-channel')" class="px-6 py-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-xl text-base font-bold transition-all">Hủy</button>
         <button onclick="submitAddChannel()" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-base font-bold transition-all">Thêm kênh</button>
       </div>
@@ -1039,41 +1123,42 @@
   </div>
 
   <!-- Edit Channel Modal (phóng to, font lớn dễ nhìn) -->
-  <div id="modal-edit-channel" class="fixed inset-0 bg-black/60 glass z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border w-full max-w-2xl rounded-2xl p-8 shadow-2xl space-y-5 transition-all">
-      <div class="flex items-center justify-between">
-        <h3 class="text-xl font-extrabold" id="modal-edit-title">Chỉnh Sửa Kênh</h3>
-        <button onclick="closeModal('modal-edit-channel')" class="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18 18 6M6 6l12 12"/></svg></button>
+  <div id="modal-edit-channel" role="dialog" aria-modal="true" aria-labelledby="modal-edit-title" tabindex="-1" class="fixed inset-0 bg-black/60 glass z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border w-full max-w-2xl max-h-[calc(100vh-2rem)] flex flex-col rounded-2xl shadow-2xl transition-all">
+      <div class="p-6 pb-4 border-b border-slate-100 dark:border-dark-border shrink-0 flex items-center justify-between">
+        <h3 class="text-xl font-extrabold text-slate-800 dark:text-slate-100" id="modal-edit-title">Chỉnh Sửa Kênh</h3>
+        <button onclick="closeModal('modal-edit-channel')" aria-label="Đóng cửa sổ" class="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18 18 6M6 6l12 12"/></svg></button>
       </div>
-      <p id="modal-edit-subtitle" class="text-sm text-slate-500 dark:text-slate-400 -mt-3"></p>
       <input type="hidden" id="modal-edit-id">
-      <div class="space-y-4">
+      <div id="modal-edit-channel-body" class="p-6 overflow-y-auto max-h-[calc(100vh-12rem)] space-y-4 flex-1">
+        <p id="modal-edit-subtitle" class="text-sm text-slate-500 dark:text-slate-400"></p>
         <div>
-          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Mạng xã hội</label>
+          <label for="modal-edit-platform" class="text-sm font-bold text-slate-500 dark:text-slate-300">Mạng xã hội</label>
           <select id="modal-edit-platform" onchange="onEditChannelPlatformChange()" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 font-semibold outline-none focus:border-blue-500 cursor-pointer"></select>
         </div>
         <div>
-          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Tên kênh hiển thị</label>
-          <input type="text" id="modal-edit-name" placeholder="VD: YouTube #01 (Chủ đề...)"
+          <label for="modal-edit-name" class="text-sm font-bold text-slate-500 dark:text-slate-300">Tên kênh hiển thị</label>
+          <input type="text" id="modal-edit-name" aria-describedby="error-modal-edit-name" placeholder="VD: YouTube #01 (Chủ đề...)"
                  class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
+          <p id="error-modal-edit-name" class="text-xs text-red-500 mt-1 hidden" role="alert"></p>
         </div>
         <div>
-          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Studio URL <span class="font-normal text-slate-400">— đường dẫn vào thẳng trang quản trị</span></label>
+          <label for="modal-edit-studio" class="text-sm font-bold text-slate-500 dark:text-slate-300">Studio URL <span class="font-normal text-slate-400">— đường dẫn vào thẳng trang quản trị</span></label>
           <input type="text" id="modal-edit-studio" placeholder="https://..."
                  class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
         </div>
         <div>
-          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Login URL <span class="font-normal text-slate-400">— đường dẫn setup lần đầu</span></label>
+          <label for="modal-edit-login" class="text-sm font-bold text-slate-500 dark:text-slate-300">Login URL <span class="font-normal text-slate-400">— đường dẫn thiết lập lần đầu</span></label>
           <input type="text" id="modal-edit-login" placeholder="https://..."
                  class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 outline-none focus:border-blue-500 transition-colors">
         </div>
         <div>
-          <label class="text-sm font-bold text-slate-500 dark:text-slate-300">Google Account liên kết</label>
+          <label for="modal-edit-acc-select" class="text-sm font-bold text-slate-500 dark:text-slate-300">Tài khoản Google liên kết</label>
           <select id="modal-edit-acc-select" class="w-full h-12 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl px-4 text-base mt-1.5 font-semibold outline-none focus:border-blue-500 cursor-pointer">
           </select>
         </div>
       </div>
-      <div class="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-dark-border">
+      <div class="p-6 pt-4 border-t border-slate-100 dark:border-dark-border shrink-0 flex justify-end gap-3">
         <button onclick="closeModal('modal-edit-channel')" class="px-6 py-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-xl text-base font-bold transition-all">Hủy</button>
         <button onclick="submitEditChannel()" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-base font-bold shadow-sm shadow-blue-600/20 transition-all">Lưu cập nhật</button>
       </div>
@@ -1084,7 +1169,7 @@
   <!-- FLOATING ACTION BUTTON (FAB) CLUSTER: XẢ PHIÊN & ĐẾM PHIÊN    -->
   <!-- ============================================================ -->
   <div id="fab-sessions-cluster" class="hidden fixed bottom-6 right-6 z-40 flex-col items-end gap-2 pointer-events-auto select-none">
-    <button id="fab-release-btn" onclick="releaseMySessions()" title="Xả các phiên đang mở (Đóng tab & giải phóng kênh)"
+    <button id="fab-release-btn" onclick="releaseMySessions()" title="Giải phóng các phiên đang mở (Đóng tab & giải phóng kênh)"
             class="group relative h-12 px-4 rounded-full flex items-center gap-2.5 transition-all duration-300 shadow-2xl glass font-bold text-xs bg-slate-900/90 dark:bg-dark-card/95 hover:scale-[1.03] active:scale-[0.98] text-slate-200 border border-slate-700/60 dark:border-dark-border cursor-pointer">
       <!-- Chấm nhấp nháy khi có phiên đang mở -->
       <span id="fab-pulse-dot" class="hidden absolute -top-1 -right-1 flex h-3.5 w-3.5">
@@ -1099,7 +1184,7 @@
         </svg>
       </span>
 
-      <span class="font-extrabold tracking-wide">Xả phiên</span>
+      <span class="font-extrabold tracking-wide">Giải phóng phiên</span>
 
       <!-- Biến đếm các phiên đang mở -->
       <span id="fab-held-count" class="px-2 py-0.5 rounded-full text-[11px] font-black bg-rose-500 text-white shadow-xs min-w-[20px] text-center transition-all">
@@ -1111,40 +1196,42 @@
   <!-- ============================================================ -->
   <!-- MODAL CẬP NHẬT ỨNG DỤNG (GitHub Releases)                    -->
   <!-- ============================================================ -->
-  <div id="modal-update-dialog" class="fixed inset-0 bg-black/60 glass z-[60] hidden flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border w-full max-w-lg rounded-2xl p-6 shadow-2xl space-y-4 transition-all">
-      <div class="flex items-start justify-between gap-3">
+  <div id="modal-update-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-update-title" tabindex="-1" class="fixed inset-0 bg-black/60 glass z-[60] hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border w-full max-w-lg max-h-[calc(100vh-2rem)] flex flex-col rounded-2xl shadow-2xl transition-all">
+      <div class="p-6 pb-3 border-b border-slate-100 dark:border-dark-border/60 shrink-0 flex items-start justify-between gap-3">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl bg-blue-600/10 text-blue-500 flex items-center justify-center shrink-0">
             <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           </div>
           <div>
-            <h3 class="text-base font-extrabold text-slate-800 dark:text-slate-100">Đã có phiên bản mới!</h3>
-            <p class="text-xs text-slate-400 mt-0.5">Phiên bản <span id="update-new-version" class="font-bold text-emerald-500">v1.0.1</span> (Hiện tại: <span id="update-cur-version">v1.0.0</span>)</p>
+            <h3 id="modal-update-title" class="text-base font-extrabold text-slate-800 dark:text-slate-100">Đã có phiên bản mới!</h3>
+            <p class="text-xs text-slate-400 mt-0.5">Phiên bản <span id="update-new-version" class="font-bold text-emerald-500">v1.1.0</span> (Hiện tại: <span id="update-cur-version">v1.1.0</span>)</p>
           </div>
         </div>
-        <button onclick="closeUpdateDialog()" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-all">
+        <button onclick="closeUpdateDialog()" aria-label="Đóng thông báo cập nhật" class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-all">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
         </button>
       </div>
 
-      <div>
-        <label class="text-xs font-bold text-slate-500 dark:text-slate-400">Nội dung cập nhật (Release Notes):</label>
-        <div id="update-release-notes" class="mt-1.5 p-3.5 bg-slate-50 dark:bg-dark-input rounded-xl text-xs text-slate-600 dark:text-slate-300 font-mono whitespace-pre-wrap max-h-48 overflow-y-auto border border-slate-200 dark:border-dark-border leading-relaxed"></div>
+      <div id="modal-update-dialog-body" class="p-6 overflow-y-auto max-h-[calc(100vh-12rem)] space-y-4 flex-1">
+        <div>
+          <label class="text-xs font-bold text-slate-500 dark:text-slate-400">Nội dung cập nhật (Release Notes):</label>
+          <div id="update-release-notes" class="mt-1.5 p-3.5 bg-slate-50 dark:bg-dark-input rounded-xl text-xs text-slate-600 dark:text-slate-300 font-mono whitespace-pre-wrap max-h-48 overflow-y-auto border border-slate-200 dark:border-dark-border leading-relaxed"></div>
+        </div>
+
+        <!-- Download Progress Bar (Ẩn mặc định) -->
+        <div id="update-progress-container" class="hidden space-y-1.5">
+          <div class="flex justify-between text-xs font-bold text-slate-500 dark:text-slate-300">
+            <span>Đang tải bản cập nhật...</span>
+            <span id="update-progress-percent">0%</span>
+          </div>
+          <div class="w-full h-2.5 bg-slate-100 dark:bg-dark-input rounded-full overflow-hidden border border-slate-200 dark:border-dark-border">
+            <div id="update-progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" class="h-full bg-blue-600 transition-all duration-150" style="width: 0%"></div>
+          </div>
+        </div>
       </div>
 
-      <!-- Download Progress Bar (Ẩn mặc định) -->
-      <div id="update-progress-container" class="hidden space-y-1.5">
-        <div class="flex justify-between text-xs font-bold text-slate-500 dark:text-slate-300">
-          <span>Đang tải bản cập nhật...</span>
-          <span id="update-progress-percent">0%</span>
-        </div>
-        <div class="w-full h-2.5 bg-slate-100 dark:bg-dark-input rounded-full overflow-hidden border border-slate-200 dark:border-dark-border">
-          <div id="update-progress-bar" class="h-full bg-blue-600 transition-all duration-150" style="width: 0%"></div>
-        </div>
-      </div>
-
-      <div class="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100 dark:border-dark-border/60">
+      <div class="p-6 pt-3 flex items-center justify-end gap-2.5 border-t border-slate-100 dark:border-dark-border/60 shrink-0">
         <button type="button" onclick="closeUpdateDialog()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-all">Để sau</button>
         <button type="button" onclick="openGitHubRelease()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-dark-input hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-all flex items-center gap-1.5">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
@@ -1179,5 +1266,39 @@
   <script src="./js/presence.js"></script>
   <script src="./js/settings.js"></script>
   <script src="./js/app.js"></script>
+
+  <!-- Responsive Mobile Off-Canvas Drawer Controller (Milestone 1 / R4) -->
+  <script>
+    function toggleMobileNav(force) {
+      const sb = document.getElementById('sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      if (!sb) return;
+      const willOpen = typeof force === 'boolean' ? force : !sb.classList.contains('mobile-open');
+      sb.classList.toggle('mobile-open', willOpen);
+      if (backdrop) backdrop.classList.toggle('hidden', !willOpen);
+    }
+
+    // Auto-close mobile drawer when user clicks nav buttons on small viewports
+    document.addEventListener('DOMContentLoaded', () => {
+      const sb = document.getElementById('sidebar');
+      if (sb) {
+        sb.addEventListener('click', (e) => {
+          if (window.innerWidth < 768 && (e.target.closest('nav button') || e.target.closest('#platform-filter-list button') || e.target.closest('#nav-btn-settings'))) {
+            toggleMobileNav(false);
+          }
+        });
+      }
+    });
+
+    // Close mobile drawer on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const sb = document.getElementById('sidebar');
+        if (sb && sb.classList.contains('mobile-open')) {
+          toggleMobileNav(false);
+        }
+      }
+    });
+  </script>
 </body>
 </html>

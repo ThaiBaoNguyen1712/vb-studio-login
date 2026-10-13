@@ -1,4 +1,4 @@
-// health.js — module Kiểm tra phiên riêng biệt: chạy đợt kiểm tra, lịch sử runs, report chi tiết.
+// health.js — module Kiểm tra phiên riêng biệt: chạy đợt kiểm tra, lịch sử đợt kiểm tra, báo cáo chi tiết.
 (function () {
   let pollTimer = null;
 
@@ -85,6 +85,17 @@
   function paintHistory() {
     const tbody = document.getElementById('health-runs-tbody');
     if (!tbody) return;
+
+    if (!tbody._delegated) {
+      tbody._delegated = true;
+      tbody.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-action="select-health-run"]');
+        if (btn && btn.dataset.runId) {
+          selectHealthRun(btn.dataset.runId);
+        }
+      });
+    }
+
     const list = runs();
     if (!list.length) {
       tbody.innerHTML = '<tr><td colspan="6" class="py-10 px-4 text-center text-slate-400 text-sm">Chưa có đợt kiểm tra nào.<br>Bấm “Kiểm tra tất cả kênh” để chạy đợt đầu tiên.</td></tr>';
@@ -96,8 +107,8 @@
       return `
         <tr class="transition-colors ${sel ? 'bg-blue-500/5' : 'hover:bg-slate-50/50 dark:hover:bg-dark-input/50'}">
           <td class="py-3 px-4 text-sm font-semibold whitespace-nowrap">${fmtTime(r.started_at)}</td>
-          <td class="py-3 px-4 text-sm">${r.triggered_by || '-'}</td>
-          <td class="py-3 px-4 text-sm whitespace-nowrap">${r.scope === 'ALL' ? 'Tất cả kênh' : `<span class="font-mono text-xs">${r.scope}</span>`}</td>
+          <td class="py-3 px-4 text-sm">${escapeHtml(r.triggered_by || '-')}</td>
+          <td class="py-3 px-4 text-sm whitespace-nowrap">${r.scope === 'ALL' ? 'Tất cả kênh' : `<span class="font-mono text-xs">${escapeHtml(r.scope)}</span>`}</td>
           <td class="py-3 px-4 text-sm text-center whitespace-nowrap">
             <b class="text-emerald-500">${st.alive || 0}</b> /
             <b class="text-red-400">${st.dead || 0}</b> /
@@ -106,7 +117,7 @@
           </td>
           <td class="py-3 px-4 text-center">${runStatusPill(r)}</td>
           <td class="py-3 px-4 text-right">
-            <button onclick="selectHealthRun('${r.id}')" class="h-8 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all">Xem report</button>
+            <button type="button" data-action="select-health-run" data-run-id="${escapeHtml(r.id)}" class="h-8 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all">Xem báo cáo</button>
           </td>
         </tr>`;
     }).join('');
@@ -136,21 +147,38 @@
     const tbody = document.getElementById('health-detail-tbody');
     const title = document.getElementById('health-detail-title');
     if (!tbody || !run) return;
+
+    if (!tbody._delegated) {
+      tbody._delegated = true;
+      tbody.addEventListener('click', (e) => {
+        const launchBtn = e.target.closest('[data-action="launch-channel"]');
+        if (launchBtn && launchBtn.dataset.channelId && typeof launchChannel === 'function') {
+          launchChannel(launchBtn.dataset.channelId);
+          return;
+        }
+        const drawerBtn = e.target.closest('[data-action="open-channel-drawer"]');
+        if (drawerBtn && drawerBtn.dataset.channelId && typeof openChannelDrawer === 'function') {
+          openChannelDrawer(drawerBtn.dataset.channelId);
+          return;
+        }
+      });
+    }
+
     if (title) title.innerText = `${run.id} • ${fmtTime(run.started_at)}`;
     const results = run.results || [];
     if (!results.length) {
-      tbody.innerHTML = '<tr><td colspan="4" class="py-8 px-4 text-center text-slate-400 text-sm">Đợt này chưa có kết quả chi tiết (đang chạy hoặc run cũ trước khi có report).</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" class="py-8 px-4 text-center text-slate-400 text-sm">Đợt này chưa có kết quả chi tiết (đang chạy hoặc đợt kiểm tra cũ trước khi có báo cáo).</td></tr>';
       return;
     }
     tbody.innerHTML = results.map(r => `
       <tr class="hover:bg-slate-50/50 dark:hover:bg-dark-input/50 transition-colors">
-        <td class="py-3 px-4 text-sm font-bold">${r.channel_name || r.channel_id} <span class="text-slate-400 font-normal text-xs">(${r.channel_id})</span></td>
+        <td class="py-3 px-4 text-sm font-bold">${escapeHtml(r.channel_name || r.channel_id)} <span class="text-slate-400 font-normal text-xs">(${escapeHtml(r.channel_id)})</span></td>
         <td class="py-3 px-4 text-center">${resultPill(r.status)}</td>
-        <td class="py-3 px-4 text-xs text-slate-500 dark:text-slate-400">${(r.detail || '').replace(/</g, '&lt;')}</td>
+        <td class="py-3 px-4 text-xs text-slate-500 dark:text-slate-400">${escapeHtml(r.detail || '')}</td>
         <td class="py-3 px-4 text-right whitespace-nowrap">
           ${r.status === 'dead'
-            ? `<button onclick="launchChannel('${r.channel_id}')" class="h-8 px-3 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-bold transition-all">Setup lại</button>`
-            : `<button onclick="openChannelDrawer('${r.channel_id}')" class="h-8 px-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg text-xs font-bold transition-all">Chi tiết</button>`}
+            ? `<button type="button" data-action="launch-channel" data-channel-id="${escapeHtml(r.channel_id)}" class="h-8 px-3 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-bold transition-all">Thiết lập lại</button>`
+            : `<button type="button" data-action="open-channel-drawer" data-channel-id="${escapeHtml(r.channel_id)}" class="h-8 px-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg text-xs font-bold transition-all">Chi tiết</button>`}
         </td>
       </tr>`).join('');
   }
@@ -181,7 +209,11 @@
     document.getElementById('health-progress-text').innerText =
       `Đang kiểm tra ${Math.min(done + 1, total)}/${total} — ${run.triggered_by || ''}`;
     document.getElementById('health-progress-pct').innerText = pct + '%';
-    document.getElementById('health-progress-bar').style.width = pct + '%';
+    const bar = document.getElementById('health-progress-bar');
+    if (bar) {
+      bar.style.width = pct + '%';
+      bar.setAttribute('aria-valuenow', pct);
+    }
   }
 
   function hideProgress() {
@@ -228,7 +260,7 @@
     if (!n) { showToast('Không có kênh nào có phiên để kiểm tra.', 'warning'); return; }
     const ok = await showConfirm({
       title: 'Kiểm tra hàng loạt',
-      message: `Phân tích cookies ${n} kênh (offline, không mở trình duyệt, không nguy cơ khóa acc)? Kênh đang mở sẽ bị bỏ qua. Kết quả lưu thành report xem lại được.`,
+      message: `Phân tích cookies ${n} kênh (ngoại tuyến từ tệp dữ liệu cục bộ, không gửi yêu cầu mạng)? Kênh đang mở sẽ bị bỏ qua. Kết quả lưu thành báo cáo xem lại được.`,
       okText: 'Bắt đầu kiểm tra',
       okDanger: false
     });

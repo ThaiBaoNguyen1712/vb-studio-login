@@ -31,7 +31,7 @@ class UpdateService:
 
     def __init__(self, settings_service: Optional[SettingsService] = None):
         self.settings_service = settings_service or SettingsService()
-        self.current_version = self.settings_service.get("app_info", "version", APP_VERSION)
+        self.current_version = Config.APP_VERSION
         self.github_repo = os.getenv("GITHUB_REPO") or self.settings_service.get(
             "app_info", "github_repo", DEFAULT_GITHUB_REPO
         )
@@ -60,6 +60,13 @@ class UpdateService:
         Kiểm tra phiên bản mới nhất từ GitHub Releases API.
         Trả về dictionary gồm trạng thái, phiên bản mới, ghi chú phát hành, và link tải.
         """
+        self.current_version = Config.APP_VERSION
+        self.github_repo = os.getenv("GITHUB_REPO") or self.settings_service.get(
+            "app_info", "github_repo", DEFAULT_GITHUB_REPO
+        )
+        self.github_token = os.getenv("GITHUB_TOKEN") or self.settings_service.get(
+            "app_info", "github_token", ""
+        )
         repo = self.github_repo.strip().strip("/")
         api_url = f"https://api.github.com/repos/{repo}/releases/latest"
         headers = self._get_headers()

@@ -78,6 +78,11 @@
       if (ch) {
         ch.status = status;
         ch.locked_by = locked_by;
+        // Co sync online: giu flag lock remote de UI hien "may khac" + nut Xin mo.
+        if ('locked_remote' in e.detail) ch.locked_remote = e.detail.locked_remote;
+        else if (status !== 'IN_USE') ch.locked_remote = false;
+        if ('locked_machine' in e.detail) ch.locked_machine = e.detail.locked_machine;
+        else if (status !== 'IN_USE') ch.locked_machine = null;
         if ('in_use_since' in e.detail) ch.in_use_since = e.detail.in_use_since;
         if ('last_heartbeat' in e.detail) ch.last_heartbeat = e.detail.last_heartbeat;
         renderDashboard();
@@ -98,6 +103,9 @@
         showToast(`Kênh ${d.channel_id} đã được nhường. Bạn có thể mở ngay!`, 'success');
         try { await notifyImportant('approve', 'Được nhường kênh', `${d.channel_id} đã được nhường. Mở ngay!`); } catch (err) {}
         try { await window.pywebview.api.close_channel_popups(d.channel_id); } catch (err) {}
+        refreshData(true);
+      } else if (d.action === 'deny' && d.channel_id) {
+        showToast(`Yêu cầu mở kênh ${d.channel_id} đã bị từ chối${d.approver ? ` bởi ${d.approver}` : ''}.`, 'warning');
         refreshData(true);
       } else if (d.action === 'force_unlock' && d.channel_id) {
         try { await window.pywebview.api.close_channel_popups(d.channel_id); } catch (err) {}
@@ -150,6 +158,32 @@
       checkFirebaseStatus();
     });
 
+    // Dynamic Header Title & Count Synchronization
+    function updateHeaderTitle(viewCode) {
+      const code = viewCode || appState.current_view || 'DASHBOARD';
+      const titleEl = document.getElementById('top-title');
+      if (!titleEl) return;
+      const channelCount = (appState.channels || []).length;
+      const platformCount = (appState.platforms || []).length;
+
+      if (code === 'DASHBOARD') {
+        titleEl.innerHTML = `Tất cả các kênh (<span id="top-count">${channelCount}</span>)`;
+        document.title = 'VB-Studio — Quản lý kênh';
+      } else if (code === 'TABLE') {
+        titleEl.innerHTML = `Bảng dữ liệu kênh (<span id="top-count">${channelCount}</span>)`;
+        document.title = 'VB-Studio — Bảng dữ liệu';
+      } else if (code === 'SOCIALS') {
+        titleEl.innerHTML = `Quản lý nền tảng (<span id="top-count">${platformCount}</span>)`;
+        document.title = 'VB-Studio — Quản lý nền tảng';
+      } else if (code === 'HEALTH') {
+        titleEl.innerHTML = `Phiên hoạt động (<span id="top-count">${channelCount}</span>)`;
+        document.title = 'VB-Studio — Phiên hoạt động';
+      } else if (code === 'SETTINGS') {
+        titleEl.innerHTML = `Cài đặt hệ thống`;
+        document.title = 'VB-Studio — Cài đặt hệ thống';
+      }
+    }
+
     // Navigation View Switcher
     function switchView(viewCode) {
       appState.current_view = viewCode;
@@ -159,16 +193,20 @@
       document.getElementById('view-health').classList.toggle('hidden', viewCode !== 'HEALTH');
       document.getElementById('view-settings').classList.toggle('hidden', viewCode !== 'SETTINGS');
 
-      // Update Nav Buttons
+      // Update Nav Buttons with aria-current="page"
       ['DASHBOARD', 'TABLE', 'SOCIALS', 'HEALTH', 'SETTINGS'].forEach(code => {
         const btn = document.getElementById(`nav-btn-${code.toLowerCase()}`);
         if (!btn) return;
         if (code === viewCode) {
           btn.className = 'sb-center w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold transition-all bg-blue-600 text-white shadow-sm shadow-blue-500/20';
+          btn.setAttribute('aria-current', 'page');
         } else {
           btn.className = 'sb-center w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-dark-card transition-all';
+          btn.removeAttribute('aria-current');
         }
       });
+
+      updateHeaderTitle(viewCode);
 
       if (viewCode === 'TABLE') renderTableRows();
       if (viewCode === 'SOCIALS') renderSocialsTable();
@@ -193,6 +231,7 @@
           if (appState.current_view === 'SETTINGS') renderSocialsTable();
         }
         renderDashboard();
+        updateHeaderTitle(appState.current_view);
         if (appState.current_view === 'TABLE') renderTableRows();
         if (appState.current_view === 'HEALTH' && typeof refreshHealth === 'function') refreshHealth(false);
         try { if (typeof updateMyHeldCountBadge === 'function') updateMyHeldCountBadge(); } catch (e) {}
@@ -237,7 +276,7 @@
       }
     }
 
-    function clearFilters() {
+    function clearAllFilters() {
       const inp = document.getElementById('input-search');
       if (inp) inp.value = '';
       appState.search_keyword = '';
@@ -246,7 +285,29 @@
       appState.selected_status = 'ALL';
       const selAcc = document.getElementById('select-account-filter');
       if (selAcc) selAcc.value = 'ALL';
-      setPlatformFilter('ALL');
-      setDashboardSort('DEFAULT');
-      setDashboardStatusFilter('ALL');
+
+      // Table view local filters
+      const tableSearch = document.getElementById('table-search');
+      if (tableSearch) tableSearch.value = '';
+      const tableStatus = document.getElementById('table-status-filter');
+      if (tableStatus) tableStatus.value = 'ALL';
+      const tablePlat = document.getElementById('table-platform-filter');
+      if (tablePlat) tablePlat.value = 'ALL';
+      appState.table_q = '';
+      appState.table_status = 'ALL';
+      appState.table_platform = 'ALL';
+
+      if (typeof setPlatformFilter === 'function') setPlatformFilter('ALL');
+      if (typeof setDashboardSort === 'function') setDashboardSort('DEFAULT');
+      if (typeof setDashboardStatusFilter === 'function') setDashboardStatusFilter('ALL');
+      if (typeof updateActiveFilterBar === 'function') updateActiveFilterBar();
+      if (typeof renderDashboard === 'function') renderDashboard();
+      if (typeof renderTableRows === 'function') renderTableRows();
     }
+
+    function clearFilters() {
+      clearAllFilters();
+    }
+
+    window.clearAllFilters = clearAllFilters;
+    window.updateHeaderTitle = updateHeaderTitle;

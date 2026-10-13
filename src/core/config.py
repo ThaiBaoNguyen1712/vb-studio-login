@@ -10,6 +10,8 @@ else:
 
 ENV_PATH = BASE_DIR / ".env"
 
+from src.core.constants import APP_NAME, APP_VERSION
+
 if ENV_PATH.exists():
     load_dotenv(ENV_PATH)
 else:
@@ -17,6 +19,8 @@ else:
 
 
 class Config:
+    APP_NAME: str = APP_NAME
+    APP_VERSION: str = APP_VERSION
     CURRENT_USER_NAME: str = os.getenv("CURRENT_USER_NAME", "User_01")
     
     # Path configuration

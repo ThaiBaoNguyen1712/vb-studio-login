@@ -73,15 +73,68 @@ class SettingsService:
                             self.settings[section].update(values)
                         else:
                             self.settings[section] = values
+
+                    # Luôn đồng bộ app_info.version và app_info.app_name với Config
+                    if "app_info" not in self.settings or not isinstance(self.settings["app_info"], dict):
+                        self.settings["app_info"] = {}
+                    self.settings["app_info"]["version"] = Config.APP_VERSION
+                    self.settings["app_info"]["app_name"] = Config.APP_NAME
+
+                    # Tự động lưu lại nếu version trong settings.json chưa khớp với Config
+                    if saved.get("app_info", {}).get("version") != Config.APP_VERSION:
+                        self.save_settings()
             except Exception as e:
                 logger.error(f"Lỗi đọc file settings.json: {e}")
                 self.settings = json.loads(json.dumps(DEFAULT_SETTINGS))
+                self.settings["app_info"]["version"] = Config.APP_VERSION
+                self.settings["app_info"]["app_name"] = Config.APP_NAME
         return self.settings
 
     def save_settings(self) -> bool:
+        # Luôn đảm bảo app_info đồng bộ với Config trước khi ghi đĩa
+        if "app_info" in self.settings and isinstance(self.settings["app_info"], dict):
+            self.settings["app_info"]["version"] = Config.APP_VERSION
+            self.settings["app_info"]["app_name"] = Config.APP_NAME
+        # Ghi nguyen tu nhu local_repo (temp + rename + retry WinError 5/32).
         try:
-            with open(self.file_path, "w", encoding="utf-8") as f:
-                json.dump(self.settings, f, ensure_ascii=False, indent=2)
+            import os
+            import tempfile
+            import time as _time
+            tmp_path = None
+            try:
+                fd, tmp_path = tempfile.mkstemp(
+                    dir=str(self.file_path.parent),
+                    prefix=self.file_path.name + ".",
+                    suffix=".tmp")
+                with os.fdopen(fd, "w", encoding="utf-8") as f:
+                    json.dump(self.settings, f, ensure_ascii=False, indent=2)
+                    f.flush()
+                    try:
+                        os.fsync(f.fileno())
+                    except Exception:
+                        pass
+                replaced = False
+                for _ in range(50):
+                    try:
+                        os.replace(tmp_path, self.file_path)
+                        replaced = True
+                        break
+                    except OSError as oe:
+                        if getattr(oe, "winerror", None) not in (5, 32):
+                            raise
+                        _time.sleep(0.02)
+                if replaced:
+                    tmp_path = None
+                else:
+                    logger.warning("Rename settings bi khoa lien tuc, ghi de truc tiep.")
+                    with open(self.file_path, "w", encoding="utf-8") as f:
+                        json.dump(self.settings, f, ensure_ascii=False, indent=2)
+            finally:
+                if tmp_path:
+                    try:
+                        os.unlink(tmp_path)
+                    except Exception:
+                        pass
             logger.info("Đã lưu cấu hình cài đặt thành công.")
             return True
         except Exception as e:

@@ -1,54 +1,342 @@
-/* VB-Studio Login - base styles (tach tu index.html) */
-    /* Custom Scrollbar for smooth commercial look */
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #475569; }
-    .glass { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+/* VB-Studio Login - Base Styles, Semantic Tokens, Responsive Shell & Accessibility */
 
-    /* Cuộn dashboard: native, không snap (snap gây khựng), không smooth ép buộc */
-    #cards-grid.h-scroll {
-      scrollbar-width: thin;
-      scrollbar-color: #334155 transparent;
-      overscroll-behavior-x: contain;
-    }
-    /* Thanh cuộn mảnh, tối giản cho toàn app */
-    #main-scroll-container, #cards-grid.h-scroll {
-      scrollbar-width: thin;
-      scrollbar-color: #334155 transparent;
-    }
-    #main-scroll-container::-webkit-scrollbar, #cards-grid.h-scroll::-webkit-scrollbar { height: 8px; width: 8px; }
-    #main-scroll-container::-webkit-scrollbar-track, #cards-grid.h-scroll::-webkit-scrollbar-track { background: transparent; }
-    #main-scroll-container::-webkit-scrollbar-thumb, #cards-grid.h-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 8px; }
-    #main-scroll-container::-webkit-scrollbar-thumb:hover, #cards-grid.h-scroll::-webkit-scrollbar-thumb:hover { background: #475569; }
-    #main-scroll-container::-webkit-scrollbar-corner, #cards-grid.h-scroll::-webkit-scrollbar-corner { background: transparent; }
+/* ======================================================== */
+/* 1. Default Semantic Tokens (Fallback & Initial Load)     */
+/* ======================================================== */
+:root {
+  --bg-app: #f0f4f9;
+  --bg-surface: #ffffff;
+  --bg-elevated: #e9f1fe;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --border-subtle: #e2e8f0;
+  --border-default: #cbd5e1;
+  --accent-primary: #3b82f6;
+  --accent-hover: #2563eb;
+  --status-success: #10b981;
+  --status-warning: #f59e0b;
+  --status-error: #ef4444;
+  --status-info: #3b82f6;
+  --grad-start: #3b82f6;
+  --grad-mid: #6366f1;
+  --grad-end: #8b5cf6;
+}
 
-    /* Fix dropdown đúp mũi tên: ẩn arrow mặc định, dùng arrow custom */
-    select.no-native-arrow {
-      appearance: none;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 10px center;
-      padding-right: 30px !important;
-    }
-    select.no-native-arrow::-ms-expand { display: none; }
+html.dark, .dark {
+  --bg-app: #0b0f19;
+  --bg-surface: #111827;
+  --bg-elevated: #161f30;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-subtle: #1f293d;
+  --border-default: #334155;
+  --accent-primary: #3b82f6;
+  --accent-hover: #2563eb;
+  --status-success: #10b981;
+  --status-warning: #f59e0b;
+  --status-error: #ef4444;
+  --status-info: #3b82f6;
+  --grad-start: #3b82f6;
+  --grad-mid: #6366f1;
+  --grad-end: #8b5cf6;
+}
 
-    /* Toast confirm: luôn nổi trên cùng */
-    #confirm-modal { transition: opacity .18s ease; }
+/* ======================================================== */
+/* 2. Semantic Utility Classes & Bridges                    */
+/* ======================================================== */
+.bg-app { background-color: var(--bg-app); }
+.bg-surface { background-color: var(--bg-surface); }
+.bg-elevated { background-color: var(--bg-elevated); }
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted { color: var(--text-muted); }
+.border-subtle { border-color: var(--border-subtle); }
+.border-default { border-color: var(--border-default); }
 
-    /* Drawer trượt phải */
-    #channel-drawer { transition: transform .18s ease; }
+/* Bridge for shell panels */
+.thm-nav { background-color: var(--bg-surface); }
+.thm-header { background-color: var(--bg-surface); overflow-x: auto; }
+.thm-panel { background-color: var(--bg-elevated); }
 
-    /* Lớp phủ theme động (được JS sinh ra theo theme đã chọn) */
-  
-    /* Sidebar thu gọn / mở rộng (hover để expand) */
-    #sidebar { transition: width .25s ease; overflow-x: hidden; }
-    #sidebar.sb-collapsed { width: 68px; }
-    #sidebar.sb-collapsed:hover { width: 256px; }
-    #sidebar.sb-collapsed:not(:hover) .sb-label { display: none !important; }
-    #sidebar.sb-collapsed:not(:hover) .sb-pad { padding-left: 0 !important; padding-right: 0 !important; }
-    #sidebar.sb-collapsed:not(:hover) .sb-center { justify-content: center !important; }
-    #sidebar.sb-collapsed:not(:hover) nav button,
-    #sidebar.sb-collapsed:not(:hover) #platform-filter-list button { justify-content: center; padding-left: 0; padding-right: 0; }
+/* --- LIGHT MODE BRIDGES (html:not(.dark)) --- */
+/* Ensure theme light mode tokens are actively applied across the shell */
+html:not(.dark) body {
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+}
+html:not(.dark) .thm-nav {
+  background-color: var(--bg-nav, var(--bg-surface));
+  border-color: var(--border-subtle);
+}
+html:not(.dark) .thm-header {
+  background-color: color-mix(in srgb, var(--bg-surface) 85%, transparent);
+  border-color: var(--border-subtle);
+}
+html:not(.dark) .thm-panel {
+  background-color: var(--bg-panel, var(--bg-elevated));
+  border-color: var(--border-subtle);
+}
+
+/* Light mode utility mappings so theme light palette reflects across views */
+html:not(.dark) .bg-slate-50 {
+  background-color: var(--bg-app);
+}
+html:not(.dark) .bg-slate-100 {
+  background-color: var(--bg-elevated);
+}
+html:not(.dark) .border-slate-200,
+html:not(.dark) .border-slate-100 {
+  border-color: var(--border-subtle);
+}
+html:not(.dark) .text-slate-800,
+html:not(.dark) .text-slate-900 {
+  color: var(--text-primary);
+}
+html:not(.dark) .text-slate-600,
+html:not(.dark) .text-slate-700 {
+  color: var(--text-secondary);
+}
+html:not(.dark) .text-slate-500,
+html:not(.dark) .text-slate-400 {
+  color: var(--text-muted);
+}
+
+/* Bridge for existing dark: utilities */
+.dark .dark\:bg-dark-bg { background-color: var(--bg-app); }
+.dark .dark\:bg-dark-sidebar { background-color: var(--bg-surface); }
+.dark .dark\:bg-dark-card { background-color: var(--bg-elevated); }
+.dark .dark\:bg-dark-input { background-color: var(--bg-surface); }
+.dark .dark\:border-dark-border { border-color: var(--border-subtle); }
+
+/* Bridge for var-based colors WITH opacity modifiers.
+   Tailwind Play CDN không tính được opacity trên màu var (hex trong var),
+   nên rule nó sinh ra bị invalid và rơi về màu sáng (header trắng xóa ở dark mode).
+   Dùng color-mix để giữ đúng độ trong suốt của thiết kế cũ. */
+.dark .dark\:bg-dark-sidebar\/80 { background-color: var(--bg-surface); background-color: color-mix(in srgb, var(--bg-surface) 80%, transparent); }
+.dark .dark\:bg-dark-sidebar\/60 { background-color: var(--bg-surface); background-color: color-mix(in srgb, var(--bg-surface) 60%, transparent); }
+.dark .dark\:bg-dark-card\/95 { background-color: var(--bg-elevated); background-color: color-mix(in srgb, var(--bg-elevated) 95%, transparent); }
+.dark .dark\:bg-dark-input\/60 { background-color: var(--bg-surface); background-color: color-mix(in srgb, var(--bg-surface) 60%, transparent); }
+.dark .dark\:border-dark-border\/60 { border-color: var(--border-subtle); border-color: color-mix(in srgb, var(--border-subtle) 60%, transparent); }
+.dark .dark\:border-dark-border\/80 { border-color: var(--border-subtle); border-color: color-mix(in srgb, var(--border-subtle) 80%, transparent); }
+
+/* --- ACCENT & GRADIENT BRIDGES (Light + Dark Modes) --- */
+.bg-blue-600 { background-color: var(--accent-primary); }
+.hover\:bg-blue-500:hover { background-color: var(--accent-hover); }
+.bg-blue-500 { background-color: var(--accent-primary); }
+.bg-blue-400 { background-color: var(--accent-hover); }
+.text-blue-600, .text-blue-500 { color: var(--accent-primary); }
+.hover\:text-blue-500:hover { color: var(--accent-hover); }
+.text-blue-400 { color: var(--accent-primary); }
+.text-blue-700, .text-blue-800 { color: var(--accent-hover); }
+.border-blue-500 { border-color: var(--accent-primary); }
+.border-blue-600 { border-color: var(--accent-hover); }
+.bg-blue-50, .bg-blue-100 { background-color: color-mix(in srgb, var(--accent-primary) 12%, transparent); }
+.bg-blue-500\/10, .bg-blue-600\/10 { background-color: color-mix(in srgb, var(--accent-primary) 10%, transparent); }
+.bg-blue-600\/20, .hover\:bg-blue-600\/20:hover { background-color: color-mix(in srgb, var(--accent-primary) 20%, transparent); }
+.border-blue-500\/20, .border-blue-500\/30, .border-blue-500\/40 { border-color: color-mix(in srgb, var(--accent-primary) 30%, transparent); }
+.shadow-blue-500\/20, .shadow-blue-600\/20 { --tw-shadow-color: color-mix(in srgb, var(--accent-primary) 20%, transparent); }
+.shadow-blue-500\/10 { --tw-shadow-color: color-mix(in srgb, var(--accent-primary) 10%, transparent); }
+
+.from-blue-500, .from-blue-600 {
+  --tw-gradient-from: var(--grad-start) var(--tw-gradient-from-position, 0%);
+  --tw-gradient-to: color-mix(in srgb, var(--grad-start) 0%, transparent) var(--tw-gradient-to-position, 100%);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+.via-indigo-500, .via-indigo-600 {
+  --tw-gradient-to: color-mix(in srgb, var(--grad-mid) 0%, transparent) var(--tw-gradient-to-position, 100%);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--grad-mid) var(--tw-gradient-via-position, 50%), var(--tw-gradient-to);
+}
+.to-purple-500, .to-purple-600 {
+  --tw-gradient-to: var(--grad-end) var(--tw-gradient-to-position, 100%);
+}
+
+/* Overlay đang đóng thì ẩn tuyệt đối, kể cả khi còn dính class flex
+   (tránh modal hiện sai sau chu kỳ đóng/mở của OverlayController). */
+#confirm-modal.hidden,
+div[id^="modal-"].hidden {
+  display: none !important;
+}
+
+/* ======================================================== */
+/* 3. Global High-Contrast Focus Rings (R3.1, P0.3)         */
+/* ======================================================== */
+:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[role="tab"]:focus-visible,
+[tabindex]:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--accent-primary) !important;
+  outline-offset: 2px !important;
+}
+
+/* ======================================================== */
+/* 4. Motion Controls (R4, P1.8)                            */
+/* ======================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .animate-pulse,
+  .animate-ping,
+  .animate-spin {
+    animation: none !important;
+  }
+
+  /* Preserve essential functional state indicators statically */
+  .animate-pulse {
+    opacity: 1 !important;
+  }
+  .animate-ping {
+    display: none !important;
+  }
+  .animate-spin {
+    transform: none !important;
+  }
+}
+
+/* ======================================================== */
+/* 5. Custom Scrollbars & UI Enhancements                  */
+/* ======================================================== */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #475569; }
+.glass { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+
+#cards-grid.h-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #334155 transparent;
+  overscroll-behavior-x: contain;
+}
+#main-scroll-container, #cards-grid.h-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #334155 transparent;
+}
+#main-scroll-container::-webkit-scrollbar, #cards-grid.h-scroll::-webkit-scrollbar { height: 8px; width: 8px; }
+#main-scroll-container::-webkit-scrollbar-track, #cards-grid.h-scroll::-webkit-scrollbar-track { background: transparent; }
+#main-scroll-container::-webkit-scrollbar-thumb, #cards-grid.h-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 8px; }
+#main-scroll-container::-webkit-scrollbar-thumb:hover, #cards-grid.h-scroll::-webkit-scrollbar-thumb:hover { background: #475569; }
+#main-scroll-container::-webkit-scrollbar-corner, #cards-grid.h-scroll::-webkit-scrollbar-corner { background: transparent; }
+
+/* Custom select dropdown arrow */
+select.no-native-arrow {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+}
+select.no-native-arrow::-ms-expand { display: none; }
+
+#confirm-modal { transition: opacity .18s ease; }
+#channel-drawer { transition: transform .18s ease; }
+
+/* ======================================================== */
+/* 6. Responsive Shell & Sidebar (R4, P1.1)                 */
+/* ======================================================== */
+#sidebar {
+  transition: width 0.25s ease, transform 0.25s ease;
+  overflow-x: hidden;
+}
+
+/* 6.1 Mobile / Compact (<768px): Off-Canvas Drawer */
+@media (max-width: 767px) {
+  #sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 260px;
+    max-width: 85vw;
+    z-index: 50;
+    transform: translateX(-100%);
+    box-shadow: none;
+  }
+  #sidebar.mobile-open {
+    transform: translateX(0);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+  }
+  #sidebar .sb-label {
+    display: initial;
+  }
+  #sidebar-pin-btn {
+    display: none;
+  }
+}
+
+/* 6.2 Tablet (768px - 1023px): Icon Rail */
+@media (min-width: 768px) and (max-width: 1023px) {
+  #sidebar {
+    position: relative;
+    width: 68px !important;
+    transform: none;
+  }
+  #sidebar .sb-label {
+    display: none !important;
+  }
+  #sidebar .sb-pad {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  #sidebar .sb-center {
+    justify-content: center !important;
+  }
+  #sidebar nav button,
+  #sidebar #platform-filter-list button {
+    justify-content: center !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  #sidebar-pin-btn {
+    display: none;
+  }
+}
+
+/* 6.3 Desktop (>=1024px): Persistent Sidebar with Click-to-Collapse + Hover-to-Expand */
+@media (min-width: 1024px) {
+  #sidebar {
+    position: relative;
+    width: 256px;
+    transform: none;
+  }
+  #sidebar.sb-collapsed {
+    width: 68px;
+  }
+  #sidebar.sb-collapsed .sb-label {
+    display: none !important;
+  }
+  #sidebar.sb-collapsed .sb-pad {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  #sidebar.sb-collapsed .sb-center {
+    justify-content: center !important;
+  }
+  #sidebar.sb-collapsed nav button,
+  #sidebar.sb-collapsed #platform-filter-list button {
+    justify-content: center !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
+/* 6.4 Header: luôn visible để dropdown thông báo (notif-panel) không bị cắt.
+   Cụm action phải co giãn (shrink + truncate), cấm dùng overflow-x:auto ở đây
+   vì nó ép overflow-y thành auto và cắt panel absolute. */
+header.thm-header {
+  overflow: visible;
+}

@@ -27,14 +27,12 @@ pyinstaller --noconfirm --clean --windowed --onefile `
   --add-data "$webData" `
   --add-data "$assetData" `
   --hidden-import webview `
-  --hidden-import playwright `
   --hidden-import packaging `
   --hidden-import packaging.version `
   --hidden-import cryptography `
   --hidden-import pyzipper `
   --collect-submodules webview `
   --collect-submodules packaging `
-  --collect-all playwright `
   --collect-all src `
   run.py
 
@@ -68,7 +66,7 @@ $readmeLines = @(
   "2. YEU CAU HE THONG:",
   "- Windows 10/11 64-bit.",
   "- Microsoft Edge WebView2 Runtime.",
-  "- Neu gap loi thieu Chromium: chay 'playwright install chromium'",
+  "- Yeu cau Google Chrome hoac Microsoft Edge da duoc cai dat tren may.",
   "=================================================="
 )
 $readmeLines | Out-File -FilePath "$pkgDir\README.txt" -Encoding utf8

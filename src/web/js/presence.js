@@ -12,7 +12,10 @@
   }
 
   function presenceOf(ch) {
-    const mine = (ch.locked_by || '') === (appState.active_user || '');
+    // mine LOAI TRU lock remote: cung ten (2 may chung gmail) nhung khac may
+    // thi van la "cua may khac" — duoc phan biet bang locked_remote tu bridge.
+    const me = (appState.active_user || '');
+    const mine = (ch.locked_by || '') === me && !ch.locked_remote;
     const since = parseTs(ch.in_use_since);
     const hb = parseTs(ch.last_heartbeat) || since;
     const age = hb ? (Date.now() - hb) : null;
@@ -36,8 +39,13 @@
   }
 
   function myHeldChannels() {
-    const me = appState.active_user || '';
-    return (appState.channels || []).filter(c => c.status === 'IN_USE' && c.locked_by === me);
+    // So khớp không phân biệt hoa/thường + trim cho đồng bộ với backend
+    // (release_user_channels so sánh lower()). Tránh trường hợp tên thao tác
+    // lệch 1 ký tự hoa/thường khiến nút Giải phóng phiên tưởng không giữ kênh nào.
+    const me = (appState.active_user || '').trim().toLowerCase();
+    if (!me) return [];
+    return (appState.channels || []).filter(c =>
+      c.status === 'IN_USE' && !c.locked_remote && ((c.locked_by || '').trim().toLowerCase() === me));
   }
 
   async function heartbeatTick() {
@@ -45,7 +53,8 @@
     if (!mine.length || !window.pywebview || !window.pywebview.api) return;
     for (const ch of mine) {
       try {
-        const res = await window.pywebview.api.heartbeat(ch.id, appState.active_user);
+        // Gửi đúng tên đang giữ lock (tránh lệch hoa/thường làm mất heartbeat)
+        const res = await window.pywebview.api.heartbeat(ch.id, ch.locked_by || appState.active_user);
         if (res && res.success === false) {
           // Mất quyền giữ (ai đó force unlock) -> refresh để đồng bộ
           await refreshData(true);
@@ -59,13 +68,14 @@
     if (_hbTimer) clearInterval(_hbTimer);
     if (_clockTimer) clearInterval(_clockTimer);
     _hbTimer = setInterval(heartbeatTick, HEARTBEAT_MS);
-    // Cập nhật timer "mở Xp" mỗi 30s mà không re-render nặng
+    // Cập nhật timer "mở Xp" mỗi 5s mà không re-render nặng.
+    // DOM thuần (không gọi backend) nên rẻ, cho cảm giác live.
     _clockTimer = setInterval(() => {
       document.querySelectorAll('[data-presence-since]').forEach(el => {
         const ts = parseTs(el.getAttribute('data-presence-since'));
         if (ts) el.textContent = elapsedText(ts);
       });
-    }, 30000);
+    }, 5000);
   }
 
   // ---------- Xin mở kênh ----------
@@ -73,10 +83,11 @@
     const ch = (appState.channels || []).find(c => c.id === channelId);
     if (!ch) return;
     if (ch.status !== 'IN_USE') { showToast('Kênh đang trống, bạn có thể mở trực tiếp.', 'info'); return; }
-    if ((ch.locked_by || '') === (appState.active_user || '')) { showToast('Bạn đang giữ kênh này rồi.', 'info'); return; }
+    if ((ch.locked_by || '') === (appState.active_user || '') && !ch.locked_remote) { showToast('Bạn đang giữ kênh này rồi.', 'info'); return; }
+    const remoteTag = ch.locked_remote ? ` trên máy khác (${ch.locked_machine || '?'})` : '';
     const msg = await showPromptToast({
       title: 'Xin mở kênh',
-      message: `Kênh đang do "${ch.locked_by}" giữ. Nhập lời nhắn (tùy chọn, tối đa 200 ký tự):`,
+      message: `Kênh đang do "${ch.locked_by}" giữ${remoteTag}. Nhập lời nhắn (tùy chọn, tối đa 200 ký tự):`,
       placeholder: 'VD: Mình cần đăng video gấp, xong trong 10p...',
       okText: 'Gửi yêu cầu'
     });
@@ -174,6 +185,23 @@
     }
     updateMyHeldCountBadge();
     if (!list) return;
+
+    if (!list._delegated) {
+      list._delegated = true;
+      list.addEventListener('click', (e) => {
+        const approveBtn = e.target.closest('[data-action="approve-request"]');
+        if (approveBtn && approveBtn.dataset.requestId) {
+          approveRequest(approveBtn.dataset.requestId);
+          return;
+        }
+        const denyBtn = e.target.closest('[data-action="deny-request"]');
+        if (denyBtn && denyBtn.dataset.requestId) {
+          denyRequest(denyBtn.dataset.requestId);
+          return;
+        }
+      });
+    }
+
     if (!items.length) {
       list.innerHTML = '<div class="px-4 py-6 text-center text-xs text-slate-400">Không có yêu cầu xin mở nào.<br>Khi đồng đội xin kênh bạn giữ, thông báo sẽ hiện ở đây.</div>';
       return;
@@ -181,21 +209,22 @@
     list.innerHTML = items.map(r => {
       const isIncoming = r.holder === (appState.active_user || '');
       const when = r.created_at ? new Date(r.created_at).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' }) : '';
+      const safeId = escapeHtml(r.id);
       const actionBtns = isIncoming
         ? `<div class="flex gap-1.5 mt-2">
-             <button onclick="approveRequest('${r.id}')" class="flex-1 h-7 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-bold transition-all">Nhường kênh</button>
-             <button onclick="denyRequest('${r.id}')" class="h-7 px-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg text-[11px] font-bold transition-all">Từ chối</button>
+             <button type="button" data-action="approve-request" data-request-id="${safeId}" class="flex-1 h-7 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-bold transition-all">Nhường kênh</button>
+             <button type="button" data-action="deny-request" data-request-id="${safeId}" class="h-7 px-3 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg text-[11px] font-bold transition-all">Từ chối</button>
            </div>`
-        : `<p class="text-[11px] text-amber-500 font-semibold mt-1.5">Đang chờ ${r.holder || 'holder'} duyệt…</p>`;
+        : `<p class="text-[11px] text-amber-500 font-semibold mt-1.5">Đang chờ ${escapeHtml(r.holder || 'holder')} duyệt…</p>`;
       return `
         <div class="px-3.5 py-3 border-b border-slate-100 dark:border-dark-border/60 last:border-0">
           <div class="flex items-center justify-between gap-2">
-            <p class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">${isIncoming ? 'Xin mở kênh' : 'Đã gửi yêu cầu'}: ${r.channel_name || r.channel_id}</p>
-            <span class="text-[10px] text-slate-400 shrink-0">${when}</span>
+            <p class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">${isIncoming ? 'Xin mở kênh' : 'Đã gửi yêu cầu'}: ${escapeHtml(r.channel_name || r.channel_id)}</p>
+            <span class="text-[10px] text-slate-400 shrink-0">${escapeHtml(when)}</span>
           </div>
           <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-            ${isIncoming ? `<b class="text-blue-500">${r.requester}</b> xin mở` : `Bạn xin <b>${r.holder || ''}</b> mở`}
-            ${r.message ? ` — “${String(r.message).replace(/</g, '&lt;')}”` : ''}
+            ${isIncoming ? `<b class="text-blue-500">${escapeHtml(r.requester)}</b> xin mở` : `Bạn xin <b>${escapeHtml(r.holder || '')}</b> mở`}
+            ${r.message ? ` — “${escapeHtml(r.message)}”` : ''}
           </p>
           ${actionBtns}
         </div>`;
@@ -275,7 +304,7 @@
     if (count === 0) {
       const totalInUse = (appState.channels || []).filter(c => c.status === 'IN_USE').length;
       if (totalInUse > 0) {
-        showToast(`Bạn không giam phiên nào (${totalInUse} phiên đang mở thuộc về đồng đội).`, 'info');
+        showToast(`Bạn không giữ phiên nào (${totalInUse} phiên đang mở thuộc về đồng đội).`, 'info');
       } else {
         showToast('Hiện không có phiên làm việc nào đang mở.', 'info');
       }
@@ -283,35 +312,47 @@
     }
 
     const names = mine.map(c => c.channel_name || c.id).join(', ');
-    const ok = await showConfirm({
-      title: 'Xác nhận xả phiên',
-      message: `Bạn đang mở ${count} kênh (${names}). Bạn có chắc muốn đóng các tab trình duyệt và giải phóng các phiên này ngay bây giờ?`,
-      okText: 'Xả ngay',
-      okDanger: true
-    });
+    let ok = false;
+    try {
+      ok = await showConfirm({
+        title: 'Xác nhận giải phóng phiên',
+        message: `Bạn đang mở ${count} kênh (${names}). Bạn có chắc muốn đóng các tab trình duyệt và giải phóng các phiên này ngay bây giờ?`,
+        okText: 'Giải phóng ngay',
+        okDanger: true
+      });
+    } catch (e) {
+      showToast('Lỗi hộp xác nhận: ' + e, 'error');
+      return;
+    }
 
     if (!ok) return;
 
     try {
-      showToast('Đang đóng các tab và xả phiên làm việc...', 'info');
-      if (window.pywebview && window.pywebview.api && typeof window.pywebview.api.release_my_sessions === 'function') {
-        const res = await window.pywebview.api.release_my_sessions(appState.active_user || '');
+      showToast('Đang đóng các tab và giải phóng phiên làm việc...', 'info');
+      const api = (window.pywebview && window.pywebview.api) || null;
+      if (api && typeof api.release_my_sessions === 'function') {
+        const res = await api.release_my_sessions(appState.active_user || '');
         if (res && res.success) {
           const released = res.released_count || 0;
           if (released > 0) {
-            showToast(`Đã đóng và xả thành công ${released} kênh đang mở!`, 'success');
+            const ids = (res.released_ids || []).join(', ');
+            showToast(`Đã đóng và giải phóng thành công ${released} kênh đang mở!${ids ? ' (' + ids + ')' : ''}`, 'success');
             if (typeof playSound === 'function') playSound('success');
           } else {
-            showToast('Đã làm mới trạng thái phiên.', 'info');
+            showToast('Backend không giải phóng kênh nào (phiên có thể đã được xả hoặc tên người giữ khác tên đang đăng nhập).', 'warning');
           }
+        } else {
+          showToast((res && res.message) || 'Backend từ chối giải phóng!', 'error');
         }
+      } else {
+        showToast('Lỗi cầu nối pywebview (không gọi được backend). Hãy restart app!', 'error');
       }
       if (typeof refreshData === 'function') {
         await refreshData(true);
       }
       updateMyHeldCountBadge();
     } catch (err) {
-      showToast('Lỗi khi xả phiên: ' + err, 'error');
+      showToast('Lỗi khi giải phóng phiên: ' + err, 'error');
     }
   }
 

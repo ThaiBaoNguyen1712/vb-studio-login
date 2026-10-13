@@ -19,6 +19,8 @@ data/backup/
 data/*.db
 data/*.json
 data/*.bak
+data/.machine_id
+data/safety/
 
 
 # Keep data directory structure with .gitkeep
@@ -32,7 +34,9 @@ release_pkg/
 *.new
 apply_update.bat
 
-# IDE
+# IDE & Agent state
 .vscode/
 .idea/
+.agents/
+
 

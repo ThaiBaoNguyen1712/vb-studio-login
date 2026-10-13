@@ -3,6 +3,15 @@
     function renderPlatformFilters() {
       const box = document.getElementById('platform-filter-list');
       if (!box) return;
+      if (!box.dataset.bound) {
+        box.dataset.bound = 'true';
+        box.addEventListener('click', (e) => {
+          const btn = e.target.closest('[data-action="filter-platform"]');
+          if (btn && btn.dataset.platform) {
+            setPlatformFilter(btn.dataset.platform);
+          }
+        });
+      }
       const plats = appState.platforms || [];
       const total = appState.channels.length;
       const countOf = (code) => code === 'ALL'
@@ -12,18 +21,21 @@
         ? 'sb-center w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold text-blue-600 dark:text-white bg-blue-50 dark:bg-blue-600/20 transition-all'
         : 'sb-center w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-dark-card transition-all';
       const allBtn = `
-        <button onclick="setPlatformFilter('ALL')" class="${btnCls(appState.selected_platform === 'ALL')}">
+        <button type="button" data-action="filter-platform" data-platform="ALL" class="${btnCls(appState.selected_platform === 'ALL')}">
           <span class="flex items-center gap-2 sb-label">${icon('globe', 'w-4 h-4 shrink-0')}<span class="sb-label">Tất cả kênh</span></span>
           <span class="sb-label text-[10px] px-1.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 font-bold">${countOf('ALL')}</span>
         </button>`;
-      box.innerHTML = allBtn + plats.map(p => `
-        <button onclick="setPlatformFilter('${p.code}')" class="${btnCls(appState.selected_platform === p.code)}">
-          <span class="flex items-center gap-2 min-w-0">
-            ${platBadge(p.code, 'w-4 h-4')}
-            <span class="sb-label truncate">${p.name || p.code}</span>
-          </span>
-          <span class="sb-label text-[10px] px-1.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700/50 font-bold shrink-0">${countOf(p.code)}</span>
-        </button>`).join('');
+      box.innerHTML = [
+        allBtn,
+        ...plats.map(p => `
+          <button type="button" data-action="filter-platform" data-platform="${escapeHtml(p.code)}" class="${btnCls(appState.selected_platform === p.code)}">
+            <span class="flex items-center gap-2 min-w-0">
+              ${platBadge(p.code, 'w-4 h-4')}
+              <span class="sb-label truncate">${escapeHtml(p.name || p.code)}</span>
+            </span>
+            <span class="sb-label text-[10px] px-1.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700/50 font-bold shrink-0">${countOf(p.code)}</span>
+          </button>`)
+      ].join('');
     }
 
     function setPlatformFilter(platformCode) {
@@ -37,7 +49,7 @@
     // Mọi thao tác phụ (ghim, kiểm tra, sửa, xóa, mở khóa) chuyển vào drawer chi tiết.
     const STATUS_DOT = {
       READY: ['bg-emerald-400', 'Sẵn sàng'],
-      NOT_SETUP: ['bg-amber-400', 'Chưa setup'],
+      NOT_SETUP: ['bg-amber-400', 'Chưa thiết lập'],
       IN_USE: ['bg-sky-400', 'Đang mở'],
       EXPIRED: ['bg-red-400', 'Hết hạn']
     };
@@ -47,27 +59,33 @@
       const isExpired = ch.status === 'EXPIRED';
       const pr = (typeof presenceOf === 'function') ? presenceOf(ch) : { mine: false, alive: true, stale: false, since: null };
       const pendN = (ch.pending_requests || []).length;
+      const safeId = escapeHtml(ch.id);
+      const safeName = escapeHtml(ch.channel_name || '');
+      const safeAccEmail = escapeHtml(ch.account_email || '');
+      const safeAccDisplay = escapeHtml(ch.account_display_name || 'Acc');
+      const safeLockedBy = escapeHtml(ch.locked_by || 'Session');
+      const remoteTag = ch.locked_remote ? ` • máy khác (${ch.locked_machine || '?'})` : '';
 
       const [dotCls, dotLabel] = STATUS_DOT[ch.status] || STATUS_DOT.NOT_SETUP;
       const dotPulse = (isInUse && pr.alive) ? ' animate-pulse' : '';
       const dotTitle = isInUse
-        ? `Đang mở bởi ${ch.locked_by || 'Session'}${pr.stale ? ' — heartbeat mất >3p, có thể treo' : ''}${pendN ? ` — ${pendN} yêu cầu xin mở` : ''}`
+        ? `Đang mở bởi ${ch.locked_by || 'Session'}${remoteTag}${pr.stale ? ' — heartbeat mất >3p, có thể treo' : ''}${pendN ? ` — ${pendN} yêu cầu xin mở` : ''}`
         : dotLabel;
-      const dot = `<span class="w-2 h-2 rounded-full ${dotCls}${dotPulse} shrink-0" title="${dotTitle}"></span>`;
+      const dot = `<span class="w-2 h-2 rounded-full ${dotCls}${dotPulse} shrink-0" title="${escapeHtml(dotTitle)}"></span>`;
       const pendBadge = pendN > 0
         ? `<span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0" title="${pendN} yêu cầu xin mở đang chờ">${icon('send', 'w-3 h-3')}${pendN}</span>` : '';
       const pinStar = ch.pinned ? `<span class="text-amber-500 shrink-0 inline-flex items-center" title="Kênh đã ghim">${icon('star-solid', 'w-3.5 h-3.5')}</span>` : '';
 
-      let mainText = isReady ? 'Mở Studio' : (isInUse ? (pr.mine ? 'Bạn đang mở' : 'Xin mở') : (isExpired ? 'Setup lại' : 'Thiết lập'));
+      let mainText = isReady ? 'Mở Studio' : (isInUse ? (pr.mine ? 'Bạn đang mở' : 'Xin mở') : (isExpired ? 'Thiết lập lại' : 'Thiết lập'));
       let mainColor = isReady ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : (isInUse ? (pr.mine ? 'bg-sky-600 text-white cursor-not-allowed opacity-80' : 'bg-blue-600 hover:bg-blue-500 text-white') : (isExpired ? 'bg-red-600 hover:bg-red-500 text-white' : 'bg-amber-600 hover:bg-amber-500 text-white'));
-      const mainAction = isInUse ? (pr.mine ? '' : `onclick="requestAccess('${ch.id}')"`) : `onclick="launchChannel('${ch.id}')"`;
+      const mainActionAttr = isInUse ? (pr.mine ? '' : `data-action="request-access" data-channel-id="${safeId}"`) : `data-action="launch-channel" data-channel-id="${safeId}"`;
       const mainDisabled = (isInUse && pr.mine) ? 'disabled' : '';
       const mainTitle = isInUse ? (pr.mine ? 'Bạn đang giữ kênh này' : 'Gửi yêu cầu xin mở tới ' + (ch.locked_by || '')) : mainText;
 
       const presenceLine = isInUse
         ? `<div class="ch-presence-line flex items-center gap-1.5 text-[11px] text-slate-400 truncate">
              <span class="w-1.5 h-1.5 rounded-full ${pr.alive ? 'bg-emerald-400 animate-pulse' : 'bg-slate-400'} shrink-0"></span>
-             <span class="truncate">${ch.locked_by || 'Session'}${pr.stale ? ' • treo?' : ''}${pr.since ? ` • <span data-presence-since="${ch.in_use_since || ''}">${(typeof elapsedText === 'function') ? elapsedText(pr.since) : ''}</span>` : ''}</span>
+             <span class="truncate">${safeLockedBy}${remoteTag ? escapeHtml(remoteTag) : ''}${pr.stale ? ' • treo?' : ''}${pr.since ? ` • <span data-presence-since="${escapeHtml(ch.in_use_since || '')}">${(typeof elapsedText === 'function') ? elapsedText(pr.since) : ''}</span>` : ''}</span>
            </div>`
         : '';
 
@@ -78,17 +96,17 @@
       return `
         <div class="ch-card border ${cardHighlight} rounded-xl p-3 transition-all flex flex-col gap-2">
           <div class="flex items-center gap-2 min-w-0">
-            <span title="${platName(ch.platform)}">${platBadge(ch.platform, 'w-5 h-5')}</span>
-            <h4 class="font-bold text-[13px] tracking-tight text-slate-800 dark:text-slate-100 truncate flex-1" title="${ch.channel_name} (${ch.id})">${ch.channel_name}</h4>
+            <span title="${escapeHtml(platName(ch.platform))}">${platBadge(ch.platform, 'w-5 h-5')}</span>
+            <h4 class="font-bold text-[13px] tracking-tight text-slate-800 dark:text-slate-100 truncate flex-1" title="${safeName} (${safeId})">${safeName}</h4>
             ${pinStar}${pendBadge}${dot}
           </div>
-          <div class="ch-acc-line flex items-center gap-1 text-[11px] text-slate-400 truncate" title="${ch.account_email || ''}">${icon('user', 'w-3 h-3 shrink-0')}<span class="truncate">${ch.account_display_name || 'Acc'}${ch.account_email ? ' • ' + ch.account_email : ''}</span></div>
+          <div class="ch-acc-line flex items-center gap-1 text-[11px] text-slate-400 truncate" title="${safeAccEmail}">${icon('user', 'w-3 h-3 shrink-0')}<span class="truncate">${safeAccDisplay}${ch.account_email ? ' • ' + safeAccEmail : ''}</span></div>
           ${presenceLine}
           <div class="flex items-center gap-1.5">
-            <button ${mainAction} ${mainDisabled} title="${mainTitle}" class="ch-main-btn flex-1 h-8 ${mainColor} font-bold text-xs rounded-lg transition-all shadow-xs truncate px-2">
-              ${mainText}
+            <button type="button" ${mainActionAttr} ${mainDisabled} title="${escapeHtml(mainTitle)}" class="ch-main-btn flex-1 h-8 ${mainColor} font-bold text-xs rounded-lg transition-all shadow-xs truncate px-2">
+              ${escapeHtml(mainText)}
             </button>
-            <button onclick="openChannelDrawer('${ch.id}')" title="Chi tiết kênh" class="w-8 h-8 shrink-0 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-dark-input hover:bg-blue-500/20 hover:text-blue-500 text-slate-500 transition-colors">${icon('eye', 'w-4 h-4')}</button>
+            <button type="button" data-action="open-drawer" data-channel-id="${safeId}" title="Chi tiết kênh" class="w-8 h-8 shrink-0 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-dark-input hover:bg-blue-500/20 hover:text-blue-500 text-slate-500 transition-colors">${icon('eye', 'w-4 h-4')}</button>
           </div>
         </div>
       `;
@@ -99,33 +117,49 @@
       const bar = document.getElementById('active-filter-bar');
       const chipsContainer = document.getElementById('active-filter-chips');
       if (!bar || !chipsContainer) return;
+      if (!chipsContainer.dataset.bound) {
+        chipsContainer.dataset.bound = 'true';
+        chipsContainer.addEventListener('click', (e) => {
+          const btn = e.target.closest('[data-action]');
+          if (!btn) return;
+          const act = btn.dataset.action;
+          if (act === 'filter-platform') setPlatformFilter(btn.dataset.platform || 'ALL');
+          else if (act === 'filter-status') setDashboardStatusFilter(btn.dataset.status || 'ALL');
+          else if (act === 'clear-account-filter') clearAccountFilter();
+          else if (act === 'clear-search-filter') clearSearchFilter();
+        });
+      }
 
       const chips = [];
 
       if (appState.selected_platform !== 'ALL') {
         const pName = platName(appState.selected_platform);
-        chips.push(`<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/60 font-semibold">Nền tảng: ${pName} <button onclick="setPlatformFilter('ALL')" class="hover:text-red-500 ml-0.5 inline-flex">${icon('x', 'w-3 h-3')}</button></span>`);
+        chips.push(`<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/60 font-semibold">Nền tảng: ${escapeHtml(pName)} <button type="button" data-action="filter-platform" data-platform="ALL" class="hover:text-red-500 ml-0.5 inline-flex">${icon('x', 'w-3 h-3')}</button></span>`);
       }
 
       if (appState.selected_status && appState.selected_status !== 'ALL') {
-        const statusMap = { 'READY': 'Sẵn sàng', 'NOT_SETUP': 'Chưa setup', 'IN_USE': 'Đang mở', 'EXPIRED': 'Hết hạn' };
-        chips.push(`<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/60 font-semibold">Trạng thái: ${statusMap[appState.selected_status] || appState.selected_status} <button onclick="setDashboardStatusFilter('ALL')" class="hover:text-red-500 ml-0.5 inline-flex">${icon('x', 'w-3 h-3')}</button></span>`);
+        const statusMap = { 'READY': 'Sẵn sàng', 'NOT_SETUP': 'Chưa thiết lập', 'IN_USE': 'Đang mở', 'EXPIRED': 'Hết hạn' };
+        chips.push(`<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/60 font-semibold">Trạng thái: ${escapeHtml(statusMap[appState.selected_status] || appState.selected_status)} <button type="button" data-action="filter-status" data-status="ALL" class="hover:text-red-500 ml-0.5 inline-flex">${icon('x', 'w-3 h-3')}</button></span>`);
       }
 
       if (appState.selected_account !== 'ALL') {
         const acc = appState.accounts.find(a => a.id === appState.selected_account);
         const aName = acc ? acc.display_name : appState.selected_account;
-        chips.push(`<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/60 font-semibold">Tài khoản: ${aName} <button onclick="clearAccountFilter()" class="hover:text-red-500 ml-0.5 inline-flex">${icon('x', 'w-3 h-3')}</button></span>`);
+        chips.push(`<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/60 font-semibold">Tài khoản: ${escapeHtml(aName)} <button type="button" data-action="clear-account-filter" class="hover:text-red-500 ml-0.5 inline-flex">${icon('x', 'w-3 h-3')}</button></span>`);
       }
 
       if (appState.search_keyword) {
-        chips.push(`<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/60 font-semibold">Tìm kiếm: "${appState.search_keyword}" <button onclick="clearSearchFilter()" class="hover:text-red-500 ml-0.5 inline-flex">${icon('x', 'w-3 h-3')}</button></span>`);
+        chips.push(`<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/60 font-semibold">Tìm kiếm: "${escapeHtml(appState.search_keyword)}" <button type="button" data-action="clear-search-filter" class="hover:text-red-500 ml-0.5 inline-flex">${icon('x', 'w-3 h-3')}</button></span>`);
       }
 
       if (chips.length > 0) {
-        chipsContainer.innerHTML = `<span class="font-bold text-slate-500 dark:text-slate-400">Đang lọc (${matchingCount}/${totalCount} kênh):</span>` + chips.join('');
+        chipsContainer.innerHTML = [
+          `<span class="font-bold text-slate-500 dark:text-slate-400">Đang lọc (${escapeHtml(String(matchingCount))}/${escapeHtml(String(totalCount))} kênh):</span>`,
+          ...chips
+        ].join('');
         bar.classList.remove('hidden');
       } else {
+        chipsContainer.innerHTML = '';
         bar.classList.add('hidden');
       }
     }
@@ -157,7 +191,62 @@
       }
     }
 
+    function initDashboardDelegation(grid) {
+      if (!grid || grid.dataset.bound) return;
+      grid.dataset.bound = 'true';
+      grid.addEventListener('click', (e) => {
+        const launchBtn = e.target.closest('[data-action="launch-channel"]');
+        if (launchBtn && launchBtn.dataset.channelId && typeof launchChannel === 'function') {
+          launchChannel(launchBtn.dataset.channelId);
+          return;
+        }
+        const reqBtn = e.target.closest('[data-action="request-access"]');
+        if (reqBtn && reqBtn.dataset.channelId && typeof requestAccess === 'function') {
+          requestAccess(reqBtn.dataset.channelId);
+          return;
+        }
+        const drawerBtn = e.target.closest('[data-action="open-drawer"]');
+        if (drawerBtn && drawerBtn.dataset.channelId && typeof openChannelDrawer === 'function') {
+          openChannelDrawer(drawerBtn.dataset.channelId);
+          return;
+        }
+        const bulkBtn = e.target.closest('[data-action="start-bulk-open"]');
+        if (bulkBtn && bulkBtn.dataset.accountId && typeof startBulkOpen === 'function') {
+          startBulkOpen(bulkBtn.dataset.accountId);
+          return;
+        }
+        const addChBtn = e.target.closest('[data-action="add-channel"]');
+        if (addChBtn && addChBtn.dataset.accountId && typeof openAddChannelModal === 'function') {
+          openAddChannelModal(addChBtn.dataset.accountId);
+          return;
+        }
+        const editAccBtn = e.target.closest('[data-action="edit-account"]');
+        if (editAccBtn && editAccBtn.dataset.accountId && typeof openEditAccountModal === 'function') {
+          openEditAccountModal(editAccBtn.dataset.accountId);
+          return;
+        }
+      });
+    }
+
+    function updateDashboardEmptyState(hasFilters, totalChannels) {
+      const emptyState = document.getElementById('empty-state');
+      const titleEl = document.getElementById('empty-state-title');
+      const descEl = document.getElementById('empty-state-desc');
+      const btnEl = document.getElementById('empty-state-btn');
+      if (!emptyState) return;
+      if (totalChannels === 0) {
+        if (titleEl) titleEl.innerText = 'Chưa có kênh nào trong hệ thống';
+        if (descEl) descEl.innerText = 'Hệ thống chưa có kênh nào. Vui lòng thêm tài khoản và kênh mới để bắt đầu.';
+        if (btnEl) btnEl.classList.add('hidden');
+      } else {
+        if (titleEl) titleEl.innerText = 'Không tìm thấy kênh phù hợp';
+        if (descEl) descEl.innerText = 'Không tìm thấy kênh phù hợp với bộ lọc hiện tại.';
+        if (btnEl) btnEl.classList.remove('hidden');
+      }
+    }
+
     function renderDashboardInner(grid, emptyState) {
+      initDashboardDelegation(grid);
       const filtered = appState.channels.filter(ch => {
         if (appState.selected_platform !== 'ALL' && ch.platform !== appState.selected_platform) return false;
         if (appState.selected_account !== 'ALL' && ch.account_id !== appState.selected_account) return false;
@@ -285,6 +374,7 @@
 
         if (visibleGroups.length === 0) {
           grid.innerHTML = '';
+          updateDashboardEmptyState(hasActiveFilters, totalCount);
           emptyState.classList.remove('hidden');
           return;
         }
@@ -303,7 +393,7 @@
             <div class="w-[320px] min-w-[280px] max-w-[340px] shrink-0 bg-slate-100/70 dark:bg-dark-sidebar/60 border border-slate-200 dark:border-dark-border rounded-2xl p-4 flex flex-col gap-3 shadow-xs self-start">
               <div class="flex items-center gap-2.5 pb-3 border-b border-slate-200/80 dark:border-dark-border/80 min-h-[58px] min-w-0">
                 ${platBadge(pCode, 'w-9 h-9')}
-                <h4 class="font-extrabold text-sm text-slate-800 dark:text-slate-100 truncate leading-tight min-w-0 flex-1">${platName(pCode)}</h4>
+                <h4 class="font-extrabold text-sm text-slate-800 dark:text-slate-100 truncate leading-tight min-w-0 flex-1">${escapeHtml(platName(pCode))}</h4>
               </div>
               <div class="flex flex-col gap-3">
                 ${cards.map(ch => renderChannelCard(ch, true, true)).join('')}
@@ -327,15 +417,15 @@
           ];
           const grad = avatarGradients[idx % avatarGradients.length];
 
-          const countBadgeText = hasActiveFilters ? `${group.matchingChannels.length} / ${group.totalChannels} card` : `${group.matchingChannels.length} card`;
+          const countBadgeText = hasActiveFilters ? `${group.matchingChannels.length} / ${group.totalChannels} thẻ kênh` : `${group.matchingChannels.length} thẻ kênh`;
           const hasPinned = group.matchingChannels.some(c => c.pinned);
           const colBorder = hasPinned
             ? 'border-amber-400/80 dark:border-amber-500/70 ring-2 ring-amber-400/25 dark:ring-amber-500/20 shadow-xs'
             : 'border-slate-200 dark:border-dark-border shadow-xs';
 
           const logoHtml = group.logo
-            ? `<img src="${group.logo}" class="w-9 h-9 rounded-xl object-cover shrink-0 shadow-xs ring-1 ring-slate-200 dark:ring-dark-border" title="${group.display_name}">`
-            : `<div class="w-9 h-9 rounded-xl bg-gradient-to-br ${grad} text-white font-extrabold text-xs flex items-center justify-center shrink-0 shadow-xs">${initial}</div>`;
+            ? `<img src="${escapeHtml(group.logo)}" class="w-9 h-9 rounded-xl object-cover shrink-0 shadow-xs ring-1 ring-slate-200 dark:ring-dark-border" title="${escapeHtml(group.display_name)}">`
+            : `<div class="w-9 h-9 rounded-xl bg-gradient-to-br ${grad} text-white font-extrabold text-xs flex items-center justify-center shrink-0 shadow-xs">${escapeHtml(initial)}</div>`;
 
           return `
             <div class="w-[320px] min-w-[280px] max-w-[340px] shrink-0 bg-slate-100/70 dark:bg-dark-sidebar/60 border ${colBorder} rounded-2xl p-4 flex flex-col gap-3 self-start">
@@ -345,10 +435,10 @@
                   ${logoHtml}
                   <div class="min-w-0 flex-1">
                     <div class="flex items-center gap-1.5 min-w-0">
-                      <h4 class="font-extrabold text-sm text-slate-800 dark:text-slate-100 truncate leading-tight" title="${group.display_name}">${group.display_name}</h4>
+                      <h4 class="font-extrabold text-sm text-slate-800 dark:text-slate-100 truncate leading-tight" title="${escapeHtml(group.display_name)}">${escapeHtml(group.display_name)}</h4>
                       ${hasPinned ? `<span class="text-amber-500 text-xs shrink-0" title="Có kênh đã ghim">${icon('star-solid', 'w-3.5 h-3.5')}</span>` : ''}
                     </div>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate leading-tight" title="${group.email}">${group.email || 'Google Account'}</p>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate leading-tight" title="${escapeHtml(group.email || '')}">${escapeHtml(group.email || 'Tài khoản Google')}</p>
                   </div>
                 </div>
                 <div class="flex flex-col items-end gap-1 shrink-0">
@@ -356,9 +446,9 @@
                     ${countBadgeText}
                   </span>
                   <div class="flex items-center gap-2 leading-none">
-                    <button onclick="startBulkOpen('${group.id}')" title="Mở nối tiếp tất cả kênh Sẵn sàng của tài khoản này" class="inline-flex items-center gap-0.5 text-[10px] font-bold text-sky-500 hover:text-sky-400 transition-colors">Mở hết ${icon('play', 'w-2.5 h-2.5')}</button>
-                    <button onclick="openAddChannelModal('${group.id}')" title="Thêm kênh cho tài khoản này" class="text-[10px] font-bold text-emerald-500 hover:text-emerald-400 transition-colors">+ Kênh</button>
-                    <button onclick="openEditAccountModal('${group.id}')" title="Sửa tài khoản / đổi logo" class="inline-flex items-center gap-0.5 text-[10px] font-bold text-slate-400 hover:text-blue-500 transition-colors">Sửa ${icon('pencil', 'w-2.5 h-2.5')}</button>
+                    <button type="button" data-action="start-bulk-open" data-account-id="${escapeHtml(group.id)}" title="Mở nối tiếp tất cả kênh Sẵn sàng của tài khoản này" class="inline-flex items-center gap-0.5 text-[10px] font-bold text-sky-500 hover:text-sky-400 transition-colors">Mở hết ${icon('play', 'w-2.5 h-2.5')}</button>
+                    <button type="button" data-action="add-channel" data-account-id="${escapeHtml(group.id)}" title="Thêm kênh cho tài khoản này" class="text-[10px] font-bold text-emerald-500 hover:text-emerald-400 transition-colors">+ Kênh</button>
+                    <button type="button" data-action="edit-account" data-account-id="${escapeHtml(group.id)}" title="Sửa tài khoản / đổi logo" class="inline-flex items-center gap-0.5 text-[10px] font-bold text-slate-400 hover:text-blue-500 transition-colors">Sửa ${icon('pencil', 'w-2.5 h-2.5')}</button>
                   </div>
                 </div>
               </div>
@@ -386,6 +476,7 @@
 
         if (filtered.length === 0) {
           grid.innerHTML = '';
+          updateDashboardEmptyState(hasActiveFilters, totalCount);
           emptyState.classList.remove('hidden');
           return;
         }
@@ -402,6 +493,7 @@
       ['DEFAULT', 'DATE_DESC', 'DATE_ASC', 'PLATFORM', 'STATUS', 'ACCOUNT'].forEach(k => {
         const btn = document.getElementById(`sort-btn-${k}`);
         if (btn) {
+          btn.setAttribute('aria-pressed', k === order ? 'true' : 'false');
           const baseCls = 'inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs whitespace-nowrap transition-all';
           if (k === order) {
             btn.className = `${baseCls} font-bold bg-blue-600 text-white shadow-xs`;
@@ -418,6 +510,7 @@
       ['ALL', 'READY', 'NOT_SETUP', 'IN_USE', 'EXPIRED'].forEach(st => {
         const btn = document.getElementById(`status-btn-${st}`);
         if (btn) {
+          btn.setAttribute('aria-pressed', st === status ? 'true' : 'false');
           if (st === status) {
             btn.className = 'px-2 py-1 rounded-md text-xs font-bold bg-blue-600 text-white shadow-xs transition-all';
           } else {
@@ -434,6 +527,7 @@
       ['GRID', 'HORIZONTAL'].forEach(m => {
         const btn = document.getElementById(`display-mode-${m}`);
         if (btn) {
+          btn.setAttribute('aria-pressed', m === mode ? 'true' : 'false');
           if (m === mode) {
             btn.className = 'px-2.5 py-1 rounded-md text-xs font-bold bg-blue-600 text-white shadow-xs transition-all';
           } else {

@@ -29,16 +29,18 @@
       const plats = appState.platforms || [];
       grid.innerHTML = plats.map(p => `
         <label class="flex items-center gap-2.5 p-3 bg-slate-100 dark:bg-dark-input border border-slate-200 dark:border-dark-border rounded-xl text-sm font-bold cursor-pointer hover:border-blue-500 transition-colors">
-          <input type="checkbox" class="modal-acc-plat w-5 h-5 accent-blue-600" value="${p.code}" checked>
-          ${platBadge(p.code, 'w-5 h-5')}<span class="truncate">${p.name || p.code}</span>
+          <input type="checkbox" class="modal-acc-plat w-5 h-5 accent-blue-600" value="${escapeHtml(p.code)}" checked>
+          ${platBadge(p.code, 'w-5 h-5')}<span class="truncate">${escapeHtml(p.name || p.code)}</span>
         </label>`).join('');
     }
     function renderTablePlatformOptions() {
       const sel = document.getElementById('table-platform-filter');
       if (!sel) return;
       const cur = sel.value || 'ALL';
-      sel.innerHTML = '<option value="ALL">Mọi nền tảng</option>' +
-        (appState.platforms || []).map(p => `<option value="${p.code}">${p.name || p.code}</option>`).join('');
+      sel.innerHTML = [
+        '<option value="ALL">Mọi nền tảng</option>',
+        ...(appState.platforms || []).map(p => `<option value="${escapeHtml(p.code)}">${escapeHtml(p.name || p.code)}</option>`)
+      ].join('');
       sel.value = cur;
     }
     function setBranchPlatforms(checked) {
@@ -106,38 +108,90 @@
       else { prev.src = ''; prev.dataset.dataurl = ''; prev.classList.add('hidden'); }
     }
 
+    function setFieldError(fieldId, errorMsg) {
+      const el = document.getElementById(fieldId);
+      const errEl = document.getElementById(`error-${fieldId}`);
+      if (!el) return;
+      if (errorMsg) {
+        el.setAttribute('aria-invalid', 'true');
+        el.setAttribute('aria-describedby', `error-${fieldId}`);
+        if (errEl) {
+          errEl.textContent = errorMsg;
+          errEl.classList.remove('hidden');
+        }
+      } else {
+        el.removeAttribute('aria-invalid');
+        if (errEl) {
+          errEl.textContent = '';
+          errEl.classList.add('hidden');
+        }
+      }
+    }
+
+    function clearFieldErrors(fieldIds) {
+      (fieldIds || []).forEach(id => setFieldError(id, null));
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      ['modal-acc-name', 'modal-acc-email', 'modal-acc-notes', 'modal-editacc-name', 'modal-editacc-email', 'modal-editacc-notes'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('input', () => setFieldError(id, null));
+        }
+      });
+    });
+
     function openAddAccountModal() {
       const nextIdx = getNextAccountId();
+      clearFieldErrors(['modal-acc-name', 'modal-acc-email', 'modal-acc-notes']);
       document.getElementById('modal-acc-name').value = `Tài khoản #${nextIdx}`;
       document.getElementById('modal-acc-email').value = '';
       document.getElementById('modal-acc-notes').value = '';
       clearAccountLogo('modal-acc-logo', 'modal-acc-logo-preview');
       setBranchPlatforms(true);
-      document.getElementById('modal-add-account').classList.remove('hidden');
-      setTimeout(() => document.getElementById('modal-acc-email').focus(), 100);
+      OverlayController.open('modal-add-account', { initialFocusEl: '#modal-acc-email' });
     }
 
     function openEditAccountModal(accountId) {
       const acc = (appState.accounts || []).find(a => a.id === accountId);
       if (!acc) { showToast('Không tìm thấy tài khoản!', 'error'); return; }
+      clearFieldErrors(['modal-editacc-name', 'modal-editacc-email', 'modal-editacc-notes']);
       document.getElementById('modal-editacc-id').value = acc.id;
       document.getElementById('modal-editacc-name').value = acc.display_name || '';
       document.getElementById('modal-editacc-email').value = acc.email || '';
       document.getElementById('modal-editacc-notes').value = acc.notes || '';
       document.getElementById('modal-editacc-logo').value = '';
       setLogoPreview('modal-editacc-logo-preview', acc.logo || '');
-      document.getElementById('modal-edit-account').classList.remove('hidden');
+      OverlayController.open('modal-edit-account', { initialFocusEl: '#modal-editacc-name' });
     }
 
     async function submitEditAccount() {
       const id = document.getElementById('modal-editacc-id').value;
-      const name = document.getElementById('modal-editacc-name').value.trim();
-      const email = document.getElementById('modal-editacc-email').value.trim();
-      const notes = document.getElementById('modal-editacc-notes').value.trim();
+      const nameEl = document.getElementById('modal-editacc-name');
+      const emailEl = document.getElementById('modal-editacc-email');
+      const notesEl = document.getElementById('modal-editacc-notes');
+      const name = (nameEl ? nameEl.value : '').trim();
+      const email = (emailEl ? emailEl.value : '').trim();
+      const notes = (notesEl ? notesEl.value : '').trim();
       const prev = document.getElementById('modal-editacc-logo-preview');
       const logo = (prev && !prev.classList.contains('hidden') && prev.dataset.dataurl) ? prev.dataset.dataurl : '';
-      if (!name) { showToast('Vui lòng nhập tên tài khoản!', 'error'); return; }
-      if (!email) { showToast('Vui lòng nhập Gmail!', 'error'); return; }
+
+      clearFieldErrors(['modal-editacc-name', 'modal-editacc-email', 'modal-editacc-notes']);
+      let firstInvalid = null;
+      if (!name) {
+        setFieldError('modal-editacc-name', 'Vui lòng nhập tên tài khoản!');
+        firstInvalid = firstInvalid || nameEl;
+      }
+      if (!email) {
+        setFieldError('modal-editacc-email', 'Vui lòng nhập Gmail!');
+        firstInvalid = firstInvalid || emailEl;
+      }
+      if (firstInvalid) {
+        firstInvalid.focus();
+        showToast('Vui lòng kiểm tra lại thông tin biểu mẫu!', 'error');
+        return;
+      }
+
       showBlockingLoading('Đang lưu thay đổi tài khoản...');
       try {
         const acc = (appState.accounts || []).find(a => a.id === id);
@@ -162,16 +216,26 @@
 
     async function submitAddAccount() {
       const nextIdx = getNextAccountId();
-      const name = document.getElementById('modal-acc-name').value.trim();
-      const email = document.getElementById('modal-acc-email').value.trim();
-      const notes = document.getElementById('modal-acc-notes').value.trim();
+      const nameEl = document.getElementById('modal-acc-name');
+      const emailEl = document.getElementById('modal-acc-email');
+      const notesEl = document.getElementById('modal-acc-notes');
+      const name = (nameEl ? nameEl.value : '').trim();
+      const email = (emailEl ? emailEl.value : '').trim();
+      const notes = (notesEl ? notesEl.value : '').trim();
 
+      clearFieldErrors(['modal-acc-name', 'modal-acc-email', 'modal-acc-notes']);
+      let firstInvalid = null;
       if (!name) {
-        showToast('Vui lòng nhập tên tài khoản!', 'error');
-        return;
+        setFieldError('modal-acc-name', 'Vui lòng nhập tên tài khoản!');
+        firstInvalid = firstInvalid || nameEl;
       }
       if (!email) {
-        showToast('Vui lòng nhập Gmail đăng nhập!', 'error');
+        setFieldError('modal-acc-email', 'Vui lòng nhập Gmail đăng nhập!');
+        firstInvalid = firstInvalid || emailEl;
+      }
+      if (firstInvalid) {
+        firstInvalid.focus();
+        showToast('Vui lòng kiểm tra lại thông tin biểu mẫu!', 'error');
         return;
       }
 
@@ -217,19 +281,22 @@
       document.getElementById('modal-edit-id').value = ch.id;
       const platSel = document.getElementById('modal-edit-platform');
       const knownPlat = (appState.platforms || []).some(p => p.code === ch.platform);
-      platSel.innerHTML = (appState.platforms || []).map(p => `<option value="${p.code}" ${p.code === ch.platform ? 'selected' : ''}>${p.name || p.code}</option>`).join('')
-        + (knownPlat ? '' : `<option value="${ch.platform}" selected>${ch.platform} (đã xóa)</option>`);
+      const platOptions = (appState.platforms || []).map(p => `<option value="${escapeHtml(p.code)}" ${p.code === ch.platform ? 'selected' : ''}>${escapeHtml(p.name || p.code)}</option>`);
+      if (!knownPlat) {
+        platOptions.push(`<option value="${escapeHtml(ch.platform)}" selected>${escapeHtml(ch.platform)} (đã xóa)</option>`);
+      }
+      platSel.innerHTML = platOptions.join('');
       document.getElementById('modal-edit-name').value = ch.channel_name;
       document.getElementById('modal-edit-studio').value = ch.studio_url;
       document.getElementById('modal-edit-login').value = ch.login_url;
 
       const sel = document.getElementById('modal-edit-acc-select');
-      sel.innerHTML = appState.accounts.map(a => `<option value="${a.id}" ${a.id === ch.account_id ? 'selected' : ''}>${a.display_name} (${a.id})</option>`).join('');
+      sel.innerHTML = appState.accounts.map(a => `<option value="${escapeHtml(a.id)}" ${a.id === ch.account_id ? 'selected' : ''}>${escapeHtml(a.display_name)} (${escapeHtml(a.id)})</option>`).join('');
 
       const sub = document.getElementById('modal-edit-subtitle');
       if (sub) sub.innerText = `${platName(ch.platform)} • ID: ${ch.id} • ${ch.account_email || ''}`;
 
-      document.getElementById('modal-edit-channel').classList.remove('hidden');
+      OverlayController.open('modal-edit-channel', { initialFocusEl: '#modal-edit-name' });
     }
 
     async function submitEditChannel() {
@@ -255,13 +322,21 @@
     }
 
     function closeModal(modalId) {
-      document.getElementById(modalId).classList.add('hidden');
+      if (window.OverlayController) {
+        OverlayController.close(modalId);
+      } else {
+        const el = document.getElementById(modalId);
+        if (el) el.classList.add('hidden');
+      }
     }
 
     function renderAccountFilters() {
       const sel = document.getElementById('select-account-filter');
-      sel.innerHTML = '<option value="ALL">Tất cả Google Acc</option>' + 
-        appState.accounts.map(a => `<option value="${a.id}">${a.display_name} (${a.id})</option>`).join('');
+      if (!sel) return;
+      sel.innerHTML = [
+        '<option value="ALL">Tất cả tài khoản Google</option>',
+        ...appState.accounts.map(a => `<option value="${escapeHtml(a.id)}">${escapeHtml(a.display_name)} (${escapeHtml(a.id)})</option>`)
+      ].join('');
     }
 
     // ============ Thêm kênh lẻ cho 1 tài khoản ============
@@ -272,9 +347,9 @@
       const sub = document.getElementById('modal-addch-subtitle');
       if (sub) sub.innerText = `${acc.display_name} • ${acc.email || ''}`;
       const sel = document.getElementById('modal-addch-platform');
-      sel.innerHTML = (appState.platforms || []).map(p => `<option value="${p.code}">${p.name || p.code}</option>`).join('');
+      sel.innerHTML = (appState.platforms || []).map(p => `<option value="${escapeHtml(p.code)}">${escapeHtml(p.name || p.code)}</option>`).join('');
       previewAddChannel();
-      document.getElementById('modal-add-channel').classList.remove('hidden');
+      OverlayController.open('modal-add-channel', { initialFocusEl: '#modal-addch-platform' });
     }
 
     function previewAddChannel() {
@@ -284,8 +359,8 @@
       if (!p || !box) return;
       box.innerHTML = `${platBadge(code, 'w-10 h-10')}
         <div class="min-w-0">
-          <p class="text-sm font-bold text-slate-800 dark:text-slate-100">${p.name || p.code}</p>
-          <p class="text-[11px] text-slate-400 truncate">Mở: ${p.studio_url || '-'}${p.login_url && p.login_url !== p.studio_url ? `<br>Login: ${p.login_url}` : ''}</p>
+          <p class="text-sm font-bold text-slate-800 dark:text-slate-100">${escapeHtml(p.name || p.code)}</p>
+          <p class="text-[11px] text-slate-400 truncate">Mở: ${escapeHtml(p.studio_url || '-')}${p.login_url && p.login_url !== p.studio_url ? `<br>Login: ${escapeHtml(p.login_url)}` : ''}</p>
         </div>`;
     }
 

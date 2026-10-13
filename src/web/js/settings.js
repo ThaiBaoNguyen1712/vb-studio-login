@@ -1,12 +1,16 @@
 // settings.js — tabs cài đặt, Firebase config, trình duyệt, cập nhật.
     // Settings tabs
     function switchSettingsTab(tabId) {
-      ['tab-firebase', 'tab-browser', 'tab-vault', 'tab-theme', 'tab-data', 'tab-app'].forEach(t => {
+      const tabs = ['tab-firebase', 'tab-browser', 'tab-vault', 'tab-theme', 'tab-data', 'tab-app'];
+      tabs.forEach(t => {
         const el = document.getElementById(t);
         if (el) el.classList.toggle('hidden', t !== tabId);
         const btn = document.getElementById(`btn-${t}`);
         if (btn) {
-          if (t === tabId) {
+          const isActive = (t === tabId);
+          btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+          btn.setAttribute('tabindex', isActive ? '0' : '-1');
+          if (isActive) {
             btn.className = 'pb-3 border-b-2 border-blue-500 text-blue-500';
           } else {
             btn.className = 'pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-200';
@@ -21,7 +25,43 @@
       }
     }
 
+    function initSettingsTabsKeyboard() {
+      const tablist = document.getElementById('settings-tabs-list');
+      if (!tablist || tablist._keyboardBound) return;
+      tablist._keyboardBound = true;
+      const tabs = ['tab-firebase', 'tab-browser', 'tab-vault', 'tab-theme', 'tab-data', 'tab-app'];
+      tablist.addEventListener('keydown', (e) => {
+        const currentBtn = e.target.closest('[role="tab"]');
+        if (!currentBtn) return;
+        const currentIndex = tabs.findIndex(t => `btn-${t}` === currentBtn.id);
+        if (currentIndex === -1) return;
+        let targetIndex = -1;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          targetIndex = (currentIndex + 1) % tabs.length;
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          targetIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+        } else if (e.key === 'Home') {
+          e.preventDefault();
+          targetIndex = 0;
+        } else if (e.key === 'End') {
+          e.preventDefault();
+          targetIndex = tabs.length - 1;
+        }
+        if (targetIndex !== -1) {
+          const targetTab = tabs[targetIndex];
+          const targetBtn = document.getElementById(`btn-${targetTab}`);
+          if (targetBtn) {
+            targetBtn.focus();
+            switchSettingsTab(targetTab);
+          }
+        }
+      });
+    }
+
     function renderSettingsData() {
+      initSettingsTabsKeyboard();
       const browser = appState.settings.browser || {};
       const dirInput = document.getElementById('cfg-browser-dir');
       if (dirInput) dirInput.value = browser.profiles_dir || './profiles';
@@ -32,8 +72,8 @@
       const popupInput = document.getElementById('cfg-popup-enabled');
       if (popupInput) popupInput.checked = !appState.settings.general || appState.settings.general.enable_request_popup !== false;
       const verEl = document.getElementById('app-current-version-label');
-      if (verEl && appState.settings && appState.settings.app_info && appState.settings.app_info.version) {
-        verEl.innerText = appState.settings.app_info.version;
+      if (verEl) {
+        verEl.innerText = (appState.settings && appState.settings.app_info && appState.settings.app_info.version) || 'v1.1.0';
       }
 
       renderAuthUI();
@@ -75,16 +115,23 @@
 
     async function checkForUpdates() {
       showAsyncLoading('Kiểm tra cập nhật...');
-      showToast('Đang kiểm tra cập nhật...', 'info');
       try {
         const res = await window.pywebview.api.check_for_updates();
         latestUpdateInfo = res;
+
+        if (res && res.current_version) {
+          const mainVerEl = document.getElementById('app-current-version-label');
+          if (mainVerEl) mainVerEl.innerText = res.current_version;
+          if (appState.settings && appState.settings.app_info) {
+            appState.settings.app_info.version = res.current_version;
+          }
+        }
 
         if (res && res.has_update) {
           const newVerEl = document.getElementById('update-new-version');
           if (newVerEl) newVerEl.innerText = res.latest_version || 'Mới nhất';
           const curVerEl = document.getElementById('update-cur-version');
-          if (curVerEl) curVerEl.innerText = res.current_version || 'v1.0.0';
+          if (curVerEl) curVerEl.innerText = res.current_version || 'v1.1.0';
           const notesEl = document.getElementById('update-release-notes');
           if (notesEl) notesEl.innerText = res.release_notes || 'Không có ghi chú phát hành.';
           
@@ -173,7 +220,10 @@
       const pct = e.detail?.percent || 0;
       const progBar = document.getElementById('update-progress-bar');
       const progPercent = document.getElementById('update-progress-percent');
-      if (progBar) progBar.style.width = `${pct}%`;
+      if (progBar) {
+        progBar.style.width = `${pct}%`;
+        progBar.setAttribute('aria-valuenow', pct);
+      }
       if (progPercent) progPercent.innerText = `${pct}%`;
     });
 
@@ -281,12 +331,21 @@
 
       try {
         const res = await window.pywebview.api.test_firebase_connection();
+        let sync = null;
+        try {
+          if (window.pywebview.api.get_sync_status) {
+            sync = await window.pywebview.api.get_sync_status();
+          }
+        } catch (e) {}
         const nowStr = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         if (res && res.success) {
           if (dot) dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0';
           if (text) {
             text.className = 'font-semibold text-emerald-600 dark:text-emerald-400 truncate';
-            text.textContent = 'Dữ liệu đã được đồng bộ với Đám mây (Firebase Realtime)';
+            // Ping OK != dong bo xong: hien trang thai sync that (hien dien/khoa online).
+            text.textContent = (sync && sync.online)
+              ? `Online: đang đồng bộ hiện diện + khóa liên máy (${sync.remote_locks || 0} khóa, ${sync.inbox_pending || 0} yêu cầu chờ)`
+              : 'Kết nối đám mây OK, nhưng sync liên máy đang ngoại tuyến (chỉ ping, chưa đăng nhập/không có mạng ổn định)';
           }
           if (time) time.textContent = `Kiểm tra lúc ${nowStr}`;
         } else {
