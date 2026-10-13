@@ -1541,7 +1541,36 @@ class WebBridge:
         """Downloads updated exe and applies it"""
         def on_progress(pct: int):
             self.notify_frontend("update_download_progress", {"percent": pct})
-        return self._update_service.download_and_apply_update(download_url, progress_callback=on_progress)
+        res = self._update_service.download_and_apply_update(download_url, progress_callback=on_progress)
+        if res.get("success"):
+            self._schedule_app_exit_for_update()
+        return res
+
+    def exit_for_update(self) -> None:
+        """Kích hoạt tắt app ngay lập tức từ giao diện để updater thay thế file exe"""
+        self._schedule_app_exit_for_update(delay_sec=0.2)
+
+    def _schedule_app_exit_for_update(self, delay_sec: float = 1.2) -> None:
+        """Đóng pywebview và thoát process sau delay_sec để frontend hiển thị thông báo xong."""
+        def _exit_worker():
+            import time
+            time.sleep(delay_sec)
+            try:
+                self.shutdown()
+            except Exception as e:
+                logger.warning(f"Lỗi dọn dẹp trước khi restart update: {e}")
+            if self._window:
+                try:
+                    self._window.destroy()
+                except Exception:
+                    pass
+            import os
+            os._exit(0)
+
+        import threading
+        t = threading.Thread(target=_exit_worker, daemon=True)
+        t.start()
+
 
 
     def browse_folder(self) -> Optional[str]:

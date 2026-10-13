@@ -32,7 +32,8 @@ dist/
 release_pkg/
 *.spec
 *.new
-apply_update.bat
+apply_update.py
+apply_update.pyw
 
 # IDE & Agent state
 .vscode/

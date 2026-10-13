@@ -180,6 +180,51 @@ class UpdateService:
             logger.error(f"Lỗi mở link release: {e}")
             return False
 
+    @staticmethod
+    def find_python_runner() -> Optional[str]:
+        """Tìm trình thực thi Python trên Windows (ưu tiên pythonw.exe để không mở console)."""
+        pw = shutil.which("pythonw")
+        if pw:
+            return pw
+        p = shutil.which("python")
+        if p:
+            pw_same = Path(p).parent / "pythonw.exe"
+            if pw_same.exists():
+                return str(pw_same)
+            return p
+        for attr in ("base_prefix", "exec_prefix"):
+            base = getattr(sys, attr, None)
+            if base:
+                pw_base = Path(base) / "pythonw.exe"
+                if pw_base.exists():
+                    return str(pw_base)
+                p_base = Path(base) / "python.exe"
+                if p_base.exists():
+                    return str(p_base)
+        local_app_data = os.environ.get("LOCALAPPDATA", "")
+        if local_app_data:
+            py_dir = Path(local_app_data) / "Programs" / "Python"
+            if py_dir.exists():
+                for sub in sorted(py_dir.glob("Python3*"), reverse=True):
+                    pw_cand = sub / "pythonw.exe"
+                    if pw_cand.exists():
+                        return str(pw_cand)
+                    p_cand = sub / "python.exe"
+                    if p_cand.exists():
+                        return str(p_cand)
+        prog_files = os.environ.get("ProgramFiles", "")
+        if prog_files:
+            py_dir = Path(prog_files) / "Python"
+            if py_dir.exists():
+                for sub in sorted(py_dir.glob("Python3*"), reverse=True):
+                    pw_cand = sub / "pythonw.exe"
+                    if pw_cand.exists():
+                        return str(pw_cand)
+                    p_cand = sub / "python.exe"
+                    if p_cand.exists():
+                        return str(p_cand)
+        return None
+
     def download_and_apply_update(self, download_url: str, progress_callback=None) -> Dict[str, Any]:
         """
         Tải file exe mới và tạo kịch bản thay thế khi khởi động lại.
@@ -194,12 +239,11 @@ class UpdateService:
         current_exe_path = Path(sys.executable).resolve()
         exe_dir = current_exe_path.parent
         new_exe_path = exe_dir / (current_exe_path.name + ".new")
-        updater_bat_path = exe_dir / "apply_update.bat"
+        updater_py_path = exe_dir / "apply_update.py"
 
         try:
             headers = self._get_headers(is_raw_asset=True)
             req = urllib.request.Request(download_url, headers=headers)
-
 
             logger.info(f"Bắt đầu tải cập nhật từ: {download_url}")
             with urllib.request.urlopen(req, timeout=60) as resp:
@@ -220,36 +264,132 @@ class UpdateService:
 
             logger.info(f"Đã tải xong file exe mới: {new_exe_path} ({downloaded} bytes)")
 
-            # Tạo script updater.bat để thay thế exe sau khi app tắt
-            # Bat script: chờ app thoát -> ghi đè file exe -> khởi chạy exe mới -> tự xóa updater.bat
-            bat_content = f"""@echo off
-chcp 65001 >nul
-echo Dang cap nhat VB-STUDIO...
-timeout /t 2 /nobreak >nul
-:loop
-move /y "{new_exe_path}" "{current_exe_path}" >nul 2>&1
-if errorlevel 1 (
-    timeout /t 1 /nobreak >nul
-    goto loop
-)
-start "" "{current_exe_path}"
-del "%~f0" >nul 2>&1
-exit
+            # Tạo script apply_update.py để thay thế exe sau khi app tắt (không dùng file .bat để tránh hiện màn hình console)
+            current_pid = os.getpid()
+            py_content = f'''# -*- coding: utf-8 -*-
 """
-            with open(updater_bat_path, "w", encoding="utf-8") as f:
-                f.write(bat_content)
+VBLogin Self-Updater Script (No Console Window)
+Chờ app tắt -> Thay thế file exe -> Khởi chạy bản mới -> Tự xóa script.
+"""
+import ctypes
+import os
+import subprocess
+import sys
+import time
+from pathlib import Path
 
-            # Thực thi updater.bat trong process ngầm tách biệt hoàn toàn
+# Ẩn console window ngay lập tức nếu vô tình mở bằng python.exe
+try:
+    hwnd = ctypes.windll.kernel32.GetConsoleWindow()
+    if hwnd:
+        ctypes.windll.user32.ShowWindow(hwnd, 0)
+except Exception:
+    pass
+
+OLD_PID = {current_pid}
+CURRENT_EXE = r"{current_exe_path}"
+NEW_EXE = r"{new_exe_path}"
+
+def wait_for_process_exit(pid: int, timeout_sec: float = 20.0):
+    if pid <= 0:
+        return
+    SYNCHRONIZE = 0x00100000
+    PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+    start_time = time.time()
+    while time.time() - start_time < timeout_sec:
+        handle = ctypes.windll.kernel32.OpenProcess(SYNCHRONIZE | PROCESS_QUERY_LIMITED_INFORMATION, False, pid)
+        if not handle:
+            return
+        exit_code = ctypes.c_ulong()
+        if ctypes.windll.kernel32.GetExitCodeProcess(handle, ctypes.byref(exit_code)):
+            if exit_code.value != 259:  # 259 = STILL_ACTIVE
+                ctypes.windll.kernel32.CloseHandle(handle)
+                return
+        ctypes.windll.kernel32.CloseHandle(handle)
+        time.sleep(0.15)
+    try:
+        subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)], capture_output=True, timeout=3)
+    except Exception:
+        pass
+
+def main():
+    wait_for_process_exit(OLD_PID)
+    time.sleep(0.5)
+
+    replaced = False
+    for _ in range(30):
+        try:
+            if os.path.exists(NEW_EXE):
+                if os.path.exists(CURRENT_EXE):
+                    try:
+                        os.remove(CURRENT_EXE)
+                    except Exception:
+                        pass
+                os.replace(NEW_EXE, CURRENT_EXE)
+                replaced = True
+                break
+        except Exception:
+            time.sleep(0.5)
+
+    if replaced and os.path.exists(CURRENT_EXE):
+        try:
+            CREATE_NO_WINDOW = 0x08000000
+            DETACHED_PROCESS = 0x00000008
+            CREATE_NEW_PROCESS_GROUP = 0x00000200
+            flags = CREATE_NO_WINDOW | DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
+            subprocess.Popen([CURRENT_EXE], creationflags=flags, close_fds=True)
+        except Exception:
+            try:
+                os.startfile(CURRENT_EXE)
+            except Exception:
+                pass
+
+    try:
+        self_path = Path(__file__).resolve()
+        time.sleep(0.3)
+        self_path.unlink(missing_ok=True)
+    except Exception:
+        pass
+
+if __name__ == "__main__":
+    main()
+'''
+            with open(updater_py_path, "w", encoding="utf-8") as f:
+                f.write(py_content)
+
+            # Thực thi apply_update.py trong process ngầm tách biệt hoàn toàn, không tạo console
+            runner = self.find_python_runner()
+            CREATE_NO_WINDOW = 0x08000000
+            DETACHED_PROCESS = 0x00000008
+            CREATE_NEW_PROCESS_GROUP = 0x00000200
+            flags = CREATE_NO_WINDOW | DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            startupinfo.wShowWindow = 0  # SW_HIDE
+
+            if runner:
+                cmd = [runner, str(updater_py_path)]
+            else:
+                cmd = [
+                    "powershell.exe",
+                    "-WindowStyle", "Hidden",
+                    "-NoProfile",
+                    "-ExecutionPolicy", "Bypass",
+                    "-Command",
+                    f"python '{updater_py_path}'"
+                ]
+
             subprocess.Popen(
-                ["cmd.exe", "/c", str(updater_bat_path)],
-                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.DETACHED_PROCESS,
+                cmd,
+                creationflags=flags,
+                startupinfo=startupinfo,
                 close_fds=True,
                 shell=False
             )
 
             return {
                 "success": True,
-                "message": "Cập nhật thành công! Ứng dụng sẽ tự khởi động lại ngay bây giờ..."
+                "message": "Cập nhật thành công! Ứng dụng sẽ tự khởi động lại ngay..."
             }
 
         except Exception as e:
@@ -259,7 +399,13 @@ exit
                     new_exe_path.unlink()
                 except Exception:
                     pass
+            if updater_py_path.exists():
+                try:
+                    updater_py_path.unlink()
+                except Exception:
+                    pass
             return {
                 "success": False,
                 "message": f"Không thể cập nhật: {str(e)}"
             }
+

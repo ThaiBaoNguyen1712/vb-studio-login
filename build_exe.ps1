@@ -45,8 +45,9 @@ if (Test-Path $pkgDir) { Remove-Item -Recurse -Force $pkgDir }
 New-Item -ItemType Directory -Force -Path $pkgDir | Out-Null
 
 Copy-Item "dist\VBLogin.exe" "$pkgDir\"
-if (Test-Path "scripts\Tao-Shortcut-Desktop.bat") {
-  Copy-Item "scripts\Tao-Shortcut-Desktop.bat" "$pkgDir\"
+if (Test-Path "scripts\tao_shortcut_desktop.py") {
+  Copy-Item "scripts\tao_shortcut_desktop.py" "$pkgDir\"
+  Copy-Item "scripts\tao_shortcut_desktop.pyw" "$pkgDir\"
 }
 if (Test-Path ".env.example") {
   Copy-Item ".env.example" "$pkgDir\"
@@ -60,7 +61,7 @@ $readmeLines = @(
   "1. HUONG DAN SU DUNG:",
   "- Chay truc tiep file VBLogin.exe de mo ung dung.",
   "- File VBLogin.exe se tu dong tao Shortcut 'VBLogin' ra Desktop.",
-  "- Hoac click dup file Tao-Shortcut-Desktop.bat de tao shortcut Desktop bat cu luc nao.",
+  "- Hoac click dup file tao_shortcut_desktop.pyw de tao shortcut Desktop bat cu luc nao.",
   "- Du lieu va profile se duoc luu tu dong tai thu muc cua ung dung.",
   "",
   "2. YEU CAU HE THONG:",

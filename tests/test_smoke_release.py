@@ -96,6 +96,19 @@ class TestSmokeRelease(unittest.TestCase):
             if spec_path.exists():
                 self.assertNotIn("playwright", spec_path.read_text(encoding="utf-8").lower())
 
+    def test_no_bat_files_in_scripts(self):
+        """Đảm bảo không còn file .bat nào trong thư mục scripts."""
+        bat_files = list(Path("scripts").glob("*.bat"))
+        self.assertEqual(bat_files, [], f"Không được chứa file .bat trong scripts: {bat_files}")
+        self.assertTrue(Path("scripts/tao_shortcut_desktop.py").exists(), "tao_shortcut_desktop.py phải tồn tại")
+
+    def test_update_service_find_python_runner(self):
+        from src.services.update_service import UpdateService
+        runner = UpdateService.find_python_runner()
+        self.assertIsNotNone(runner, "Cần tìm được pythonw hoặc python runner trên môi trường test")
+        self.assertTrue(Path(runner).exists())
+
 
 if __name__ == "__main__":
     unittest.main()
+

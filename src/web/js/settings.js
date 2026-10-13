@@ -199,6 +199,13 @@
           showToast(res.message, 'success');
           if (progPercent) progPercent.innerText = '100% (Đang khởi động lại...)';
           if (progBar) progBar.style.width = '100%';
+          setTimeout(async () => {
+            try {
+              if (window.pywebview && window.pywebview.api && window.pywebview.api.exit_for_update) {
+                await window.pywebview.api.exit_for_update();
+              }
+            } catch (e) {}
+          }, 2500);
         } else {
           showToast((res && res.message) || 'Cập nhật thất bại!', 'error');
           if (btnApply) {
